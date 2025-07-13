@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useHospital } from "../context/HospitalContext";
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
@@ -8,23 +8,23 @@ type ProtectedRouteProps = {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { hospitalData, loading } = useHospital();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Add a slight delay to prevent layout flicker on refresh
+   
     const timeout = setTimeout(() => {
       setReady(true);
-    }, 200); // short enough not to be noticed, long enough to reduce jitter
+    }, 200); 
 
     return () => clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
-    if (ready && !loading && !user) {
-      navigate("/login", { replace: true });
+    if (ready && !loading && !hospitalData) {
+      navigate("/hq_login", { replace: true });
     }
-  }, [user, loading, ready, navigate]);
+  }, [hospitalData, loading, ready, navigate]);
 
   if (!ready || loading) {
     return (

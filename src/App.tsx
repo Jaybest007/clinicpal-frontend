@@ -9,6 +9,16 @@ import ProtectedRoute from "./utilities/ProtectedRoute";
 import { DashboardProvider } from "./context/DashboardContext";
 import Patients from "./pages/Patients";
 import Reports from "./pages/Reports";
+import { Appointment } from "./pages/Appointment";
+import LandingPage from "./pages/LandingPage";
+import { PageNotFound } from "./utilities/PageNotFound";
+import { HospitalRegistration } from "./pages/HospitalRegistration";
+import { HospitalDashboard } from "./pages/HospitalDashboard";
+import HqLogin from "./pages/HqPages/HqLogin";
+import HospitalProtectedRoute from "./utilities/HospitalProtectedRoute";
+import { HqPatients } from "./pages/HqPages/HqPatients";
+// import { HqReports } from "./pages/HqPages/HqReports";
+
 
 function App() {
   return (
@@ -18,10 +28,19 @@ function App() {
       <Routes>
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="*" element={<PageNotFound />} />
+        <Route path="/onboarding" element={<HospitalRegistration />} />
         <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /> </ProtectedRoute> } />
         <Route path="/patients" element={<ProtectedRoute> <Patients /> </ProtectedRoute> } />
-        <Route path="/reports" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
+        <Route path="/reports/:patient_id" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
+        <Route path="/reports/" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
+        <Route path="/appointments/" element={<ProtectedRoute> <Appointment /> </ProtectedRoute> } />
 
+        <Route path="/hq_login" element={<HqLogin />} />
+        <Route path="/hq" element={<HospitalProtectedRoute><HospitalDashboard /></HospitalProtectedRoute>} />
+        <Route path="/hq/patients" element={<HospitalProtectedRoute><HqPatients /></HospitalProtectedRoute>} />
+        {/* <Route path="/hq/reports" element={<HospitalProtectedRoute><HqReports /></HospitalProtectedRoute>} /> */}
       </Routes>
       </DashboardProvider>
     </BrowserRouter>

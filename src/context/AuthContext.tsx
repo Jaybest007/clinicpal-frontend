@@ -1,100 +1,196 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { useEffect } from "react";
+import { toast } from "react-toastify";
 
-//====interface for login info=====
+// ================= Interfaces =================
 interface LoginData {
   email: string;
   password: string;
 }
 
-//===interface for authenticated user that has logged in====
 interface AuthUser {
   id: string;
   name: string;
   token: string;
+  role?: string;
+  hospital_id: string;
 }
 
-//===interface for signupdata===
-interface SignUpData{
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    password: string;
-    confirmPassword: string;
+interface SignUpData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  hospital_id: string;
 }
-//==interface for setting type of auth
+
+interface HospitalSignupData {
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+}
+
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
-  login: (credentials: LoginData) => Promise<void>;
-  signup: (credentials: SignUpData) => Promise<void>;
+  userRole: string;
+  login: (credentials: LoginData) => Promise<AuthUser>;
+  signup: (data: SignUpData) => Promise<AuthUser>;
   logout: () => void;
+  hospital_Signup: (data: HospitalSignupData) => Promise<void>;
 }
 
+// ================= Constants =================
+const STORAGE_KEY = "clinicpal_user";
+
+// ================= Context Setup =================
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// ================= Provider =================
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<string>("");
 
-    //====check for user data in local storage=====
+  // ==== Rehydrate from localStorage ====
   useEffect(() => {
-    setLoading(true);
-    const storedUser = localStorage.getItem("clinicpal_user");
+    const storedUser = localStorage.getItem(STORAGE_KEY);
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (parsed?.token) {
+          setUser(parsed);
+          setUserRole(parsed.role || "");
+        }
+      } catch (error) {
+        console.error("Invalid user session data:", error);
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
-    setLoading(false);
   }, []);
 
-  const login = useCallback(async (credentials: LoginData) => {
+  // ==== Login ====
+  const login = useCallback(async (credentials: LoginData): Promise<AuthUser> => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await axios.post<AuthUser>("http://localhost:5000/api/auth/login", credentials);
-      setUser(response.data);
-      localStorage.setItem("clinicpal_user", JSON.stringify(response.data));
-    } catch (err) {
-      throw err
+      const loggedInUser = response.data;
 
+      // Save to state and localStorage
+      setUser(loggedInUser);
+      setUserRole(loggedInUser.role || "");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedInUser));
+
+      toast.success("Login successful");
+
+      // Hard refresh to clear stale context
+      setTimeout(() => {
+        window.location.replace("/dashboard");
+      }, 100);
+
+      return loggedInUser;
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Login failed. Please try again.";
+      toast.error(message);
+      throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-
-const signup = useCallback(async (credentials: SignUpData) => {
-  try {
+  // ==== Signup (User) ====
+  const signup = useCallback(async (data: SignUpData): Promise<AuthUser> => {
     setLoading(true);
-    const response = await axios.post<AuthUser>("http://localhost:5000/api/auth/signup", credentials);
-    setUser(response.data);
-    localStorage.setItem("clinicpal_user", JSON.stringify(response.data));
-  } catch (err) {
-    throw err;
-  } finally {
-    setLoading(false); 
-  }
-}, []);
+    try {
+      const response = await axios.post<AuthUser>("http://localhost:5000/api/auth/signup", data);
+      const newUser = response.data;
 
+      setUser(newUser);
+      setUserRole(newUser.role || "");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
+      toast.success("Signup successful");
 
+      setTimeout(() => {
+        window.location.replace("/dashboard");
+      }, 100);
 
+      return newUser;
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Signup failed. Please try again.";
+      toast.error(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
+  // ==== Signup (Hospital) ====
+  const hospital_Signup = useCallback(async (data: HospitalSignupData): Promise<void> => {
+    setLoading(true);
+    try {
+      await axios.post("http://localhost:5000/api/auth/hospitals_signup", data);
+      toast.success("Hospital registered successfully");
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.error ||err?.response?.data?.message ||
+        "Hospital signup failed.";
+      toast.error(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const logout = () => {
+  // ==== Logout ====
+  const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem("clinicpal_user");
-  };
+    setUserRole("");
+    localStorage.removeItem(STORAGE_KEY);
+
+    toast.info("Logged out");
+
+    // Reload to flush context
+    window.location.replace("/login");
+  }, []);
+
+  
+
+
+
+
+
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        userRole,
+        login,
+        signup,
+        logout,
+        hospital_Signup,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+// ================= Hook =================
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used inside AuthProvider");
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
   return context;
 };

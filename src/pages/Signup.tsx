@@ -3,6 +3,7 @@ import { FaEyeSlash, FaEye } from "react-icons/fa";
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface signUpData{
     firstName: string;
@@ -11,6 +12,7 @@ interface signUpData{
     phone: string;
     password: string;
     confirmPassword: string;
+    hospital_id: string;
 }
 
 
@@ -38,6 +40,7 @@ const SignUp = () => {
         phone: "",
         password: "",
         confirmPassword: "",
+        hospital_id: "",
     })
 
     const [error, setError] = useState({
@@ -47,7 +50,8 @@ const SignUp = () => {
         phone: "",
         password: "",
         confirmPassword: "",
-        server: ""
+        server: "",
+        hospital_id: "",
     })
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,59 +93,88 @@ const SignUp = () => {
 
     //=====Handle submision========
     const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault()
+  event.preventDefault();
 
-        const {firstName, lastName, email, phone, password, confirmPassword} = formData;
+  const { firstName, lastName, email, phone, password, confirmPassword, hospital_id } = formData;
 
-        const newError: Partial<typeof error> = {};
+  const newError: Partial<typeof error> = {};
 
-        if (firstName.trim() === "") newError.firstName = "First name can't be empty";
-        if (lastName.trim() === "") newError.lastName = "Last name can't be empty";
-        if (email.trim() === "") newError.email = "Email can't be empty";
-        if (phone.toString().trim() === "") newError.phone = "Phone can't be empty";
-        if (password.trim() === "") newError.password = "Password can't be empty";
-        if (confirmPassword.trim() === "") newError.confirmPassword = "Confirm password can't be empty";
-        if (password !== confirmPassword) newError.confirmPassword = "Passwords do not match";
-        
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        //let validate email
-        if(!emailRegex.test(formData.email)){
-            setError(prev => ({...prev, email: "Please enter a valid email address"}))
-        }
+  if (!firstName.trim()) newError.firstName = "First name can't be empty";
+  if (!lastName.trim()) newError.lastName = "Last name can't be empty";
+  if (!email.trim()) newError.email = "Email can't be empty";
+  if (!phone.trim()) newError.phone = "Phone can't be empty";
+  if (!password.trim()) newError.password = "Password can't be empty";
+  if (!confirmPassword.trim()) newError.confirmPassword = "Confirm password can't be empty";
+  if (password !== confirmPassword) newError.confirmPassword = "Passwords do not match";
+  if (!hospital_id.trim()) newError.hospital_id = "Hospital code is required";
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    newError.email = "Please enter a valid email address";
+  }
 
-       if (Object.keys(newError).length > 0) {
-        setError(prev => ({ ...prev, ...newError }));
-        return;
-        }
+  if (Object.keys(newError).length > 0) {
+    setError(prev => ({ ...prev, ...newError }));
+    return;
+  }
 
+  setError({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    server: "",
+    hospital_id:"",
+  });
 
-        setError({
-            firstName: "",
-            lastName: "",
-            email: "",
-            phone: "",
-            password: "",
-            confirmPassword: "",
-            server: ""
-        });
+  try {
+    await signup(formData);
+    toast.success("User created successfully");
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      hospital_id: ""
+    });
+  } catch (err: any) {
+    const errData = err?.response?.data;
 
-        try{
-            await signup(formData);
-            setError(prev => ({ ...prev, server: "" }));
-        
-        } catch(err: any){
-            const serverErr = err.res.data.error || "Signup failed. Please try again.";
-            setError(serverErr);
-        }
+    const newError: Partial<typeof error> = {};
 
-        
+    // If backend sends field-level errors
+    if (Array.isArray(errData?.errors)) {
+      errData.errors.forEach((e: { param: string; msg: string }) => {
+        newError[e.param as keyof typeof error] = e.msg;
+      });
     }
+
+    // If backend sends a direct error object
+    if (typeof errData?.error === "object") {
+      Object.entries(errData.error).forEach(([key, value]) => {
+        newError[key as keyof typeof error] = value as string;
+      });
+    }
+
+    // If backend sends string error
+    if (typeof errData?.error === "string" || errData?.message) {
+      newError.server = errData.error || errData.message;
+    }
+
+    setError(prev => ({ ...prev, ...newError }));
+    toast.error(newError.server || "Signup failed. Please try again.");
+  }
+};
+
 
 
     return(
         <div className="min-h-screen flex justify-center items-center bg-neutral-100 px-4">
             <div className="w-full sm:w-3/4 md:w-2/3 lg:w-1/2 bg-white rounded-xl drop-shadow-sm p-8 sm:p-10">
-                <h1 className="text-center font-md text-3xl mb-6">Create Account</h1>
+                <h1 className="text-center font-bold text-3xl mb-6">Staff Onboarding </h1>
 
                 {error.server && (
                 <p className="text-red-800 text-center bg-red-100 p-2 mb-2 rounded border border-red-300">
@@ -219,6 +252,7 @@ const SignUp = () => {
                     <input
                     type={hidden ? "password" : "text"}
                     name="password"
+                    placeholder="enter password"
                     className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-neutral-100 ${
                         error.password ? "border border-red-400" : "border-none"
                     } focus:outline-none pr-20`}
@@ -239,6 +273,7 @@ const SignUp = () => {
                     <label htmlFor="confirmPassword" className="block mb-1">Confirm Password</label>
                     <input
                     type={hidden ? "password" : "text"}
+                    placeholder="Confirm password"
                     name="confirmPassword"
                     className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-neutral-100 ${
                         error.confirmPassword ? "border border-red-400" : "border-none"
@@ -248,6 +283,20 @@ const SignUp = () => {
                     {error.confirmPassword && <p className="text-sm text-red-600 mt-1">{error.confirmPassword}</p>}
                 </div>
 
+                    <div className="w-full">
+                    <label htmlFor="HospitalCode" className="block mb-1">Hospital Code</label>
+                    <input
+                        type="text"
+                        name="hospital_id"
+                        className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-neutral-100 ${
+                        error.hospital_id ? "border border-red-400" : "border-none"
+                        } focus:outline-none`}
+                        placeholder="Enter Hospital code"
+                        onChange={handleInputChange}
+                    />
+                    {error.hospital_id && <p className="text-sm text-red-600 mt-1">{error.hospital_id}</p>}
+                    </div>
+               
                 <button
                     type="submit"
                     className="w-full p-3 mt-2 font-semibold bg-blue-400 hover:bg-blue-300 text-white rounded-lg transition-colors"

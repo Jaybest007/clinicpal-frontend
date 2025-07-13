@@ -2,6 +2,7 @@ import { FaTimes } from "react-icons/fa";
 import { useDashboard } from "../context/DashboardContext";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 // Types
 interface patientInfo {
@@ -11,6 +12,9 @@ interface patientInfo {
   phone: string;
   age: number;
   admission_status: number;
+  admission_reason: string;
+  discharged_on: string;
+  admitted_on: string;
 }
 
 interface nextOfKinData {
@@ -29,7 +33,7 @@ interface Props {
 }
 
 const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
-  const { nextOfKinData, admitPatient, loading } = useDashboard();
+  const { nextOfKinData, admitPatient, loading, fetch_Admitted_Patient_Report, fetchAllPatients } = useDashboard();
   const {user} = useAuth()
   const [nextOfKin, setNextOfKin] = useState<nextOfKinData | null>(null);
   const [admissionReason, setAdmissionReason] = useState("");
@@ -74,6 +78,9 @@ const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
           wrote_by: wrote_by,
         });
         setAdmissionReason(""); 
+        fetch_Admitted_Patient_Report()
+        fetchAllPatients()
+        onClose()
       } catch (err: any) {
         const errorMessage = err?.response?.data.message || err?.response?.data.error || "Failed to admit patient";
         setError(errorMessage);
@@ -85,8 +92,8 @@ const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
 
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center px-4 py-8">
-      <div className="bg-white w-full max-w-lg md:max-w-2xl rounded-xl shadow-xl overflow-y-auto max-h-[90vh] relative animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm px-2 py-8 overflow-y-auto">
+      <div className="relative w-full max-w-3xl mx-auto bg-white shadow-2xl rounded-2xl p-8 border border-blue-100 animate-fade-in mt-5">
         {/* Close Button */}
         <button
           className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition"
@@ -166,7 +173,39 @@ const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
             )}
           </section>
 
-          <section className="space-y-3 border-t-2">
+            {/* admission detail and last visit section */}
+            <section className="space-y-3">
+            <h3 className="text-sm font-semibold uppercase text-gray-500 tracking-wide border-b pb-1">
+              Last Visit
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+              <div>
+              <p className="text-gray-500">Last Admission</p>
+              <p className="font-medium text-gray-800">
+                {patient.admitted_on ? new Date(patient.admitted_on).toLocaleString(undefined, {dateStyle: "medium", timeStyle: "short"}) 
+                  : <span className="text-gray-400">N/A</span>}
+              </p>
+              </div>
+              <div>
+              <p className="text-gray-500">Admission Reason</p>
+              <p className="font-medium text-gray-800">
+                {patient.admission_reason ? patient.admission_reason : <span className="text-gray-400">N/A</span>}
+              </p>
+              </div>
+              <div>
+              <p className="text-gray-500">Discharged On</p>
+              <p className="font-medium text-gray-800">
+                {patient.admission_status === 1 ? "Still in taking treatment" : patient.discharged_on ? new Date(patient.discharged_on).toLocaleString(undefined, {dateStyle: "medium", timeStyle: "short"}) 
+                  : <span className="text-gray-400">N/A</span>}
+              </p>
+              </div>
+            </div>
+            <button  className="bg-gray-200 px-2 py-1 rounded-md hover:bg-gray-100">
+               <Link to={`/reports/${patient.patient_id}`}>🧾 Read Patient Report </Link>
+            </button>
+            </section>
+
+          { user?.role === "doctor" && <section className="space-y-3  border-t">
             <form onSubmit={handleAdmit} className="mt-4 space-y-2">
               <label htmlFor="admissionReason" className="block text-sm text-gray-600">
                 Admission Condition <span className="text-red-500">*</span>
@@ -200,7 +239,7 @@ const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
               </button>
             </form>
 
-          </section>
+          </section>}
         </div>
 
         {/* Footer */}
