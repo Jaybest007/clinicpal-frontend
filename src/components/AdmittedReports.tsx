@@ -13,7 +13,7 @@ interface Report {
 
 export const AdmittedReport: React.FC = () => {
   const { admittedPatientReport } = useDashboard();
- const reports: Report[] = admittedPatientReport?.reports || [];
+ const reports: Report[] = admittedPatientReport ?? [];
 
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
@@ -37,7 +37,7 @@ export const AdmittedReport: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-6">
-          {Object.entries(groupedReports).map(([patientId, { patient, reports }], idx) => (
+          {Object.entries(groupedReports).map(([patientId, { patient, reports }], ) => (
             <details
               key={patientId}
               className="bg-white border border-blue-100 rounded-xl shadow-md group transition-all duration-200"

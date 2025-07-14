@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDashboard } from '../context/DashboardContext';
-import { DischargeBtn } from './dischargeBtn';
+import {DischargeBtn} from './DischargeBtn'
 import { ReportBtn } from './ReportBtn';
 import { useAuth } from '../context/AuthContext';
-import { FaCapsules, FaTimes } from 'react-icons/fa';
 import { MdWarning } from 'react-icons/md';
 
 const AdmittedPage = () => {
