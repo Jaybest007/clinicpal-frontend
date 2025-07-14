@@ -24,7 +24,8 @@ interface hospitalData {
 }
 interface staffsData{
     id: string;
-    full_name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     phone: string;
     role: string;

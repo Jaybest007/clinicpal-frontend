@@ -16,22 +16,24 @@ interface Report {
   created_at: string;
 }
 
+// Union type to cover both possible structures
+type PatientReportData = Report[] | { reports: Report[] } | undefined;
+
 export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
   const { fetchPatientReport, patientReport, loading } = useDashboard();
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const {user} = useAuth();
-  const navigate = useNavigate()
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const allowedRoles = ["super admin", "doctor", "nurse"];
-    if (!allowedRoles.includes(user?.role)) {
+    // ✅ Check that user.role is defined before checking access
+    if (user?.role && !allowedRoles.includes(user.role)) {
       navigate("/reports");
     }
 
-
     fetchReport();
-   
-  }, [navigate, user ,patient_id]);
+  }, [navigate, user, patient_id]);
 
   async function fetchReport() {
     try {
@@ -39,16 +41,18 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
     } catch (err: any) {
       toast.error(
         err?.response?.data?.error ||
-          err?.response?.data?.message ||
-          "Unable to fetch data"
+        err?.response?.data?.message ||
+        "Unable to fetch data"
       );
     }
   }
 
-  // patientReport is expected to be { results: Report[] }
-  const reports: Report[] = Array.isArray(patientReport)
-    ? patientReport
-    : patientReport?.reports || [];
+  // ✅ Safely extract reports from patientReport
+  const typedReport = patientReport as PatientReportData;
+  const reports: Report[] = Array.isArray(typedReport)
+    ? typedReport
+    : typedReport?.reports || [];
+
   const patientName = reports[0]?.full_name || "Unknown";
 
   return (
@@ -68,17 +72,17 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
           No reports available for this patient.
         </p>
       ) : (
-        <details open className="bg-white border border-blue-100 rounded-xl shadow-md group transition-all duration-200">
+        <details
+          open
+          className="bg-white border border-blue-100 rounded-xl shadow-md group transition-all duration-200"
+        >
           <summary className="flex justify-between items-center px-6 py-4 cursor-pointer hover:bg-blue-50 transition font-semibold rounded-xl group-open:rounded-b-none">
             <div>
               <p className="text-base text-blue-900 font-bold tracking-wide">
                 {patientName.toUpperCase()}
               </p>
               <p className="text-xs text-blue-500 mt-1">
-                ID:{" "}
-                <span className="font-mono">
-                  {patient_id.toUpperCase()}
-                </span>
+                ID: <span className="font-mono">{patient_id.toUpperCase()}</span>
               </p>
             </div>
             <FaChevronDown className="w-5 h-5 text-blue-400 group-open:rotate-180 transition-transform" />
@@ -102,8 +106,7 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
                       </p>
                       <div className="flex flex-wrap gap-3 text-xs text-slate-500 mt-1">
                         <span>
-                          <span className="font-semibold">By:</span>{" "}
-                          {report.wrote_by}
+                          <span className="font-semibold">By:</span> {report.wrote_by}
                         </span>
                         <span>
                           <span className="font-semibold">At:</span>{" "}
@@ -126,7 +129,7 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
         </details>
       )}
 
-      {/* Modal */}
+      {/* 🧾 Modal */}
       {selectedReport && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center px-4 py-8">
           <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] relative animate-fade-in border border-blue-100">
@@ -164,7 +167,7 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
                       month: "short",
                       day: "numeric",
                       hour: "2-digit",
-                      minute: "2-digit"
+                      minute: "2-digit",
                     })}
                   </span>
                 </span>

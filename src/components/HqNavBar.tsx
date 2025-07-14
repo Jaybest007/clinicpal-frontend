@@ -2,13 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { useHospital } from "../context/HospitalContext";
-import { useLocation } from "react-router-dom";
+
 
 
 export const HqNavBar: React.FC = () => {
   const { logout } = useHospital();
-  // const location = useLocation();
-  // const isActive = location.pathname 
+
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 py-4 px-6 md:px-16 lg:px-24">

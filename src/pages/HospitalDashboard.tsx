@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import logo from "../assets/logo.png";
+
 import StatCard from "../components/StatCard";
 import { FaSearch, FaUser, FaUserInjured } from "react-icons/fa";
 import { TiWarning } from "react-icons/ti";
@@ -11,7 +10,7 @@ import { HqNavBar } from "../components/HqNavBar";
 
 
 export const HospitalDashboard = () => {
-  const { loading, logout, hospitalData, staffs, deleteUser, updateStaffRole } = useHospital();
+  const { hospitalData, staffs, deleteUser, updateStaffRole } = useHospital();
   const {patientsData} = useDashboard()
   const totalStaff = Array.isArray(staffs) ? staffs.length : 0;
   const totalPatients = patientsData.length;

@@ -102,7 +102,7 @@ const NewPatient = ({ isOpen, onClose }: NewPatientProps) => {
     const hasError = Object.values(newErrors).some(err => err !== "");
 
     if (hasError) {
-      setError(newErrors);
+      setError({ ...newErrors, server: "" });
       return;
     }
 

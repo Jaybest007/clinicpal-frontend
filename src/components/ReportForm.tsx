@@ -21,7 +21,7 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
   const { patientsData, loading, newReport, fetch_Admitted_Patient_Report, fetchPatientReport } = useDashboard();
   const { user } = useAuth();
   const [medications, setMedications] = useState<string[]>([]);
-  const [suggestion, setSuggestion] = useState<string[]>([]);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
   
   const [reportData, setReportData] = useState<reportData>({
     patient_id: "",

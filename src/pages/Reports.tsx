@@ -3,7 +3,7 @@ import NavBar from "../components/NavBar";
 import ReportForm from "../components/ReportForm";
 import { AdmittedReport } from "../components/AdmittedReports";
 import { PatientReport } from "../components/PatientReport";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 
@@ -78,8 +78,9 @@ const Reports = () => {
         <ReportForm
           isOpen={showReportModal}
           onClose={() => setShowReportModal(false)}
-          patient_id={patient_id}
+          patient_id={patient_id ?? ""}
         />
+
       </main>
     </div>
   );

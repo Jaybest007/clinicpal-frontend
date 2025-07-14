@@ -21,9 +21,10 @@ export const Appointment = () => {
   useEffect(() => {
     document.title = "Appointments - ClinicPal App";
     const allowedRoles = ["super admin", "doctor", "nurse"];
-    if (!allowedRoles.includes(user?.role)) {
-      navigate("/reports");
-    }
+    if (user?.role && !allowedRoles.includes(user.role)) {
+    navigate("/reports");
+  }
+
   }, []);
   const {user} = useAuth()
   const { appointments, loading } = useDashboard();
