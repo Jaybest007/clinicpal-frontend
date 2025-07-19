@@ -67,28 +67,21 @@ export const Laboratory = () => {
         <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm border-b border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between px-4 py-4 rounded-t-xl shadow-sm">
           <h1 className="text-xl md:text-2xl font-semibold text-blue-900">Laboratory Orders</h1>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setViewType("internal")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition border ${viewType === "internal" ? "bg-blue-600 text-white" : "bg-white text-blue-700 border-blue-200"}`}
+          <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 md:gap-4 w-full md:w-auto">
+            <select
+              value={viewType}
+              onChange={(e) => setViewType(e.target.value)}
+              className="text-sm px-3 py-2 border rounded shadow text-gray-700 bg-white w-full xs:w-auto"
             >
-              Internal Orders
-            </button>
-            <button
-              onClick={() => setViewType("external")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition border ${viewType === "external" ? "bg-blue-600 text-white" : "bg-white text-blue-700 border-blue-200"}`}
-            >
-              External Orders
-            </button>
-          </div>
-
-          <div className="mt-3 md:mt-0 flex w-full md:w-auto gap-2">
+              <option value="internal">Internal Orders</option>
+              <option value="external">External Orders</option>
+            </select>
             <button
               onClick={() => {
                 fetchLaboratoryData();
                 fetchExternalOrder();
               }}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-md text-sm font-medium transition"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium transition w-full xs:w-auto"
               disabled={loading}
             >
               {loading ? "Loading..." : "Refresh"}
@@ -163,7 +156,7 @@ export const Laboratory = () => {
         )}
 
         {viewType === "external" && (
-          <div className="bg-neutral-100 p-4 rounded-lg">
+          <div className="">
             <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
               <StatCard icon={RiFileList3Fill} title="Total Orders" value={externalOrder.filter(order => order.order_type === "lab").length} />
             </div>
