@@ -14,7 +14,7 @@ interface PatientInfo {
   address: string;
   phone: string;
   age: number;
-  admission_status: number;
+  admission_status: boolean;
   admission_reason: string;
   visit_on: string;
   visit_reason: string;
@@ -67,13 +67,13 @@ const Patients = () => {
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-2 md:px-8 py-8">
         {/* Sticky Action Bar */}
-        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex items-center justify-between px-4 md:px-8 py-4 rounded-t-xl shadow-sm mb-6">
-          <h1 className="text-3xl font-bold text-blue-900 tracking-tight">
+        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 md:px-8 py-4 rounded-t-xl shadow-sm mb-6 gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-900 tracking-tight">
             Patient Records
           </h1>
           <button
             onClick={() => setShowNewPatient((prev) => !prev)}
-            className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none text-white px-6 py-2 text-base rounded-lg shadow transition-all font-semibold"
+            className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none text-white px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base rounded-lg shadow transition-all font-semibold"
             aria-label={showNewPatient ? "Close registration form" : "Register new patient"}
           >
             {showNewPatient ? "Close Form" : "Register Patient"}

@@ -8,7 +8,7 @@ import { MdWarning } from 'react-icons/md';
 const AdmittedPage = () => {
   const { patientsData } = useDashboard();
   const { user } = useAuth()
-  const admittedPatients = patientsData.filter(patient => patient.admission_status === 1);
+  const admittedPatients = patientsData.filter(patient => patient.admission_status === true );
   const [confirmPage, setConfirmPage] = useState(false);
 
   return (

@@ -19,7 +19,7 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const { patientsData, queList } = useDashboard();
   const Total_admitted = Array.isArray(patientsData)
-    ? patientsData.filter((p) => p.admission_status === 1).length
+    ? patientsData.filter((p) => p.admission_status === true).length
     : 0;
   const oneDayAgo = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
 
@@ -91,7 +91,7 @@ return user?.role === "unactivated" ? (
 
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+          <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 p-2">
             <StatCard title="Total Patients" icon={FaUser} value={patientsData.length} />
             <StatCard title="Admitted" icon={FaUserInjured} value={Total_admitted} />
             <StatCard title="Discharged" icon={FaUserInjured} value={Total_Discharged} />
@@ -111,7 +111,7 @@ return user?.role === "unactivated" ? (
           </div>
 
           {/* Summary Card - Clinical Detail */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-t-4 border-blue-500">
+            <div className="bg-white rounded-2xl shadow-lg p-2 sm:p-8 border-t-4 border-blue-500 ">
             <h3 className="text-2xl font-semibold text-gray-700 mb-3 flex items-center gap-3">
               <FaStethoscope className="text-blue-500" />
               Clinic Summary
@@ -123,7 +123,7 @@ return user?.role === "unactivated" ? (
               <span className="text-green-600 font-bold">{Total_admitted} admitted</span> and
               <span className="text-red-500 font-bold ml-1">{Total_Discharged} discharged</span>. Stay sharp!
             </p>
-          </div>
+            </div>
 
           {/* Dynamic Forms & Admitted Patients */}
           <div className="space-y-8">

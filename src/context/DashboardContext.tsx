@@ -26,7 +26,7 @@ interface PatientsData {
   age: number;
   phone: string;
   gender: "male" | "female";
-  admission_status: number;
+  admission_status: boolean;
   admission_reason: string;
   visit_on: string;
   visit_reason: string;
@@ -70,7 +70,7 @@ interface fetchReport {
     report: string;
     wrote_by: string;
     created_at: string;
-    admission_status: number;
+    admission_status: boolean;
 }
 
 //====interface for dischagre

@@ -17,7 +17,7 @@ export const HospitalDashboard = () => {
 
   const totalStaff = Array.isArray(staffs) ? staffs.length : 0;
   const totalPatients = patientsData.length;
-  const totalAdmitted = patientsData.filter(p => p.admission_status === 1).length;
+  const totalAdmitted = patientsData.filter(p => p.admission_status === true).length;
 
   const handleUpdateRole = async (
     e: React.FormEvent<HTMLFormElement>,

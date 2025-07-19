@@ -10,7 +10,7 @@ export interface patientInfo {
   address: string;
   phone: string;
   age: number;
-  admission_status: number;
+  admission_status: boolean;
   admission_reason: string;
   visit_on: string;
   visit_reason: string;
@@ -138,7 +138,7 @@ const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
           <p className="text-xs text-gray-500 mt-1">
             Patient ID: <span className="font-mono">{patient.patient_id.toUpperCase()}</span>
           </p>
-          {patient.admission_status === 1 && (
+          {patient.admission_status === true && (
             <span className="inline-block bg-yellow-100 text-yellow-700 text-xs font-semibold px-3 py-1 rounded-md mt-2 ring-1 ring-yellow-500">
               Admitted
             </span>
@@ -204,7 +204,7 @@ const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
               <div>
                 <p className="text-gray-500">Discharged On</p>
                 <p className="font-medium text-gray-800">
-                  {patient.admission_status === 1 ? "Still in taking treatment" : patient.discharged_on ? new Date(patient.discharged_on).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : <span className="text-gray-400">N/A</span>}
+                  {patient.admission_status === true ? "Still in taking treatment" : patient.discharged_on ? new Date(patient.discharged_on).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : <span className="text-gray-400">N/A</span>}
                 </p>
               </div>
             </div>

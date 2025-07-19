@@ -151,9 +151,9 @@ export const Ultrasound = () => {
         )}
 
         {viewType === "external" && (
-          <div className="bg-yellow-50 text-yellow-800 p-6 border border-yellow-300 rounded-xl shadow-md text-center">
+          <div className="bg-yellow-50 text-yellow-800 p-2 border border-yellow-300 rounded-xl shadow-md text-center">
             <h2 className="text-xl font-semibold mb-2">External Orders View</h2>
-            <div className="p-4 rounded-lg">
+            <div className="p-1 rounded-lg">
               <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
                 <StatCard icon={RiFileList3Fill} title="Total Orders" value={externalOrder.filter(order => order.order_type === "ultrasound").length} />
               </div>
