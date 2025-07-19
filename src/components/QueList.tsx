@@ -67,8 +67,8 @@ const QueList: React.FC = () => {
                     <td className="px-3 py-2">{item.qued_by}</td>
                     <td className="px-3 py-2 space-x-2">
                       <Link to={`/reports/${item.patient_id}`} className="text-blue-600 hover:underline">View</Link>
-                      <button onClick={() => setConfirmModal({ type: "called", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="text-green-600 hover:underline">Call</button>
-                      <button onClick={() => setConfirmModal({ type: "remove", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="text-red-600 hover:underline">Remove</button>
+                      <button onClick={() => setConfirmModal({ type: "called", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="bg-lime-600 hover:bg-lime-700 text-black p-1 rounded">Call</button>
+                      <button onClick={() => setConfirmModal({ type: "remove", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="bg-red-600 hover:bg-red-700 text-white p-1 rounded">Remove</button>
                     </td>
                   </tr>
                 ))}
@@ -102,14 +102,14 @@ const QueList: React.FC = () => {
                   <tr key={item.id} className="border-t">
                     <td className="px-3 py-2">{i + 1}</td>
                     <td className="px-3 py-2">{new Date(item.checked_in_at).toLocaleString()}</td>
-                    <td className="px-3 py-2">{item.patient_id}</td>
+                    <td className="px-3 py-2">{String(item.patient_id).toUpperCase()}</td>
                     <td className="px-3 py-2">{item.patient_fullname}</td>
                     <td className="px-3 py-2">{item.visit_reason}</td>
                     <td className="px-3 py-2">{item.status}</td>
                     <td className="px-3 py-2">{item.assigned_doctor}</td>
                     <td className="px-3 py-2 space-x-2">
-                      <Link to={`/reports/${item.patient_id}`} className="text-blue-600 hover:underline">View</Link>
-                      <button onClick={() => setConfirmModal({ type: "seen", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="text-yellow-600 hover:underline">Seen</button>
+                      <Link to={`/reports/${item.patient_id}`} className="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded">View</Link>
+                      <button onClick={() => setConfirmModal({ type: "seen", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="bg-yellow-600 text-white hover:bg-yellow-700 p-1 rounded">Seen</button>
                     </td>
                   </tr>
                 ))}
@@ -120,7 +120,7 @@ const QueList: React.FC = () => {
       </section>
 
       {confirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-65">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
             <h3 className="text-lg font-medium mb-2">Confirm Action</h3>
             <p className="text-sm mb-4">Are you sure you want to <strong>{confirmModal.type}</strong> <strong>{confirmModal.full_name}</strong>?</p>

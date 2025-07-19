@@ -44,11 +44,11 @@ const NavBar = () => {
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* App Logo or Title */}
         <div className="flex items-center space-x-3">
-          <FiMenu className="md:hidden cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
           <Link to="/" className="text-xl font-bold tracking-wide">
             <img src={logo} alt="ClinicPal Logo" className="h-9 w-auto" />
           </Link>
         </div>
+        <FiMenu className="md:hidden cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex space-x-6">

@@ -13,7 +13,12 @@ interface Report {
 
 export const AdmittedReport: React.FC = () => {
   const { admittedPatientReport } = useDashboard();
- const reports: Report[] = admittedPatientReport || [];
+  // Ensure reports is always an array
+  const reports: Report[] = Array.isArray(admittedPatientReport)
+    ? admittedPatientReport
+    : admittedPatientReport && Array.isArray(admittedPatientReport)
+      ? admittedPatientReport
+      : [];
 
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 

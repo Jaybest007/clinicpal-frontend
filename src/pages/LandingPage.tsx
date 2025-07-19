@@ -58,7 +58,7 @@ const LandingPage = () => {
                 Enterprise-grade management software built for Nigerian hospitals, simple, secure, and designed for real care.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Link to="/onboarding" className="px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition shadow">
+                <Link to="/signup" className="px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition shadow">
                   Get started
                 </Link>
                 <Link to="/docs" className="px-6 py-3 bg-white text-blue-600 border border-blue-600 rounded-md font-semibold hover:bg-blue-50 transition shadow">

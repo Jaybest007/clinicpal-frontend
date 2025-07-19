@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import StatCard from "../components/StatCard";
-import { FaUser, FaUserInjured, FaStethoscope } from "react-icons/fa";
+import { FaUser, FaUserInjured, FaStethoscope, FaSearch } from "react-icons/fa";
 import NewPatient from "../components/NewPatient";
 import ReportForm from "../components/ReportForm";
 import { useAuth } from "../context/AuthContext";
 import { useDashboard } from "../context/DashboardContext";
 
 import QueList from "../components/QueList";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   useEffect(() => {
@@ -34,10 +35,7 @@ const Dashboard = () => {
     if (showReportModal) setShowReportModal(false);
   };
 
-  const toggleReport = () => {
-    setShowReportModal((prev) => !prev);
-    if (showNewPatient) setShowNewPatient(false);
-  };
+
 
 
 return user?.role === "unactivated" ? (
@@ -74,18 +72,21 @@ return user?.role === "unactivated" ? (
             </h2>
 
             <div className="flex flex-wrap justify-center sm:justify-end gap-2 sm:gap-4 w-full sm:w-auto">
-              <button
-                className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-md shadow transition"
-                onClick={toggleNewPatient}
-              >
-                {showNewPatient ? "Close Patient Form" : "Add New Patient"}
-              </button>
-              <button
-                className="bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-md shadow transition"
-                onClick={toggleReport}
-              >
-                {showReportModal ? "Close Report Form" : "Add Report"}
-              </button>
+              
+                <div className="flex gap-2">
+                <button
+                  className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-md shadow transition"
+                  onClick={toggleNewPatient}
+                >
+                  {showNewPatient ? "Close Patient Form" : "Add New Patient"}
+                </button>
+                <Link
+                  to="/patients"
+                  className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-md shadow transition"
+                >
+                  Find Patient <FaSearch />
+                </Link>
+                </div>
             </div>
           </div>
 
