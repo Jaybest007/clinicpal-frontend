@@ -89,7 +89,7 @@ export const HospitalDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-800">
-                {staffs.map((staff) => (
+                {(staffs ?? []).map((staff) => (
                   <tr key={staff.id} className="hover:bg-blue-50 transition">
                     <td className="px-4 py-3 font-mono text-slate-600">
                       {staff.created_at
@@ -156,7 +156,7 @@ export const HospitalDashboard = () => {
                 ))}
               </tbody>
             </table>
-            {staffs.length === 0 && (
+            {(Array.isArray(staffs) && staffs.length === 0) && (
               <div className="text-center text-gray-500 italic py-6">No staff records found.</div>
             )}
           </div>
