@@ -233,7 +233,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
           if (!token) return;
         try{
             setLoading(true);
-            const response = await axios.get("http://localhost:5000/api/patients/fetchPatients", 
+            const response = await axios.get("https://clinicpal.onrender.com/api/patients/fetchPatients", 
                 {
                 headers: {
                 Authorization: `Bearer ${token}`
@@ -265,7 +265,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:5000/api/patients/addPatient",
+        "https://clinicpal.onrender.com/api/patients/addPatient",
         credentials,
         {
           headers: {
@@ -288,7 +288,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
          if (!token) return;
         try{
             setLoading(true);
-            const response = await axios.post("http://localhost:5000/api/reports/newReport", 
+            const response = await axios.post("https://clinicpal.onrender.com/api/reports/newReport", 
                 credentials,
                 {
                 headers: {
@@ -308,7 +308,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
          if (!token) return;
         try{
             setLoading(true);
-            const response = await axios.post("http://localhost:5000/api/patients/admitPatient", 
+            const response = await axios.post("https://clinicpal.onrender.com/api/patients/admitPatient", 
                 credentials,
                 {
                 headers: {
@@ -332,7 +332,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
         if (!token) return;
         try {
             setLoading(true);
-            const response = await axios.post("http://localhost:5000/api/patients/quePatient", 
+            const response = await axios.post("https://clinicpal.onrender.com/api/patients/quePatient", 
                 credentials, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -355,7 +355,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
     if (!token) return;
     try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/patients/fetchQueue", {
+        const response = await axios.get("https://clinicpal.onrender.com/api/patients/fetchQueue", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -384,7 +384,7 @@ useEffect(() => {
         if (!token) return;
         try {
             setLoading(true);
-            const response = await axios.post("http://localhost:5000/api/patients/queActions", 
+            const response = await axios.post("https://clinicpal.onrender.com/api/patients/queActions", 
                 credentials, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -408,7 +408,7 @@ useEffect(() => {
         if (!token) return;
         try{
             setLoading(true);
-            const response = await axios.get("http://localhost:5000/api/reports/fetch_admitted_patient_reports",
+            const response = await axios.get("https://clinicpal.onrender.com/api/reports/fetch_admitted_patient_reports",
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -438,7 +438,7 @@ useEffect(() => {
          if (!token) return;
         try{
             setLoading(true)
-            const response =  await axios.post("http://localhost:5000/api/reports/fetchPatientReport", 
+            const response =  await axios.post("https://clinicpal.onrender.com/api/reports/fetchPatientReport", 
                 credentials, {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -460,7 +460,7 @@ useEffect(() => {
         if (!token) return;
         try{
             setLoading(true);
-            const response = await axios.post("http://localhost:5000/api/patients/dischargePatient", 
+            const response = await axios.post("https://clinicpal.onrender.com/api/patients/dischargePatient", 
                 credentials,{
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -483,7 +483,7 @@ useEffect(() => {
          if (!token) return;
         try{
             setLoading(true);
-            const response = await axios.post("http://localhost:5000/api/appointments/addAppointment",
+            const response = await axios.post("https://clinicpal.onrender.com/api/appointments/addAppointment",
                 credentials, {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -504,7 +504,7 @@ useEffect(() => {
         try{
             if (!token) return;
             setLoading(true)
-            const response = await axios.get("http://localhost:5000/api/appointments/fetchAppointments",
+            const response = await axios.get("https://clinicpal.onrender.com/api/appointments/fetchAppointments",
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -532,7 +532,7 @@ const fetchPharmacyData = useCallback(async () => {
     if (!token) return;
     try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/pharmacy/fetchPharmacyData", {
+        const response = await axios.get("https://clinicpal.onrender.com/api/pharmacy/fetchPharmacyData", {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -553,7 +553,7 @@ const updatePharmacyOrderStatus = useCallback(async (credentials: pharmacyOrderS
     if (!token) return;
     try {
         setLoading(true);
-        const response = await axios.post("http://localhost:5000/api/pharmacy/updateOrderStatus", 
+        const response = await axios.post("https://clinicpal.onrender.com/api/pharmacy/updateOrderStatus", 
             credentials, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -576,7 +576,7 @@ const fetchLaboratoryData = useCallback(async () => {
     if (!token) return;
     try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/laboratory/fetchLaboratoryData", 
+        const response = await axios.get("https://clinicpal.onrender.com/api/laboratory/fetchLaboratoryData", 
             {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -599,7 +599,7 @@ const updateLaboratoryOrderStatus = useCallback(async (credentials: labOrderderS
     if (!token) return;
     try {
         setLoading(true);
-        const response = await axios.post("http://localhost:5000/api/laboratory/updateOrderStatus", 
+        const response = await axios.post("https://clinicpal.onrender.com/api/laboratory/updateOrderStatus", 
             credentials, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -622,7 +622,7 @@ const fetchUltrasoundData = useCallback(async () => {
     if (!token) return;
     try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/ultrasound/fetchUltrasoundData", {
+        const response = await axios.get("https://clinicpal.onrender.com/api/ultrasound/fetchUltrasoundData", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -643,7 +643,7 @@ const updateUltrasoundOrderStatus = useCallback(async (credentials: labOrderderS
     if (!token) return;
     try {
         setLoading(true);
-        const response = await axios.post("http://localhost:5000/api/ultrasound/updateOrderStatus", 
+        const response = await axios.post("https://clinicpal.onrender.com/api/ultrasound/updateOrderStatus", 
             credentials, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -666,7 +666,7 @@ const submitExternalOrder = useCallback(async (credentials: externalOrder) => {
     if (!token) return;
     try {
         setLoading(true);
-        const response = await axios.post("http://localhost:5000/api/external/submitExternalOrder", 
+        const response = await axios.post("https://clinicpal.onrender.com/api/external/submitExternalOrder", 
             credentials, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -688,7 +688,7 @@ const fetchExternalOrder = useCallback( async()=> {
     if(!token) return;
     try{
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/external/fetchOrder",
+        const response = await axios.get("https://clinicpal.onrender.com/api/external/fetchOrder",
             {
                 headers: {
                     Authorization: `Bearer ${token}`

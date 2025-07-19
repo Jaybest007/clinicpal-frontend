@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = useCallback(async (data: SignUpData): Promise<AuthUser> => {
     setLoading(true);
     try {
-      const response = await axios.post<AuthUser>("http://localhost:5000/api/auth/signup", data);
+      const response = await axios.post<AuthUser>("https://clinicpal.onrender.com/api/auth/signup", data);
       const newUser = response.data;
 
       setUser(newUser);
@@ -137,7 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const hospital_Signup = useCallback(async (data: HospitalSignupData): Promise<void> => {
     setLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/auth/hospitals_signup", data);
+      await axios.post("https://clinicpal.onrender.com/api/auth/hospitals_signup", data);
       toast.success("Hospital registered successfully");
     } catch (err: any) {
       const message =

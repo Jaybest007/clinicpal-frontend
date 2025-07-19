@@ -76,7 +76,7 @@ const hospitalLogin = useCallback( async(credentials: hospitalLogin) => {
     try{
         setLoading(true);
 
-        const response = await axios.post("http://localhost:5000/api/auth/hospital_login", credentials)    
+        const response = await axios.post("https://clinicpal.onrender.com/api/auth/hospital_login", credentials)    
         localStorage.setItem("hospital_data", JSON.stringify(response.data));
         setHospitalData(response.data);
         toast.success(response.data.success)
@@ -105,7 +105,7 @@ const fetchStaffs = useCallback( async() =>{
     
     try{
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/hospitals/fetchStaffs",
+        const response = await axios.get("https://clinicpal.onrender.com/api/hospitals/fetchStaffs",
             {
                 headers: {
                     Authorization: `Bearer ${hospitalData?.token}`
@@ -133,7 +133,7 @@ useEffect(()=> {
  const updateStaffRole = useCallback( async(credentials: updateStaffRole)=> {
     try{
         setLoading(true);
-        const response = await axios.post("http://localhost:5000/api/hospitals/update_staff_role", 
+        const response = await axios.post("https://clinicpal.onrender.com/api/hospitals/update_staff_role", 
             credentials, {
                 headers: {
                     Authorization: `Bearer ${hospitalData?.token}`
@@ -153,7 +153,7 @@ useEffect(()=> {
 const deleteUser = useCallback( async(credentials: deleteUser) => {
     try{
         setLoading(true)
-        const response = await axios.post("http://localhost:5000/api/hospitals/delete_staff", 
+        const response = await axios.post("https://clinicpal.onrender.com/api/hospitals/delete_staff", 
             credentials, {
                 headers: {
                     Authorization: `Bearer ${hospitalData?.token}`

@@ -2,37 +2,59 @@
 import pic1 from "../assets/pic.png";
 import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const LandingPage = () => {
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   return (
 
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100">
         <header className="sticky top-0 z-50 bg-white border-b border-gray-200 py-4 md:py-5 px-6 md:px-16 lg:px-24 backdrop-blur-sm bg-opacity-90">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-            
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
             {/* Logo and Brand */}
             <div className="flex items-center space-x-4">
-            <img src={logo} alt="ClinicPal Logo" className="h-10 w-auto" />
+              <img src={logo} alt="ClinicPal Logo" className="h-10 w-auto" />
             </div>
 
-            {/* Navigation */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-10 text-sm font-medium">
-            <a href="#about" className="text-slate-600 hover:text-blue-600 transition">About</a>
-            <a href="#features" className="text-slate-600 hover:text-blue-600 transition">Features</a>
-            <a href="#contact" className="text-slate-600 hover:text-blue-600 transition">Contact</a>
-            <Link
+              <a href="#about" className="text-slate-600 hover:text-blue-600 transition">About</a>
+              <a href="#features" className="text-slate-600 hover:text-blue-600 transition">Features</a>
+              <a href="#contact" className="text-slate-600 hover:text-blue-600 transition">Contact</a>
+              <Link
                 to="/login"
                 className="ml-2 bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition"
-            >
+              >
                 Login
-            </Link>
+              </Link>
             </nav>
-        </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileOpen((open) => !open)}
+              aria-label="Open menu"
+            >
+              <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Mobile Navigation Drawer */}
+          {mobileOpen && (
+            <nav className="md:hidden bg-white border-t border-gray-200 px-4 py-4 space-y-3">
+              <a href="#about" className="block text-slate-600 hover:text-blue-600 transition">About</a>
+              <a href="#features" className="block text-slate-600 hover:text-blue-600 transition">Features</a>
+              <a href="#contact" className="block text-slate-600 hover:text-blue-600 transition">Contact</a>
+              <Link
+                to="/login"
+                className="block bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition mt-2"
+              >
+                Login
+              </Link>
+            </nav>
+          )}
         </header>
-
-
-
-
 
 
     <main className="text-slate-800 bg-white">
