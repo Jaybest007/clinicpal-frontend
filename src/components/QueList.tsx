@@ -60,15 +60,44 @@ const QueList: React.FC = () => {
                   <tr key={item.id} className="border-t">
                     <td className="px-3 py-2">{i + 1}</td>
                     <td className="px-3 py-2">{new Date(item.checked_in_at).toLocaleString()}</td>
-                    <td className="px-3 py-2">{item.patient_id}</td>
+                    <td className="px-3 py-2">{String (item.patient_id).toUpperCase()}</td>
                     <td className="px-3 py-2">{item.patient_fullname}</td>
                     <td className="px-3 py-2">{item.visit_reason}</td>
                     <td className="px-3 py-2">{item.status}</td>
                     <td className="px-3 py-2">{item.qued_by}</td>
-                    <td className="px-3 py-2 space-x-2">
-                      <Link to={`/reports/${item.patient_id}`} className="text-blue-600 hover:underline">View</Link>
-                      <button onClick={() => setConfirmModal({ type: "called", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="bg-lime-600 hover:bg-lime-700 text-black p-1 rounded">Call</button>
-                      <button onClick={() => setConfirmModal({ type: "remove", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="bg-red-600 hover:bg-red-700 text-white p-1 rounded">Remove</button>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          to={`/reports/${item.patient_id}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded whitespace-nowrap"
+                        >
+                          View
+                        </Link>
+                        <button
+                          onClick={() =>
+                            setConfirmModal({
+                              type: "called",
+                              patient_id: String(item.patient_id),
+                              full_name: item.patient_fullname,
+                            })
+                          }
+                          className="bg-lime-600 hover:bg-lime-700 text-white px-2 py-1 rounded whitespace-nowrap"
+                        >
+                          Call
+                        </button>
+                        <button
+                          onClick={() =>
+                            setConfirmModal({
+                              type: "remove",
+                              patient_id: String(item.patient_id),
+                              full_name: item.patient_fullname,
+                            })
+                          }
+                          className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded whitespace-nowrap"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -100,17 +129,36 @@ const QueList: React.FC = () => {
               <tbody>
                 {calledList.map((item, i) => (
                   <tr key={item.id} className="border-t">
-                    <td className="px-3 py-2">{i + 1}</td>
-                    <td className="px-3 py-2">{new Date(item.checked_in_at).toLocaleString()}</td>
-                    <td className="px-3 py-2">{String(item.patient_id).toUpperCase()}</td>
-                    <td className="px-3 py-2">{item.patient_fullname}</td>
-                    <td className="px-3 py-2">{item.visit_reason}</td>
-                    <td className="px-3 py-2">{item.status}</td>
-                    <td className="px-3 py-2">{item.assigned_doctor}</td>
-                    <td className="px-3 py-2 space-x-2">
-                      <Link to={`/reports/${item.patient_id}`} className="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded">View</Link>
-                      <button onClick={() => setConfirmModal({ type: "seen", patient_id: String(item.patient_id), full_name: item.patient_fullname })} className="bg-yellow-600 text-white hover:bg-yellow-700 p-1 rounded">Seen</button>
+                    <td className="px-3 py-2 border">{i + 1}</td>
+                    <td className="px-3 py-2 border">{new Date(item.checked_in_at).toLocaleString()}</td>
+                    <td className="px-3 py-2 border">{String(item.patient_id).toUpperCase()}</td>
+                    <td className="px-3 py-2 border">{item.patient_fullname}</td>
+                    <td className="px-3 py-2 border">{item.visit_reason}</td>
+                    <td className="px-3 py-2 border">{item.status}</td>
+                    <td className="px-3 py-2 border">{item.assigned_doctor}</td>
+                    <td className="px-3 py-2 border">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <Link
+                          to={`/reports/${item.patient_id}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm text-center"
+                        >
+                          View
+                        </Link>
+                        <button
+                          onClick={() =>
+                            setConfirmModal({
+                              type: "seen",
+                              patient_id: String(item.patient_id),
+                              full_name: item.patient_fullname,
+                            })
+                          }
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 rounded text-sm text-center"
+                        >
+                          Seen
+                        </button>
+                      </div>
                     </td>
+
                   </tr>
                 ))}
               </tbody>

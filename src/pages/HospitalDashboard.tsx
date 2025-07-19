@@ -100,7 +100,7 @@ export const HospitalDashboard = () => {
                         : "N/A"}
                     </td>
                     <td className="px-4 py-3 font-semibold text-gray-900">
-                      {staff.firstName} {staff.lastName}
+                      {staff.firstname} {staff.lastname}
                     </td>
                     <td className="px-4 py-3">
                       {editingStaffId === staff.id ? (
