@@ -61,9 +61,9 @@ const LandingPage = () => {
                 <Link to="/onboarding" className="px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition shadow">
                   Get started
                 </Link>
-                <a href="/docs" className="px-6 py-3 bg-white text-blue-600 border border-blue-600 rounded-md font-semibold hover:bg-blue-50 transition shadow">
+                <Link to="/docs" className="px-6 py-3 bg-white text-blue-600 border border-blue-600 rounded-md font-semibold hover:bg-blue-50 transition shadow">
                   See Documentation
-                </a>
+                </Link>
               </div>
             </div>
             <div className="flex-1">
