@@ -68,25 +68,27 @@ return user?.role === "unactivated" ? (
       <main className="flex-1 pt-8 px-2 md:px-8">
         <div className="max-w-6xl mx-auto space-y-10">
           {/* Sticky Action Bar */}
-          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4 rounded-t-xl shadow-sm mb-6 gap-4">
-            <h2 className="text-3xl font-bold text-blue-900 tracking-tight">
+          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col sm:flex-row items-center sm:justify-between px-4 md:px-8 py-3 rounded-t-xl shadow-sm mb-4 gap-3 sm:gap-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-blue-900 text-center sm:text-left">
               Welcome, {user?.name || "Doctor"}
             </h2>
-            <div className="flex flex-wrap gap-4">
-             <button
-                className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none text-white px-6 py-2 text-base rounded-lg shadow font-normal transition"
+
+            <div className="flex flex-wrap justify-center sm:justify-end gap-2 sm:gap-4 w-full sm:w-auto">
+              <button
+                className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-md shadow transition"
                 onClick={toggleNewPatient}
               >
                 {showNewPatient ? "Close Patient Form" : "Add New Patient"}
               </button>
               <button
-                className="bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none text-white px-6 py-2 text-base rounded-lg shadow font-normal transition"
+                className="bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-md shadow transition"
                 onClick={toggleReport}
               >
                 {showReportModal ? "Close Report Form" : "Add Report"}
               </button>
             </div>
           </div>
+
 
           {/* Stat Cards */}
           <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">

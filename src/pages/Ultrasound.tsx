@@ -57,31 +57,29 @@ export const Ultrasound = () => {
       <NavBar />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-2 md:px-8 py-8">
-        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex items-center justify-between px-4 md:px-8 py-4 rounded-t-xl shadow-sm mb-6">
-          <h1 className="text-3xl font-bold text-blue-900 tracking-tight">Ultrasound</h1>
-          <div className="flex items-center gap-4">
+        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between px-2 md:px-8 py-3 rounded-t-xl shadow-sm mb-4 gap-2 md:gap-0">
+          <h1 className="text-2xl md:text-3xl font-bold text-blue-900 tracking-tight mb-2 md:mb-0">Ultrasound</h1>
+          <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 md:gap-4 w-full md:w-auto">
             <select
               value={viewType}
               onChange={(e) => setViewType(e.target.value)}
-              className="text-sm px-4 py-2 border rounded shadow text-gray-700 bg-white"
+              className="text-sm px-3 py-2 border rounded shadow text-gray-700 bg-white w-full xs:w-auto"
             >
               <option value="internal">Internal</option>
               <option value="external">External</option>
             </select>
             <button
               onClick={() => setModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow text-sm font-semibold"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm font-semibold w-full xs:w-auto"
             >
               + New Order
             </button>
-          </div>
-          <div className="mt-3 md:mt-0 flex w-full md:w-auto gap-2">
             <button
               onClick={() => {
-                fetchLaboratoryData();
-                fetchExternalOrder();
+          fetchLaboratoryData();
+          fetchExternalOrder();
               }}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-md text-sm font-medium transition"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium transition w-full xs:w-auto"
               disabled={loading}
             >
               {loading ? "Loading..." : "Refresh"}

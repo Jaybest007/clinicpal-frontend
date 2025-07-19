@@ -46,7 +46,7 @@ const NavBar = () => {
         <div className="flex items-center space-x-3">
           <FiMenu className="md:hidden cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
           <Link to="/" className="text-xl font-bold tracking-wide">
-            <img src={logo} alt="ClinicPal Logo" className="h-10 w-auto" />
+            <img src={logo} alt="ClinicPal Logo" className="h-9 w-auto" />
           </Link>
         </div>
 

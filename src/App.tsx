@@ -21,7 +21,7 @@ import HqReports from "./pages/HqPages/HqReports";
 import {Pharmacy} from "./pages/Pharmacy";
 import { Laboratory } from "./pages/Laboratory"; 
 import { Ultrasound } from "./pages/Ultrasound"; // Importing the Ultrasound page
-
+import DocumentationPage from "./pages/Documentation";
 
 function App() {
   return (
@@ -42,7 +42,9 @@ function App() {
         <Route path="/pharmacy" element={<ProtectedRoute> <Pharmacy /> </ProtectedRoute>} />
         <Route path="/laboratory" element={<ProtectedRoute> <Laboratory /> </ProtectedRoute>} />
         <Route path="/ultrasound" element={<ProtectedRoute> <Ultrasound /> </ProtectedRoute>} />
+        <Route path="/docs" element={<DocumentationPage />} />
 
+        {/* Public Routes */}
         {/* Hospital Routes */}
 
         <Route path="/hq_login" element={<HqLogin />} />
