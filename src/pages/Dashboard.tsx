@@ -111,18 +111,18 @@ return user?.role === "unactivated" ? (
           </div>
 
           {/* Summary Card - Clinical Detail */}
-            <div className="bg-white rounded-2xl shadow-lg p-2 sm:p-8 border-t-4 border-blue-500 ">
-            <h3 className="text-2xl font-semibold text-gray-700 mb-3 flex items-center gap-3">
-              <FaStethoscope className="text-blue-500" />
-              Clinic Summary
-            </h3>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              You're managing a total of{" "}
-              <span className="font-bold text-blue-900">{patientsData.length}</span> patients today.
-              There are currently{" "}
-              <span className="text-green-600 font-bold">{Total_admitted} admitted</span> and
-              <span className="text-red-500 font-bold ml-1">{Total_Discharged} discharged</span>. Stay sharp!
-            </p>
+            <div className="bg-white rounded-2xl shadow-lg p-3 sm:p-5 md:p-8 border-t-4 border-blue-500 w-full">
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
+                <FaStethoscope className="text-blue-500" />
+                Clinic Summary
+              </h3>
+              <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
+                You're managing a total of{" "}
+                <span className="font-bold text-blue-900">{patientsData.length}</span> patients today.
+                There are currently{" "}
+                <span className="text-green-600 font-bold">{Total_admitted} admitted</span> and
+                <span className="text-red-500 font-bold ml-1">{Total_Discharged} discharged</span>. Stay sharp!
+              </p>
             </div>
 
           {/* Dynamic Forms & Admitted Patients */}

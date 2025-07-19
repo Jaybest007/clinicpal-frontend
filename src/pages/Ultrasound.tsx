@@ -151,49 +151,62 @@ export const Ultrasound = () => {
         )}
 
         {viewType === "external" && (
-          <div className="bg-yellow-50 text-yellow-800 p-2 border border-yellow-300 rounded-xl shadow-md text-center">
-            <h2 className="text-xl font-semibold mb-2">External Orders View</h2>
-            <div className="p-1 rounded-lg">
-              <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
-                <StatCard icon={RiFileList3Fill} title="Total Orders" value={externalOrder.filter(order => order.order_type === "ultrasound").length} />
+            <div className="bg-yellow-50 text-yellow-800 p-4 border border-yellow-300 rounded-xl shadow-md text-center">
+            <h2 className="text-xl font-semibold mb-3">External Orders View</h2>
+            <div className="rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+              <StatCard icon={RiFileList3Fill} title="Total Orders" value={externalOrder.filter(order => order.order_type === "ultrasound").length} />
               </div>
-
               <section className="bg-white rounded-xl shadow border border-slate-200 p-4 md:p-6 overflow-x-auto">
-                {loading && <div className="text-blue-600 animate-pulse text-sm mb-4">Fetching latest orders from server...</div>}
-                {!loading && externalOrder.filter(order => order.order_type === "ultrasound").length > 0 && (
-                  <table className="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead className="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
-                      <tr>
-                        <th className="px-4 py-3 text-left">NA</th>
-                        <th className="px-4 py-3 text-left">D/T</th>
-                        <th className="px-4 py-3 text-left">Name</th>
-                        <th className="px-4 py-3 text-left">Order</th>
-                        <th className="px-4 py-3 text-left">Order details</th>
-                        <th className="px-4 py-3 text-left">Sent by</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {externalOrder.filter(order => order.order_type === "ultrasound").map((order, index) => (
-                        <tr className="hover:bg-blue-50 transition border-b border-gray-200" key={order.id}>
-                          <td className="px-4 py-3 font-mono text-blue-700 border">{index + 1}</td>
-                          <td className="px-4 py-3 font-mono text-blue-700 border">{new Date(order.created_on).toLocaleString()}</td>
-                          <td className="px-4 py-3 font-medium text-gray-900 border">{order.name?.toUpperCase()}</td>
-                          <td className="px-4 py-3 font-mono text-blue-700 border">{order.order_type}</td>
-                          <td className="px-4 py-3 text-gray-700 border truncate max-w-[200px]" title={order.order_data}>{order.order_data}</td>
-                          <td className="px-4 py-3 text-gray-700 border">{order.hospital}</td>
-                        </tr>
-                      ))}
-                      {!loading && externalOrder.filter(order => order.order_type === "ultrasound").length === 0 && (
-                        <tr>
-                          <td colSpan={6} className="text-gray-500 py-6 text-center">No orders found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                )}
+              {loading && (
+                <div className="text-blue-600 animate-pulse text-sm mb-4">
+                Fetching latest orders from server...
+                </div>
+              )}
+              {!loading && (
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
+                  <tr>
+                  <th className="px-4 py-3 text-left">#</th>
+                  <th className="px-4 py-3 text-left">D/T</th>
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">Order</th>
+                  <th className="px-4 py-3 text-left">Order details</th>
+                  <th className="px-4 py-3 text-left">Sent by</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {externalOrder
+                  .filter(order => order.order_type === "ultrasound")
+                  .map((order, index) => (
+                    <tr className="hover:bg-blue-50 transition border-b border-gray-200" key={order.id}>
+                    <td className="px-4 py-3 font-mono text-blue-700 border">{index + 1}</td>
+                    <td className="px-4 py-3 font-mono text-blue-700 border">
+                      {order.created_on ? new Date(order.created_on).toLocaleString() : ""}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-gray-900 border">
+                      {order.name?.toUpperCase() || ""}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-blue-700 border">{order.order_type}</td>
+                    <td className="px-4 py-3 text-gray-700 border truncate max-w-[200px]" title={order.order_data}>
+                      {order.order_data}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 border">{order.hospital}</td>
+                    </tr>
+                  ))}
+                  {!loading && externalOrder.filter(order => order.order_type === "ultrasound").length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-gray-500 py-6 text-center">
+                    No orders found.
+                    </td>
+                  </tr>
+                  )}
+                </tbody>
+                </table>
+              )}
               </section>
             </div>
-          </div>
+            </div>
         )}
         <OrderForm
           isOpen={modalOpen}
