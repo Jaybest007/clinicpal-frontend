@@ -178,7 +178,7 @@ const Patients = () => {
           </div>
         </section>
       </main>
-
+          
       <PatientProfileModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

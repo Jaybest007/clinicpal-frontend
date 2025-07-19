@@ -1,29 +1,32 @@
 import React, { useState } from "react";
-
-import StatCard from "../components/StatCard";
+import { toast } from "react-toastify";
 import { FaSearch, FaUser, FaUserInjured } from "react-icons/fa";
 import { TiWarning } from "react-icons/ti";
-import { useHospital } from "../context/HospitalContext";
-import { toast } from "react-toastify";
-import { useDashboard } from "../context/DashboardContext";
-import { HqNavBar } from "../components/HqNavBar";
 
+import StatCard from "../components/StatCard";
+import { HqNavBar } from "../components/HqNavBar";
+import { useHospital } from "../context/HospitalContext";
+import { useDashboard } from "../context/DashboardContext";
 
 export const HospitalDashboard = () => {
-  const { hospitalData, staffs, deleteUser, updateStaffRole } = useHospital();
-  const {patientsData} = useDashboard()
-  const totalStaff = Array.isArray(staffs) ? staffs.length : 0;
-  const totalPatients = patientsData.length;
-  const totalAdmitted = patientsData.filter(patient => patient.admission_status === 1).length;
-  //========edit user role=========\\
+  const { hospitalData, staffs = [], deleteUser, updateStaffRole } = useHospital();
+  const { patientsData = [] } = useDashboard();
+
   const [editingStaffId, setEditingStaffId] = useState<string>("");
   const [newRole, setNewRole] = useState<string>("");
 
-  const handleUpdateRole = async (event: React.FormEvent<HTMLFormElement>, staffId: string) => {
-    event.preventDefault();
+  const totalStaff = Array.isArray(staffs) ? staffs.length : 0;
+  const totalPatients = patientsData.length;
+  const totalAdmitted = patientsData.filter(p => p.admission_status === 1).length;
+
+  const handleUpdateRole = async (
+    e: React.FormEvent<HTMLFormElement>,
+    staffId: string
+  ) => {
+    e.preventDefault();
 
     if (newRole.trim() === "") {
-      toast.error("Select a role");
+      toast.error("Please select a role.");
       return;
     }
 
@@ -31,123 +34,133 @@ export const HospitalDashboard = () => {
       await updateStaffRole({ id: staffId, newRole });
       setEditingStaffId("");
       setNewRole("");
-    } catch (err: any) {
-      toast.error("Unable to update role");
+      toast.success("Role updated successfully.");
+    } catch {
+      toast.error("Unable to update role.");
     }
   };
-//===============end ===========\\
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100">
-      {/* ====== Navbar ====== */}
-      <HqNavBar/>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100">
+      <HqNavBar />
 
-      {/* ====== Main Content ====== */}
-      <main className="flex-1 pt-8 px-2 md:px-8">
-        <div className="max-w-6xl mx-auto space-y-10">
-          {/* Overview Bar */}
-          <div className="flex justify-between items-center bg-white px-6 py-4 rounded-xl shadow-sm">
-            <h1 className="text-2xl font-semibold">Overview</h1>
-            <p>Hospital ID: {hospitalData?.hospital_id.toUpperCase()}</p>
-          </div>
+      <main className="max-w-7xl mx-auto py-8 px-4 space-y-10">
+        {/* Overview Header */}
+        <div className="bg-white rounded-xl shadow-sm flex items-center justify-between px-6 py-4">
+          <h1 className="text-2xl font-semibold text-blue-900">Hospital Overview</h1>
+          <p className="text-sm text-gray-700 font-medium">
+            Hospital ID: <span className="text-blue-700 font-bold">{hospitalData?.hospital_id?.toUpperCase() ?? "—"}</span>
+          </p>
+        </div>
 
-          {/* Stat Cards */}
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 m-2">
-            <StatCard title="Total Patients" icon={FaUserInjured} value={totalPatients} />
-            <StatCard title="Staffs" icon={FaUser} value={totalStaff} />
-            <StatCard title="Patients this month" icon={FaUser} value={150} />
-            <StatCard title="Critical cases" icon={TiWarning} value={5} />
-            <StatCard title="Admitted Patients" icon={FaUser} value={totalAdmitted} />
-          </div>
+        {/* Stat Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+          <StatCard title="Total Patients" icon={FaUserInjured} value={totalPatients} />
+          <StatCard title="Staff Members" icon={FaUser} value={totalStaff} />
+          <StatCard title="This Month" icon={FaUser} value={150} />
+          <StatCard title="Critical Cases" icon={TiWarning} value={5} />
+          <StatCard title="Admitted" icon={FaUser} value={totalAdmitted} />
+        </div>
 
-          {/* Staff Table */}
-          <div className="bg-white shadow-lg rounded-xl p-6 space-y-6">
-            <h1 className="text-3xl font-semibold text-gray-900">Staff Overview</h1>
+        {/* Staff Table */}
+        <section className="bg-white rounded-xl shadow-lg p-6 space-y-6 border border-slate-200">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h2 className="text-xl font-semibold text-blue-800">Staff Overview</h2>
 
-            <div className="relative w-full">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
+            <div className="relative w-full sm:w-72">
+              <FaSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-blue-400" />
               <input
                 type="text"
                 placeholder="Search by name or ID"
-                className="w-full bg-blue-50 text-gray-800 placeholder:text-gray-500 rounded-md py-2 pl-10 pr-4 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                className="w-full py-2 pl-10 pr-4 rounded-md border border-blue-300 bg-blue-50 text-sm text-blue-900 placeholder:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
               />
             </div>
+          </header>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-gray-200 rounded-md">
-                <thead className="bg-gray-100 text-gray-700 font-medium">
-                  <tr>
-                    <th className="px-6 py-3 text-left border-b">DOR</th>
-                    <th className="px-6 py-3 text-left border-b">Name</th>
-                    <th className="px-6 py-3 text-left border-b">Role</th>
-                    <th className="px-6 py-3 text-left border-b">Phone Number</th>
-                    <th className="px-6 py-3 text-left border-b">Action</th>
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <thead className="bg-slate-100 text-slate-700 text-xs uppercase font-semibold">
+                <tr>
+                  <th className="px-4 py-3 text-left whitespace-nowrap">DOR</th>
+                  <th className="px-4 py-3 text-left whitespace-nowrap">Name</th>
+                  <th className="px-4 py-3 text-left whitespace-nowrap">Role</th>
+                  <th className="px-4 py-3 text-left whitespace-nowrap">Phone</th>
+                  <th className="px-4 py-3 text-left whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-gray-800">
+                {staffs.map((staff) => (
+                  <tr key={staff.id} className="hover:bg-blue-50 transition">
+                    <td className="px-4 py-3 font-mono text-slate-600">
+                      {staff.created_at
+                        ? new Date(staff.created_at).toLocaleString(undefined, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })
+                        : "N/A"}
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-gray-900">
+                      {staff.firstName} {staff.lastName}
+                    </td>
+                    <td className="px-4 py-3">
+                      {editingStaffId === staff.id ? (
+                        <form onSubmit={(e) => handleUpdateRole(e, staff.id)} className="flex items-center gap-2">
+                          <select
+                            value={newRole}
+                            className="px-2 py-1 text-sm border border-blue-300 rounded-md bg-blue-50 text-blue-800 focus:outline-none"
+                            onChange={(e) => setNewRole(e.target.value)}
+                          >
+                            <option value="">Select Role</option>
+                            <option value="super admin">Super Admin</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="nurse">Nurse</option>
+                            <option value="junior nurse">Junior Nurse</option>
+                            <option value="unactivated">Deactivate</option>
+                          </select>
+                          <button
+                            type="submit"
+                            className="bg-green-600 text-white text-xs px-3 py-1 rounded hover:bg-green-700"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingStaffId("")}
+                            className="text-slate-500 text-xs hover:underline"
+                          >
+                            Cancel
+                          </button>
+                        </form>
+                      ) : (
+                        <span className="font-medium text-slate-700">{staff.role}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">{staff.phone}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditingStaffId(staff.id)}
+                          className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded px-3 py-1 transition"
+                        >
+                          Update Role
+                        </button>
+                        <button
+                          onClick={async () => await deleteUser({ id: staff.id })}
+                          className="bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded px-3 py-1 transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="text-gray-800">
-                  {Array.isArray(staffs) &&
-                    staffs.map((staff, index) => (
-                      <tr key={index} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-3 border-b">
-                          {staff.created_at
-                            ? new Date(staff.created_at).toLocaleString(undefined, {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                              })
-                            : "N/A"}
-                        </td>
-                        <td className="px-6 py-3 border-b">{staff.firstName} {staff.lastName}</td>
-                        <td className="px-6 py-3 border-b">
-                          {editingStaffId === staff.id ? (
-                            <form onSubmit={(e) => handleUpdateRole(e, staff.id)} className="flex items-center space-x-2">
-                              <select
-                                name="Role"
-                                value={newRole}
-                                className="px-3 py-2 bg-blue-50 border border-blue-300 rounded-md text-sm text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                onChange={(e) => setNewRole(e.target.value)}
-                              >
-                                <option value="">Select Role</option>
-                                <option value="super admin">Super Admin</option>
-                                <option value="doctor">Doctor</option>
-                                <option value="nurse">Nurse</option>
-                                <option value="junior nurse">Junior Nurse</option>
-                                <option value="unactivated">Deactivate</option>
-                              </select>
-                              <button type="submit"  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">
-                                Confirm
-                              </button>
-                              <button type="button" onClick={() => setEditingStaffId("")} className="text-gray-500 text-sm hover:underline">
-                                Cancel
-                              </button>
-                            </form>
-                          ) : (
-                            staff.role
-                          )}
-                        </td>
-                        <td className="px-6 py-3 border-b">{staff.phone}</td>
-                        <td className="px-6 py-3 border-b">
-                          <div className="flex gap-3">
-                            <button
-                              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded px-3 py-1 transition"
-                              onClick={() => setEditingStaffId(staff.id)}
-                            >
-                              Update Role
-                            </button>
-                            <button
-                              onClick={async () => await deleteUser({ id: staff.id })}
-                              className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded px-3 py-1 transition"
-                            >
-                              Delete User
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
+            {staffs.length === 0 && (
+              <div className="text-center text-gray-500 italic py-6">No staff records found.</div>
+            )}
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );

@@ -11,6 +11,8 @@ import {
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from "../assets/logo1.png";
+import { BiInjection } from 'react-icons/bi';
+import { GiMedicines, GiMicroscope } from 'react-icons/gi';
 
 
 const NavBar = () => {
@@ -27,7 +29,9 @@ const NavBar = () => {
   ...(user?.role === 'doctor' ? [{ name: 'Appointments', icon: <FiCalendar />, path: '/appointments' }] : []),
     { name: 'Patients', icon: <FiUser />, path: '/patients' },
     { name: 'Reports', icon: <FiBook />, path: '/reports' },
-    { name: 'Settings', icon: <FiSettings />, path: '/settings' },
+    { name: 'Pharmacy', icon: <GiMedicines />, path: '/pharmacy' },
+    { name: 'Laboratory', icon: <GiMicroscope />, path: '/laboratory' },
+    { name: 'Ultrasound', icon: <FiSettings />, path: '/ultrasound' },
     { name: 'Logout', icon: <FiLogOut />, path: '/login', action: logout },
   ];
 

@@ -17,7 +17,10 @@ import { HospitalDashboard } from "./pages/HospitalDashboard";
 import HqLogin from "./pages/HqPages/HqLogin";
 import HospitalProtectedRoute from "./utilities/HospitalProtectedRoute";
 import { HqPatients } from "./pages/HqPages/HqPatients";
-// import { HqReports } from "./pages/HqPages/HqReports";
+import HqReports from "./pages/HqPages/HqReports";
+import {Pharmacy} from "./pages/Pharmacy";
+import { Laboratory } from "./pages/Laboratory"; 
+import { Ultrasound } from "./pages/Ultrasound"; // Importing the Ultrasound page
 
 
 function App() {
@@ -36,11 +39,16 @@ function App() {
         <Route path="/reports/:patient_id" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
         <Route path="/reports/" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
         <Route path="/appointments/" element={<ProtectedRoute> <Appointment /> </ProtectedRoute> } />
+        <Route path="/pharmacy" element={<ProtectedRoute> <Pharmacy /> </ProtectedRoute>} />
+        <Route path="/laboratory" element={<ProtectedRoute> <Laboratory /> </ProtectedRoute>} />
+        <Route path="/ultrasound" element={<ProtectedRoute> <Ultrasound /> </ProtectedRoute>} />
+
+        {/* Hospital Routes */}
 
         <Route path="/hq_login" element={<HqLogin />} />
         <Route path="/hq" element={<HospitalProtectedRoute><HospitalDashboard /></HospitalProtectedRoute>} />
         <Route path="/hq/patients" element={<HospitalProtectedRoute><HqPatients /></HospitalProtectedRoute>} />
-        {/* <Route path="/hq/reports" element={<HospitalProtectedRoute><HqReports /></HospitalProtectedRoute>} /> */}
+        <Route path="/hq/reports" element={<HospitalProtectedRoute><HqReports /></HospitalProtectedRoute>} />
       </Routes>
       </DashboardProvider>
     </BrowserRouter>

@@ -33,28 +33,28 @@ const AdmittedPage = () => {
 
           <tbody className="bg-white divide-y divide-gray-100">
             {admittedPatients.map((patient, index) => (
-              <tr key={patient.patient_id} className="hover:bg-blue-50 transition border-b border-neutral-300">
-                <td className="px-6 py-3 font-mono text-blue-700 border-r border-neutral-300 font-medium">{patient.patient_id.toUpperCase()}</td>
-                <td className="px-6 py-3 font-semibold text-gray-800 border-r border-neutral-300">{patient.full_name.toUpperCase()}</td>
-                <td className="px-6 py-3 font-mono text-blue-700 font-medium border-r border-neutral-300">
+              <tr key={patient.patient_id} className="hover:bg-blue-50 transition border-neutral-300">
+                <td className="px-6 py-3 font-mono text-blue-700 border border-neutral-300 font-medium">{patient.patient_id.toUpperCase()}</td>
+                <td className="px-6 py-3 font-semibold text-gray-800 border border-neutral-300">{patient.full_name.toUpperCase()}</td>
+                <td className="px-6 py-3 font-mono text-blue-700 font-medium border border-neutral-300">
                   {patient.admitted_on ? new Date(patient.admitted_on).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : "N/A"}
                 </td>
 
-                <td className="px-6 py-3 border-r border-neutral-300">Room {101 + index}</td>
-                <td className="px-6 py-3 text-gray-700 border-r border-neutral-300">{patient.admission_reason || "N/A"}</td>
-                <td className="px-6 py-3 text-gray-700 flex flex-col-1 gap-3">
+                <td className="px-6 py-3 border border-neutral-300">Room {101 + index}</td>
+                <td className="px-6 py-3 text-gray-700 border border-neutral-300">{patient.admission_reason || "N/A"}</td>
+                <td className="px-6 py-3 text-gray-700 flex flex-col-1 gap-3 border">
                   { user?.role === "doctor" && 
                   <button  className='bg-lime-600 hover:bg-lime-500 px-5 py-3 rounded-md text-white'
                    onClick={()=> setConfirmPage(true)}>Discharge</button>}
                   <ReportBtn patient_id={patient.patient_id}/>
                 </td>
                 {confirmPage && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-8 overflow-y-auto">
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm px-4 py-8 overflow-y-auto">
                     <div className="relative w-full max-w-xl mx-auto bg-white shadow-xl rounded-xl border border-blue-200 animate-fade-in transition-all">
                       
                       {/* Modal Content */}
-                      <div className="px-8 pt-8 pb-6 text-center space-y-6">
-                        <MdWarning className="mx-auto text-red-500" size={60} />
+                      <div className="px-8 pt-8 pb-6 text-center space-y-2">
+                        <MdWarning className="mx-auto text-yellow-500" size={60} />
 
                         <h2 className="text-2xl font-semibold text-gray-800">
                           Confirm Discharge

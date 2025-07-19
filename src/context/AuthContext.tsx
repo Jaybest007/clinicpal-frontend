@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (credentials: LoginData): Promise<AuthUser> => {
     setLoading(true);
     try {
-      const response = await axios.post<AuthUser>("http://localhost:5000/api/auth/login", credentials);
+      const response = await axios.post<AuthUser>("https://clinicpal.onrender.com/api/auth/login", credentials);
       const loggedInUser = response.data;
 
       // Save to state and localStorage

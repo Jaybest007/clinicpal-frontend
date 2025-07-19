@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext,  useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 
@@ -28,6 +28,8 @@ interface PatientsData {
   gender: "male" | "female";
   admission_status: number;
   admission_reason: string;
+  visit_on: string;
+  visit_reason: string;
   discharged_on: string;
   admitted_on: string;
   created_at: string; 
@@ -48,6 +50,9 @@ interface report{
     patient_id: string;
     report: string;
     wrote_by: string;
+    order_to_pharmacy: boolean;
+    order_to_lab: boolean;
+    ultrasound_order: boolean; 
 }
 
 //interface for admission
@@ -92,6 +97,66 @@ interface fetchedAppointment {
     created_at: string;
 }
 
+//interface for pharmacy fetched data
+interface pharmacyData {    
+    id: any;
+    full_name: string;
+    patient_id: string;
+    order_data: string;
+    status: string;
+    requested_by: string;
+    updated_at: string;
+    created_at: string;
+}
+
+//====interface for pharmacy order status
+interface pharmacyOrderStatus {
+    id: any;
+    status: string;
+    updated_at: string;
+}
+//====interface for laboratory order status
+interface labOrderderStatus {
+    id: string;
+    status: string;
+    updated_at: string;
+}
+
+//======interface for que patient
+interface QueList {
+  id: number;
+  patient_id: number;
+  patient_fullname: string;
+  visit_reason: string;
+  assigned_doctor: string;
+  checked_in_at: string; // or Date if you'll parse it
+  status: string;
+  qued_by: string;
+}
+
+//====intetface for que actions
+interface QueActions{
+    patient_id: any;
+    action: string;
+    performed_by: any;
+}
+
+interface externalOrder {
+    full_name: string;
+    age: string;
+    order_type: "lab" | "xray" | "ultrasound" | "motuary";
+    order_data: string;
+    sent_by: string;
+}
+interface fetchedExterOrder{
+    id: string;
+    name: string;
+    age: number;
+    order_type: string;
+    order_data: string;
+    hospital: string;
+    created_on: string;
+}
 
 interface dashboardContextType {
     addNewPatient: (credentials: newPatientData) => Promise<void>;
@@ -109,9 +174,23 @@ interface dashboardContextType {
     addAppointment: (credentials: appointment) => Promise<void>;
     fetchAppointment: () => Promise<void>;
     appointments: fetchedAppointment[];
-
+    pharmacyData: pharmacyData[];
+    fetchPharmacyData: () => Promise<void>;
+    updatePharmacyOrderStatus: (credentials: pharmacyOrderStatus) => Promise<void>;
+    fetchLaboratoryData: () => Promise<void>;
+    labData: pharmacyData[];
+    updateLaboratoryOrderStatus: (credentials: labOrderderStatus) => Promise<void>;
+    quePatient: (credentials: admission) => Promise<void>;
+    queList: QueList[];
+    QueActions: (credentials: QueActions) => Promise<void>;
+    fetchQueList: () => Promise<void>;
+    fetchUltrasoundData: () => Promise<void>;
+    ultrasoundData: pharmacyData[];
+    updateUltrasoundOrderStatus: (credentials: labOrderderStatus) => Promise<void>;
+    submitExternalOrder: (credentials: externalOrder) => Promise<void>;
+    externalOrder: fetchedExterOrder[];
+    fetchExternalOrder: ()=> Promise<void>;
 }
-
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
 export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
@@ -121,6 +200,11 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
     const [nextOfKinData, setNextOfKinData] = useState<nextOfKinData[]>([]);
     const [appointments, setAppointments] = useState<fetchedAppointment[]>([]);
     const [admittedPatientReport, setAdmittedPatientReport] = useState<fetchReport[]>([]);
+    const [pharmacyData, setPharmacyData] = useState<pharmacyData[]>([]);
+    const [labData, setLabData] = useState<pharmacyData[]>([]);
+    const [ultrasoundData, setUltrasoundData] = useState<pharmacyData[]>([]);
+    const [externalOrder, setExternalOrders] = useState<fetchedExterOrder[]>([])
+    const [queList, setQueList] = useState<QueList[]>([]);
     const [token, setToken] = useState<string | null>(() => {
     const stored = localStorage.getItem("clinicpal_user");
     return stored ? JSON.parse(stored).token : null;
@@ -128,7 +212,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
     const hasFetchedPatients = useRef(false);
     const hasFetchedAppointments = useRef(false);
 
-
+//====useEffect to get token from localStorage on initial render====
     useEffect(() => {
     const stored = localStorage.getItem("clinicpal_user");
     if (stored) {
@@ -143,6 +227,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
         }
     }
     }, []);
+
     //====fetch all patients======
     const fetchAllPatients = useCallback(async () =>{
           if (!token) return;
@@ -173,7 +258,6 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
 }, [fetchAllPatients, token]);
 
 
-
     //=====send new Patients Data =====
     const addNewPatient = useCallback(
   async (credentials: newPatientData) => {
@@ -198,8 +282,6 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
   },
   [token]
 );
-
-
 
     //=====send report ======
     const newReport = useCallback(async (credentials: report) =>{
@@ -244,6 +326,83 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
         }
     },[fetchAllPatients])
 
+
+//============que patient to visit=============
+    const quePatient = useCallback(async (credentials: admission) => {
+        if (!token) return;
+        try {
+            setLoading(true);
+            const response = await axios.post("http://localhost:5000/api/patients/quePatient", 
+                credentials, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            toast.success(response.data.success);
+            setQueList((prev: any) => [...prev, response.data.queList]);
+            fetchAllPatients();
+        } catch (err: any) {
+            const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+            toast.error(errorMessage);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, [fetchAllPatients, token]);
+
+//============FETCH ALL QUEUED PATIENTS===========
+    const fetchQueList = useCallback(async () => {
+    if (!token) return;
+    try {
+        setLoading(true);
+        const response = await axios.get("http://localhost:5000/api/patients/fetchQueue", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        setQueList(response.data);
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    } finally {
+        setLoading(false);
+    }
+}, [token]);
+
+useEffect(() => {
+    if (!token) return;
+    if (!queList.length) {
+        fetchQueList();
+    }
+}, [token, fetchQueList]);
+
+//===============end of FETCHING OF QUEUED PATIENTS=================\\
+
+//============actions for que patients===========
+    const QueActions = useCallback(async (credentials:QueActions) => {
+        if (!token) return;
+        try {
+            setLoading(true);
+            const response = await axios.post("http://localhost:5000/api/patients/queActions", 
+                credentials, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            toast.success(response.data.success);
+           fetchQueList();
+            
+        } catch (err: any) {
+            const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+            toast.error(errorMessage);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+        
+    }
+    , [token, fetchQueList]);
 //============FETCH ALL ADMITTED PATIENTS REPORT==================
     const fetch_Admitted_Patient_Report = useCallback( async() => {
         if (!token) return;
@@ -367,10 +526,190 @@ useEffect(() => {
   fetchAppointment();
   hasFetchedAppointments.current = true;
 }, [fetchAppointment, token]);
+
+//=================fetch pharmacy data========================
+const fetchPharmacyData = useCallback(async () => {
+    if (!token) return;
+    try {
+        setLoading(true);
+        const response = await axios.get("http://localhost:5000/api/pharmacy/fetchPharmacyData", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    setPharmacyData(response.data);
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    }
+    finally {
+        setLoading(false);
+    }
+}, [token]);
+
+//=====update order status in pharmacy data
+const updatePharmacyOrderStatus = useCallback(async (credentials: pharmacyOrderStatus ) => {
+    if (!token) return;
+    try {
+        setLoading(true);
+        const response = await axios.post("http://localhost:5000/api/pharmacy/updateOrderStatus", 
+            credentials, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        toast.success(response.data.success);
+        fetchPharmacyData(); 
+        fetchLaboratoryData();
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    } finally {
+        setLoading(false);
+    }
+},[token]);
+
+//========fetch laboratory data==============
+const fetchLaboratoryData = useCallback(async () => { 
+    if (!token) return;
+    try {
+        setLoading(true);
+        const response = await axios.get("http://localhost:5000/api/laboratory/fetchLaboratoryData", 
+            {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        
+        setLabData(response.data);
+        
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    } finally {
+        setLoading(false);
+    }
+},[token])
+
+//============update laboratory order status================
+const updateLaboratoryOrderStatus = useCallback(async (credentials: labOrderderStatus) => {
+    if (!token) return;
+    try {
+        setLoading(true);
+        const response = await axios.post("http://localhost:5000/api/laboratory/updateOrderStatus", 
+            credentials, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        toast.success(response.data.success);
+        fetchLaboratoryData();
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    } finally {
+        setLoading(false);
+    }
+}, [token, fetchLaboratoryData]);
 //========================end ================
 
+//============fetch ultrasound order ================
+const fetchUltrasoundData = useCallback(async () => {
+    if (!token) return;
+    try {
+        setLoading(true);
+        const response = await axios.get("http://localhost:5000/api/ultrasound/fetchUltrasoundData", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        setUltrasoundData(response.data);
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    }
+    finally {
+        setLoading(false);
+    }
+},[token]); 
 
-    const contextValue = useMemo(() => ({
+//============ultrasound order action ================
+const updateUltrasoundOrderStatus = useCallback(async (credentials: labOrderderStatus) => {
+    if (!token) return;
+    try {
+        setLoading(true);
+        const response = await axios.post("http://localhost:5000/api/ultrasound/updateOrderStatus", 
+            credentials, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        toast.success(response.data.success);
+        fetchUltrasoundData();
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    } finally {
+        setLoading(false);
+    }
+}, [token, fetchUltrasoundData]);
+
+
+//===========submit external order==============
+const submitExternalOrder = useCallback(async (credentials: externalOrder) => {
+    if (!token) return;
+    try {
+        setLoading(true);
+        const response = await axios.post("http://localhost:5000/api/external/submitExternalOrder", 
+            credentials, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        toast.success(response.data.success);
+        fetchUltrasoundData();
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    } finally {
+        setLoading(false);
+    }
+}, [token, fetchUltrasoundData]);
+
+//========== fetch external orer ============
+const fetchExternalOrder = useCallback( async()=> {
+    if(!token) return;
+    try{
+        setLoading(true);
+        const response = await axios.get("http://localhost:5000/api/external/fetchOrder",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+        });
+        setExternalOrders(response.data)
+        console.log("External:", response.data); // Debugging line to check fetched data
+    } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+        toast.error(errorMessage);
+        throw err;
+    } finally {
+        setLoading(false);
+    }
+},[token])
+
+
+
+
+
+const contextValue = useMemo(() => ({
   addNewPatient,
   loading,
   patientsData,
@@ -385,7 +724,10 @@ useEffect(() => {
   patientReport,
   addAppointment,
   fetchAppointment,
-  appointments,
+  appointments,  fetchPharmacyData,pharmacyData, updatePharmacyOrderStatus, labData,
+  fetchLaboratoryData, updateLaboratoryOrderStatus, quePatient, queList, QueActions, fetchQueList,fetchUltrasoundData,
+  updateUltrasoundOrderStatus, submitExternalOrder,
+  ultrasoundData, externalOrder, fetchExternalOrder
 }), [
   addNewPatient,
   loading,
@@ -401,7 +743,12 @@ useEffect(() => {
   patientReport,
   addAppointment,
   fetchAppointment,
-  appointments,
+  appointments, fetchPharmacyData,pharmacyData, 
+  updatePharmacyOrderStatus, fetchLaboratoryData, labData,
+  updateLaboratoryOrderStatus, quePatient , queList, QueActions, fetchQueList, fetchUltrasoundData, ultrasoundData,
+  updateUltrasoundOrderStatus, submitExternalOrder, externalOrder, fetchExternalOrder
+
+
 ]);
 
 return (

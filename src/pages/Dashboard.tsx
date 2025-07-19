@@ -6,7 +6,8 @@ import NewPatient from "../components/NewPatient";
 import ReportForm from "../components/ReportForm";
 import { useAuth } from "../context/AuthContext";
 import { useDashboard } from "../context/DashboardContext";
-import AdmittedPage from "../components/AdmittedPage";
+
+import QueList from "../components/QueList";
 
 const Dashboard = () => {
   useEffect(() => {
@@ -16,7 +17,7 @@ const Dashboard = () => {
   const [showNewPatient, setShowNewPatient] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const { user, logout } = useAuth();
-  const { patientsData } = useDashboard();
+  const { patientsData, queList } = useDashboard();
   const Total_admitted = Array.isArray(patientsData)
     ? patientsData.filter((p) => p.admission_status === 1).length
     : 0;
@@ -79,7 +80,7 @@ return user?.role === "unactivated" ? (
                 {showNewPatient ? "Close Patient Form" : "Add New Patient"}
               </button>
               <button
-                className="bg-yellow-600 hover:bg-yellow-700 focus:ring-2 focus:ring-yellow-400 focus:outline-none text-white px-6 py-2 text-base rounded-lg shadow font-normal transition"
+                className="bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none text-white px-6 py-2 text-base rounded-lg shadow font-normal transition"
                 onClick={toggleReport}
               >
                 {showReportModal ? "Close Report Form" : "Add Report"}
@@ -92,6 +93,19 @@ return user?.role === "unactivated" ? (
             <StatCard title="Total Patients" icon={FaUser} value={patientsData.length} />
             <StatCard title="Admitted" icon={FaUserInjured} value={Total_admitted} />
             <StatCard title="Discharged" icon={FaUserInjured} value={Total_Discharged} />
+            <StatCard title="Que List" icon={FaUser} value={queList.length} />
+            <StatCard
+              title="Visited Patients Today"
+              icon={FaUser}
+              value={
+                patientsData.filter(patient => {
+                  const visitTime = new Date(patient.visit_on).getTime();
+                  const now = Date.now();
+                  return visitTime >= now - 24 * 60 * 60 * 1000;
+                }).length
+              }
+            />
+
           </div>
 
           {/* Summary Card - Clinical Detail */}
@@ -122,7 +136,7 @@ return user?.role === "unactivated" ? (
               </div>
             )}
             <div>
-              <AdmittedPage />
+              <QueList />
             </div>
           </div>
         </div>
