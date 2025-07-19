@@ -35,58 +35,82 @@ const QueList: React.FC = () => {
 
   if (!queList || queList.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-300">
-        🚫 No patients in queue.
+      <div className="p-8 text-center text-neutral-500 dark:text-neutral-300 bg-white dark:bg-neutral-900 rounded-lg shadow-lg mt-8">
+        <span className="text-3xl">🚫</span>
+        <div className="mt-2 text-lg font-medium">No patients in queue.</div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">🩺 Patient Queue</h2>
-      <div className="overflow-x-auto">
+    <div className="p-4 sm:p-8 bg-white dark:bg-neutral-900 rounded-xl shadow-lg max-w-7xl mx-auto mt-6">
+      <h2 className="text-2xl sm:text-3xl font-bold text-primary-700 dark:text-primary-200 mb-6 flex items-center gap-2">
+        <span className="text-3xl">🩺</span> Patient Queue
+      </h2>
+      <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800">
         {waitingList.length === 0 ? (
-          <div className="p-6 text-center text-gray-500 dark:text-gray-300">🕑 No waiting patients yet.</div>
+          <div className="p-8 text-center text-neutral-500 dark:text-neutral-300 text-lg">🕑 No waiting patients yet.</div>
         ) : (
-          <table className="min-w-full table-auto border border-gray-300 dark:border-gray-700">
-            <thead className="bg-gray-100 dark:bg-gray-800">
+          <table className="min-w-full table-auto text-sm sm:text-base">
+            <thead>
               <tr>
-                {["N/A", "Check-In Time", "Patient ID", "Full Name", "Visit Reason", "Status", "Queued By", "Actions"].map(header => (
-                  <th key={header} className="px-4 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-200">{header}</th>
+                {["#", "Check-In Time", "Patient ID", "Full Name", "Visit Reason", "Status", "Queued By", "Actions"].map(header => (
+                  <th
+                    key={header}
+                    className="px-3 py-3 text-left font-semibold text-primary-700 dark:text-primary-200 bg-primary-50 dark:bg-primary-900"
+                  >
+                    {header}
+                  </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody>
               {waitingList.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-4 py-2 text-sm">{index + 1}</td>
-                  <td className="px-4 py-2 text-sm">{new Date(item.checked_in_at).toLocaleString()}</td>
-                  <td className="px-4 py-2 text-sm">{item.patient_id}</td>
-                  <td className="px-4 py-2 text-sm">{item.patient_fullname.toUpperCase()}</td>
-                  <td className="px-4 py-2 text-sm">{item.visit_reason}</td>
-                  <td className="px-4 py-2 text-sm">{item.status}</td>
-                  <td className="px-4 py-2 text-sm">{item.qued_by}</td>
-                  <td className="px-4 py-2 text-sm">
+                <tr
+                  key={item.id}
+                  className="hover:bg-primary-100 dark:hover:bg-primary-950 transition"
+                >
+                  <td className="px-3 py-2">{index + 1}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">{new Date(item.checked_in_at).toLocaleString()}</td>
+                  <td className="px-3 py-2">{item.patient_id}</td>
+                  <td className="px-3 py-2 font-semibold">{item.patient_fullname.toUpperCase()}</td>
+                  <td className="px-3 py-2">{item.visit_reason}</td>
+                  <td className="px-3 py-2">
+                    <span className="inline-block px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs font-medium">
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">{item.qued_by}</td>
+                  <td className="px-3 py-2">
                     <div className="flex flex-wrap gap-2">
-                      <Link to={`/reports/${item.patient_id}`} className="text-white bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-md text-sm transition">View</Link>
-                      <button className="text-white bg-red-600 hover:bg-red-500 px-3 py-1.5 rounded-md text-sm transition"
+                      <Link
+                        to={`/reports/${item.patient_id}`}
+                        className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-md font-medium shadow transition"
+                      >
+                        View
+                      </Link>
+                      <button
+                        className="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-md font-medium shadow transition"
                         onClick={() =>
                           setConfirmModal({
                             type: "remove",
                             patient_id: item.patient_id,
                             full_name: item.patient_fullname
                           })
-                        }>
+                        }
+                      >
                         Remove
                       </button>
-                      <button className="text-white bg-green-600 hover:bg-green-500 px-3 py-1.5 rounded-md text-sm transition"
+                      <button
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md font-medium shadow transition"
                         onClick={() =>
                           setConfirmModal({
                             type: "called",
                             patient_id: item.patient_id,
                             full_name: item.patient_fullname
                           })
-                        }>
+                        }
+                      >
                         Call
                       </button>
                     </div>
@@ -99,41 +123,62 @@ const QueList: React.FC = () => {
       </div>
 
       {/* 📞 Called Patients */}
-      <section className="mt-8">
-        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">📞 Called Patients</h2>
+      <section className="mt-10">
+        <h2 className="text-2xl sm:text-3xl font-bold text-primary-700 dark:text-primary-200 mb-6 flex items-center gap-2">
+          <span className="text-3xl">📞</span> Called Patients
+        </h2>
         {calledList.length === 0 ? (
-          <div className="p-6 text-center text-gray-500 dark:text-gray-300">🕑 No called patients yet.</div>
+          <div className="p-8 text-center text-neutral-500 dark:text-neutral-300 text-lg">🕑 No called patients yet.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-auto border border-gray-300 dark:border-gray-700">
-              <thead className="bg-gray-100 dark:bg-gray-800">
+          <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800">
+            <table className="min-w-full table-auto text-sm sm:text-base">
+              <thead>
                 <tr>
-                  {["N/A", "Check-In", "ID", "Name", "Reason", "Status", "Doctor", "Actions"].map(header => (
-                    <th key={header} className="px-4 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-200">{header}</th>
+                  {["#", "Check-In", "ID", "Name", "Reason", "Status", "Doctor", "Actions"].map(header => (
+                    <th
+                      key={header}
+                      className="px-3 py-3 text-left font-semibold text-primary-700 dark:text-primary-200 bg-primary-50 dark:bg-primary-900"
+                    >
+                      {header}
+                    </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody>
                 {calledList.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="px-4 py-2 text-sm">{index + 1}</td>
-                    <td className="px-4 py-2 text-sm">{new Date(item.checked_in_at).toLocaleString()}</td>
-                    <td className="px-4 py-2 text-sm">{item.patient_id}</td>
-                    <td className="px-4 py-2 text-sm">{item.patient_fullname.toUpperCase()}</td>
-                    <td className="px-4 py-2 text-sm">{item.visit_reason}</td>
-                    <td className="px-4 py-2 text-sm">{item.status}</td>
-                    <td className="px-4 py-2 text-sm">{item.assigned_doctor}</td>
-                    <td className="px-4 py-2 text-sm">
+                  <tr
+                    key={item.id}
+                    className="hover:bg-primary-100 dark:hover:bg-primary-950 transition"
+                  >
+                    <td className="px-3 py-2">{index + 1}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{new Date(item.checked_in_at).toLocaleString()}</td>
+                    <td className="px-3 py-2">{item.patient_id}</td>
+                    <td className="px-3 py-2 font-semibold">{item.patient_fullname.toUpperCase()}</td>
+                    <td className="px-3 py-2">{item.visit_reason}</td>
+                    <td className="px-3 py-2">
+                      <span className="inline-block px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium">
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">{item.assigned_doctor}</td>
+                    <td className="px-3 py-2">
                       <div className="flex flex-wrap gap-2">
-                        <Link to={`/reports/${item.patient_id}`} className="text-white bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-md text-sm transition">View</Link>
-                        <button className="text-white bg-yellow-600 hover:bg-yellow-500 px-3 py-1.5 rounded-md text-sm transition"
+                        <Link
+                          to={`/reports/${item.patient_id}`}
+                          className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-md font-medium shadow transition"
+                        >
+                          View
+                        </Link>
+                        <button
+                          className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-md font-medium shadow transition"
                           onClick={() =>
                             setConfirmModal({
                               type: "seen",
                               patient_id: item.patient_id,
                               full_name: item.patient_fullname
                             })
-                          }>
+                          }
+                        >
                           Seen
                         </button>
                       </div>
@@ -149,23 +194,66 @@ const QueList: React.FC = () => {
       {/* 🔒 Confirmation Modal */}
       {confirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">Confirm Action</h2>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">
-              Are you sure you want to <strong>{confirmModal.type}</strong> <strong>{confirmModal.full_name}</strong> from the queue?
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-xs sm:max-w-sm p-6">
+            <h2 className="text-lg font-bold text-primary-700 dark:text-primary-200 mb-3">Confirm Action</h2>
+            <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-6">
+              Are you sure you want to <span className="font-semibold text-primary-700 dark:text-primary-200">{confirmModal.type}</span> <span className="font-semibold">{confirmModal.full_name}</span> from the queue?
             </p>
-            <div className="flex justify-end gap-4">
-              <button className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded transition" onClick={() => setConfirmModal(null)}>No</button>
+            <div className="flex justify-end gap-3">
               <button
-                className={`px-4 py-2 ${confirmModal.type === "remove" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"} text-white rounded transition`}
+                className="px-4 py-2 bg-neutral-300 hover:bg-neutral-400 text-neutral-800 rounded font-medium transition"
+                onClick={() => setConfirmModal(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className={`px-4 py-2 ${
+                  confirmModal.type === "remove"
+                    ? "bg-rose-600 hover:bg-rose-700"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+                } text-white rounded font-medium transition`}
                 onClick={handleActionConfirm}
               >
-                Yes
+                Confirm
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Responsive styles */}
+      <style>{`
+        @media (max-width: 640px) {
+          table thead {
+        display: none;
+          }
+          table, tbody, tr, td {
+        display: block;
+        width: 100%;
+          }
+          tr {
+        margin-bottom: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        background: var(--tw-bg-opacity,1) theme('colors.white');
+          }
+          td {
+        padding: 0.75rem 1rem;
+        border: none;
+        position: relative;
+          }
+          td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #64748b;
+        display: block;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+          }
+        }
+      `}</style>
     </div>
   );
 };
