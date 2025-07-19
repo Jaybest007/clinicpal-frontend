@@ -3,6 +3,7 @@ import { FaSearch, FaTimes } from "react-icons/fa";
 import NavBar from "../components/NavBar";
 import NewPatient from "../components/NewPatient";
 import PatientProfileModal from "../components/PatientProfilemModal";
+import type { patientInfo } from "../components/PatientProfilemModal";
 import { useDashboard } from "../context/DashboardContext";
 import AdmittedPage from "../components/AdmittedPage";
 import { useAuth } from "../context/AuthContext";
@@ -14,12 +15,17 @@ interface PatientInfo {
   phone: string;
   age: number;
   admission_status: number;
+  admission_reason: string;
+  visit_on: string;
+  visit_reason: string;
+  discharged_on: string | null;
+  admitted_on: string | null;
 }
 
 const Patients = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPatients, setFilteredPatients] = useState<PatientInfo[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState<PatientInfo | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<patientInfo | null>(null);
   const [showNewPatient, setShowNewPatient] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { patientsData } = useDashboard();
@@ -122,7 +128,11 @@ const Patients = () => {
                     <li key={patient.patient_id}>
                       <button
                         onClick={() => {
-                          setSelectedPatient(patient);
+                          setSelectedPatient({
+                            ...patient,
+                            discharged_on: patient.discharged_on ?? "",
+                            admitted_on: patient.admitted_on ?? ""
+                          });
                           setIsModalOpen(true);
                         }}
                         className="group w-full text-left bg-gradient-to-br from-blue-50 to-white border border-blue-100 hover:border-blue-500 hover:shadow-lg rounded-xl p-5 transition duration-200"

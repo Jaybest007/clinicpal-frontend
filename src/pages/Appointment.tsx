@@ -28,7 +28,17 @@ export const Appointment = () => {
   }, []);
   const {user} = useAuth()
   const { appointments, loading } = useDashboard();
-  const appointmentList: AppointmentType[] = appointments?.appointments ?? [];
+  // Map fetchedAppointment[] to AppointmentType[] by ensuring 'id' exists
+  const appointmentList: AppointmentType[] = (appointments || []).map((appt: any, idx: number) => ({
+    id: appt.id ?? appt._id ?? String(idx),
+    patient_id: appt.patient_id,
+    patient_name: appt.patient_name,
+    doctor_name: appt.doctor_name,
+    time: appt.time ?? null,
+    status: appt.status,
+    notes: appt.notes,
+    created_at: appt.created_at,
+  }));
   const navigate = useNavigate()
   const [currentView, setCurrentView] = useState<"yesterday" | "today" | "tomorrow">("today");
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);

@@ -116,7 +116,7 @@ const fetchStaffs = useCallback( async() =>{
         setStaffs(response.data.results);
        
     } catch(err: any){
-        const error = err.response.data.error || err.response.data.message;
+        const error = err.response?.data?.error || err.response?.data?.message || "An unexpected error occurred.";
         toast.error(error);
     } finally{
         setLoading(false);

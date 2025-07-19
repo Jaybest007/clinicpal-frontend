@@ -11,7 +11,6 @@ import {
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from "../assets/logo1.png";
-import { BiInjection } from 'react-icons/bi';
 import { GiMedicines, GiMicroscope } from 'react-icons/gi';
 
 

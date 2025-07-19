@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
-interface patientInfo {
+export interface patientInfo {
   full_name: string;
   patient_id: string;
   address: string;
