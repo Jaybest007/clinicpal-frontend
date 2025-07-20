@@ -32,6 +32,10 @@ interface HospitalSignupData {
   email: string;
   phone: string;
 }
+interface tempInfo{
+  hospital_id: string;
+  password: string;
+}
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -41,6 +45,8 @@ interface AuthContextType {
   signup: (data: SignUpData) => Promise<AuthUser>;
   logout: () => void;
   hospital_Signup: (data: HospitalSignupData) => Promise<void>;
+  tempInfo: tempInfo[];
+  setTempInfo: React.Dispatch<React.SetStateAction<tempInfo[]>>;
 }
 
 // ================= Constants =================
@@ -54,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
-
+  const [tempInfo, setTempInfo] = useState<tempInfo[]>([])
   // ==== Rehydrate from localStorage ====
   useEffect(() => {
     const storedUser = localStorage.getItem(STORAGE_KEY);
@@ -137,11 +143,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const hospital_Signup = useCallback(async (data: HospitalSignupData): Promise<void> => {
     setLoading(true);
     try {
-      await axios.post("https://clinicpal.onrender.com/api/auth/hospitals_signup", data);
+      const response = await axios.post("https://clinicpal.onrender.com/api/auth/hospitals_signup", data);
       toast.success("Hospital registered successfully");
+      setTempInfo(response.data.secretInfo);
     } catch (err: any) {
       const message =
-        err?.response?.data?.error ||err?.response?.data?.message ||
+        err?.response?.data?.error || err?.response?.data?.message ||
         "Hospital signup failed.";
       toast.error(message);
       throw err;
@@ -179,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signup,
         logout,
         hospital_Signup,
+        setTempInfo, tempInfo
       }}
     >
       {children}
