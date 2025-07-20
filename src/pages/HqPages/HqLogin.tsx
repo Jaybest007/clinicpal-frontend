@@ -53,8 +53,8 @@ const HospitalLogin: React.FC = () => {
         {tempInfo.length > 0 &&
         <div className="text-center mb-5 bg-blue-50 ring-1 rounded p-2 shadow-sm">
           <p className="text-sm text-gray-500">Access your hospital dashboard</p>
-          <h1 className="font-bold text-blue-800">Hospital ID:{tempInfo[0]?.hospital_id}</h1>
-          <h1 className="font-bold text-blue-800">Password:  {tempInfo[0]?.password}</h1>
+          <h1 className="font-bold text-blue-800">Hospital ID: {tempInfo[0]?.hospital_id}</h1>
+          <h1 className="font-bold text-blue-800">Password: {tempInfo[0]?.password}</h1>
         </div>}
         
         <div className="flex flex-col items-center mb-6">
