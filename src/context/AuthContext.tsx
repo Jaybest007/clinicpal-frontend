@@ -145,7 +145,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await axios.post("https://clinicpal.onrender.com/api/auth/hospitals_signup", data);
       toast.success("Hospital registered successfully");
-      setTempInfo(response.data.secretInfo);
+      setTempInfo([{
+        hospital_id: response.data.secretInfo.hospital_id,
+        password: response.data.secretInfo.password
+      }]);
     } catch (err: any) {
       const message =
         err?.response?.data?.error || err?.response?.data?.message ||
