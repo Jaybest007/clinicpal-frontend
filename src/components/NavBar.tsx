@@ -10,7 +10,7 @@ import {
 } from 'react-icons/fi';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import logo from "../assets/logo1.svg";
+import logo from "../assets/logo1.png";
 import { GiMedicines, GiMicroscope } from 'react-icons/gi';
 
 
