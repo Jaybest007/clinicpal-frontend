@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { HqNavBar } from "../../components/HqNavBar";
 import { useDashboard } from "../../context/DashboardContext";
-
+import PatientProfileModal from "../../components/PatientProfilemModal";
+import type { patientInfo } from "../../components/PatientProfilemModal";
 
 export const HqPatients: React.FC = () => {
     const { patientsData } = useDashboard();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedPatient, setSelectedPatient] = useState<patientInfo | null>(null);
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100">
         {/* =======nav bar=========== */}
@@ -40,7 +43,13 @@ export const HqPatients: React.FC = () => {
                                 <td className="px-6 py-4 border-b">{patient.age}</td>
                                 <td className="px-6 py-4 border-b">{patient.phone}</td>
                                 <td className="px-6 py-4 border-b">
-                                    <button className="text-blue-600 hover:underline">View</button>
+                                    <button 
+                                        className="text-blue-600 hover:underline"
+                                        onClick={() => {
+                                            setSelectedPatient(patient);
+                                            setIsModalOpen(true);
+                                        }}
+                                    >View</button>
                                     <button className="ml-2 text-red-600 hover:underline">Delete</button>
                                 </td>
                             </tr>
@@ -51,6 +60,11 @@ export const HqPatients: React.FC = () => {
                 </div>
             </div>
         </main>
+        <PatientProfileModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                patient={selectedPatient}
+              />
     </div>
   );
 }
