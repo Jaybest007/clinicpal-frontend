@@ -60,7 +60,7 @@ return user?.role === "unactivated" ? (
     </div>
   </div>
 ) : (
-  <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100">
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
       <NavBar />
 
       <main className="flex-1 pt-8 px-2 md:px-8">
@@ -93,12 +93,12 @@ return user?.role === "unactivated" ? (
 
           {/* Stat Cards */}
           <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 p-2">
-            <StatCard title="Total Patients" icon={FaUser} value={patientsData.length} />
+            <StatCard title="All Patients" icon={FaUser} value={patientsData.length} />
             <StatCard title="Admitted" icon={FaUserInjured} value={Total_admitted} />
             <StatCard title="Discharged" icon={FaUserInjured} value={Total_Discharged} />
             <StatCard title="Que List" icon={FaUser} value={queList.length} />
             <StatCard
-              title="Visited Patients Today"
+              title="Visited Patients"
               icon={FaUser}
               value={
                 patientsData.filter(patient => {
