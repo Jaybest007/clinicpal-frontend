@@ -158,6 +158,13 @@ interface fetchedExterOrder{
     created_on: string;
 }
 
+interface newPatient {
+    full_name: string;
+    address: string;
+    patient_id: string;
+    phone: string;
+}
+
 interface dashboardContextType {
     addNewPatient: (credentials: newPatientData) => Promise<void>;
     patientsData: PatientsData[];
@@ -190,6 +197,7 @@ interface dashboardContextType {
     submitExternalOrder: (credentials: externalOrder) => Promise<void>;
     externalOrder: fetchedExterOrder[];
     fetchExternalOrder: ()=> Promise<void>;
+    newPatient: newPatient[];
 }
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
@@ -205,6 +213,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
     const [ultrasoundData, setUltrasoundData] = useState<pharmacyData[]>([]);
     const [externalOrder, setExternalOrders] = useState<fetchedExterOrder[]>([])
     const [queList, setQueList] = useState<QueList[]>([]);
+    const [newPatient, setNewPatient] = useState<newPatient[]>([]);
     const [token, setToken] = useState<string | null>(() => {
     const stored = localStorage.getItem("clinicpal_user");
     return stored ? JSON.parse(stored).token : null;
@@ -274,6 +283,8 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
         }
       );
       toast.success(response.data.success);
+      setNewPatient(response.data.newPatient);
+      console.log(response.data)
     } catch (err: any) {
       throw err;
     } finally {
@@ -727,7 +738,7 @@ const contextValue = useMemo(() => ({
   appointments,  fetchPharmacyData,pharmacyData, updatePharmacyOrderStatus, labData,
   fetchLaboratoryData, updateLaboratoryOrderStatus, quePatient, queList, QueActions, fetchQueList,fetchUltrasoundData,
   updateUltrasoundOrderStatus, submitExternalOrder,
-  ultrasoundData, externalOrder, fetchExternalOrder
+  ultrasoundData, externalOrder, fetchExternalOrder, newPatient
 }), [
   addNewPatient,
   loading,
@@ -746,7 +757,7 @@ const contextValue = useMemo(() => ({
   appointments, fetchPharmacyData,pharmacyData, 
   updatePharmacyOrderStatus, fetchLaboratoryData, labData,
   updateLaboratoryOrderStatus, quePatient , queList, QueActions, fetchQueList, fetchUltrasoundData, ultrasoundData,
-  updateUltrasoundOrderStatus, submitExternalOrder, externalOrder, fetchExternalOrder
+  updateUltrasoundOrderStatus, submitExternalOrder, externalOrder, fetchExternalOrder, newPatient
 
 
 ]);
