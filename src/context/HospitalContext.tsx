@@ -53,7 +53,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [loading, setLoading] = useState<boolean>(false);
   const [hospitalData, setHospitalData] = useState<hospitalData | null>(null);
   const [staffs, setStaffs] = useState<staffsData[] | null>(null);
-  const {fetchAllPatients} = useDashboard()
+ 
 
   // Prevent duplicate fetches
   const fetchStaffsInProgress = useRef(false);
@@ -204,7 +204,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         );
         toast.success(response.data.success);
-        await fetchAllPatients();
+        
       } catch (err: any) {
         const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
         toast.error(errorMessage);
