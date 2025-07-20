@@ -198,6 +198,7 @@ interface dashboardContextType {
     externalOrder: fetchedExterOrder[];
     fetchExternalOrder: ()=> Promise<void>;
     newPatient: newPatient[];
+    setNewPatient: React.Dispatch<React.SetStateAction<newPatient[]>>;
 }
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
@@ -284,7 +285,6 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
       );
       toast.success(response.data.success);
       setNewPatient(response.data.newPatient);
-      console.log(response.data)
     } catch (err: any) {
       throw err;
     } finally {
@@ -738,7 +738,7 @@ const contextValue = useMemo(() => ({
   appointments,  fetchPharmacyData,pharmacyData, updatePharmacyOrderStatus, labData,
   fetchLaboratoryData, updateLaboratoryOrderStatus, quePatient, queList, QueActions, fetchQueList,fetchUltrasoundData,
   updateUltrasoundOrderStatus, submitExternalOrder,
-  ultrasoundData, externalOrder, fetchExternalOrder, newPatient
+  ultrasoundData, externalOrder, fetchExternalOrder, newPatient, setNewPatient
 }), [
   addNewPatient,
   loading,
@@ -757,7 +757,7 @@ const contextValue = useMemo(() => ({
   appointments, fetchPharmacyData,pharmacyData, 
   updatePharmacyOrderStatus, fetchLaboratoryData, labData,
   updateLaboratoryOrderStatus, quePatient , queList, QueActions, fetchQueList, fetchUltrasoundData, ultrasoundData,
-  updateUltrasoundOrderStatus, submitExternalOrder, externalOrder, fetchExternalOrder, newPatient
+  updateUltrasoundOrderStatus, submitExternalOrder, externalOrder, fetchExternalOrder, newPatient, setNewPatient
 
 
 ]);

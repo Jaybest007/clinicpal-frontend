@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { useDashboard } from "../context/DashboardContext";
 import { useAuth } from "../context/AuthContext";
+import {  useNavigate } from "react-router-dom";
 
 interface PatientsData {
   full_name: string;
@@ -25,6 +26,7 @@ const NewPatient = ({ isOpen, onClose }: NewPatientProps) => {
   const { addNewPatient, loading, fetchAllPatients } = useDashboard();
   const { user } = useAuth();
   const name = user?.name || "";
+  const navigate = useNavigate()
 
   const [patientData, setPatientData] = useState<PatientsData>({
     full_name: "",
@@ -138,6 +140,7 @@ const NewPatient = ({ isOpen, onClose }: NewPatientProps) => {
       });
 
       fetchAllPatients();
+      navigate("/confirmation", {replace:true});
       onClose(); // Close modal after successful submit
     } catch (err: any) {
       const errorMessage =
