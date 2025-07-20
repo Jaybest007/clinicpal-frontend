@@ -2,7 +2,7 @@ import axios from "axios";
 import React from "react";
 import { useCallback, useContext, createContext, useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
-import { useDashboard } from "./DashboardContext";
+
 
 //========== interfaces ==========
 interface hospitalLogin {
