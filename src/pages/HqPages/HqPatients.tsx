@@ -3,9 +3,11 @@ import { HqNavBar } from "../../components/HqNavBar";
 import { useDashboard } from "../../context/DashboardContext";
 import PatientProfileModal from "../../components/PatientProfilemModal";
 import type { patientInfo } from "../../components/PatientProfilemModal";
+import { useHospital } from "../../context/HospitalContext";
 
 export const HqPatients: React.FC = () => {
     const { patientsData } = useDashboard();
+    const {deletePatient} = useHospital();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<patientInfo | null>(null);
   return (
@@ -44,13 +46,19 @@ export const HqPatients: React.FC = () => {
                                 <td className="px-6 py-4 border-b">{patient.phone}</td>
                                 <td className="px-6 py-4 border-b">
                                     <button 
-                                        className="text-blue-600 hover:underline"
+                                        className="bg-blue-600 text-white px-2 hover:bg-blue-700 rounded"
                                         onClick={() => {
                                             setSelectedPatient(patient);
                                             setIsModalOpen(true);
                                         }}
                                     >View</button>
-                                    <button className="ml-2 text-red-600 hover:underline">Delete</button>
+                                    <button 
+                                        className="ml-2 bg-red-600 hover:bg-red-700 text-white px-2 rounded"
+                                        onClick={async () => {
+                                            deletePatient(patient.patient_id);
+                                        }}
+                                    >
+                                        Delete</button>
                                 </td>
                             </tr>
                            ))}

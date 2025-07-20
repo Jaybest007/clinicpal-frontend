@@ -2,6 +2,7 @@ import axios from "axios";
 import React from "react";
 import { useCallback, useContext, createContext, useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
+import { useDashboard } from "./DashboardContext";
 
 //========== interfaces ==========
 interface hospitalLogin {
@@ -41,6 +42,7 @@ interface HospitalContextType {
   hospitalData: hospitalData | null;
   logout: () => void;
   staffs: staffsData[] | null;
+  deletePatient: (patient_id: string) => Promise<void>;
 }
 
 //============ context setup =============
@@ -51,6 +53,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [loading, setLoading] = useState<boolean>(false);
   const [hospitalData, setHospitalData] = useState<hospitalData | null>(null);
   const [staffs, setStaffs] = useState<staffsData[] | null>(null);
+  const {fetchAllPatients} = useDashboard()
 
   // Prevent duplicate fetches
   const fetchStaffsInProgress = useRef(false);
@@ -182,6 +185,37 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [hospitalData, fetchStaffs]
   );
 
+//===========delete patient data ===============
+  const deletePatient = useCallback(
+    async (patient_id: string) => {
+
+      if (!hospitalData?.token) {
+        toast.error("Unauthorized. Please login again.");
+        return;
+      }
+      try {
+        setLoading(true);
+        const response = await axios.delete(
+          `https://clinicpal.onrender.com/api/hospitals/delete_patient/${patient_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${hospitalData.token}`,
+            },
+          }
+        );
+        toast.success(response.data.success);
+        await fetchAllPatients();
+      } catch (err: any) {
+        const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [hospitalData, fetchStaffs]
+  );
+
+
   return (
     <HospitalContext.Provider
       value={{
@@ -192,6 +226,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         hospitalData,
         logout,
         staffs,
+        deletePatient
       }}
     >
       {children}

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { FaSearch, FaUser, FaUserInjured } from "react-icons/fa";
 import { TiWarning } from "react-icons/ti";
-
 import StatCard from "../components/StatCard";
 import { HqNavBar } from "../components/HqNavBar";
 import { useHospital } from "../context/HospitalContext";
