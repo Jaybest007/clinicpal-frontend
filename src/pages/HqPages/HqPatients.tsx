@@ -6,7 +6,7 @@ import type { patientInfo } from "../../components/PatientProfilemModal";
 import { useHospital } from "../../context/HospitalContext";
 
 export const HqPatients: React.FC = () => {
-    const { patientsData } = useDashboard();
+    const { patientsData, fetchAllPatients } = useDashboard();
     const {deletePatient} = useHospital();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<patientInfo | null>(null);
@@ -22,7 +22,7 @@ export const HqPatients: React.FC = () => {
                     <h1 className="text-2xl font-semibold">Patients</h1>
                 </div>
 
-                 <div className="bg-white shadow-lg rounded-xl p-6 space-y-6">
+                 <div className="bg-white shadow-lg rounded-xl p-6 space-y-6 overflow-x-auto">
                     <table className="min-w-full bg-white border border-gray-200 rounded-md">
                         <thead className="bg-gray-100 text-gray-700 font-medium">
                         <tr>
@@ -45,20 +45,26 @@ export const HqPatients: React.FC = () => {
                                 <td className="px-6 py-4 border-b">{patient.age}</td>
                                 <td className="px-6 py-4 border-b">{patient.phone}</td>
                                 <td className="px-6 py-4 border-b">
-                                    <button 
-                                        className="bg-blue-600 text-white px-2 hover:bg-blue-700 rounded"
-                                        onClick={() => {
-                                            setSelectedPatient(patient);
-                                            setIsModalOpen(true);
-                                        }}
-                                    >View</button>
-                                    <button 
-                                        className="ml-2 bg-red-600 hover:bg-red-700 text-white px-2 rounded"
-                                        onClick={async () => {
-                                            deletePatient(patient.patient_id);
-                                        }}
-                                    >
-                                        Delete</button>
+                                    <div className="grid grid-cols-1 gap-2 sm:flex sm:space-x-2">
+                                        <button 
+                                            className="bg-blue-600 text-white px-2 py-1 hover:bg-blue-700 rounded w-full"
+                                            onClick={() => {
+                                                setSelectedPatient(patient);
+                                                setIsModalOpen(true);
+                                            }}
+                                        >
+                                            View
+                                        </button>
+                                        <button 
+                                            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded w-full"
+                                            onClick={async () => {
+                                                await deletePatient(patient.patient_id);
+                                                fetchAllPatients();
+                                            }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                            ))}

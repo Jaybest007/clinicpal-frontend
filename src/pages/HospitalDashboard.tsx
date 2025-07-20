@@ -45,10 +45,13 @@ export const HospitalDashboard = () => {
 
       <main className="max-w-7xl mx-auto py-8 px-4 space-y-10">
         {/* Overview Header */}
-        <div className="bg-white rounded-xl shadow-sm flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-semibold text-blue-900">Hospital Overview</h1>
-          <p className="text-sm text-gray-700 font-medium">
-            Hospital ID: <span className="text-blue-700 font-bold">{hospitalData?.hospital_id?.toUpperCase() ?? "—"}</span>
+        <div className="bg-white rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 sm:px-6 py-4">
+          <h1 className="text-xl sm:text-2xl font-semibold text-blue-900">Hospital Overview</h1>
+          <p className="text-xs sm:text-sm text-gray-700 font-medium">
+            Hospital ID:{" "}
+            <span className="text-blue-700 font-bold break-all">
+              {hospitalData?.hospital_id?.toUpperCase() ?? "—"}
+            </span>
           </p>
         </div>
 
@@ -56,7 +59,20 @@ export const HospitalDashboard = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
           <StatCard title="Total Patients" icon={FaUserInjured} value={totalPatients} />
           <StatCard title="Staff Members" icon={FaUser} value={totalStaff} />
-          <StatCard title="This Month" icon={FaUser} value={150} />
+          <StatCard
+            title="Visited this Month"
+            icon={FaUser}
+            value={
+              patientsData.filter(patient => {
+          const visitDate = new Date(patient.visit_on);
+          const now = new Date();
+          return (
+            visitDate.getFullYear() === now.getFullYear() &&
+            visitDate.getMonth() === now.getMonth()
+          );
+              }).length
+            }
+          />
           <StatCard title="Critical Cases" icon={TiWarning} value={5} />
           <StatCard title="Admitted" icon={FaUser} value={totalAdmitted} />
         </div>

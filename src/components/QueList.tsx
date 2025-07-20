@@ -45,27 +45,27 @@ const QueList: React.FC = () => {
             <table className="w-full border rounded-md shadow-sm text-sm">
               <thead className="bg-gray-100 text-gray-700">
                 <tr>
-                  <th className="px-3 py-2">#</th>
-                  <th className="px-3 py-2">Time</th>
-                  <th className="px-3 py-2">Patient ID</th>
-                  <th className="px-3 py-2">Name</th>
-                  <th className="px-3 py-2">Reason</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2">Queued By</th>
-                  <th className="px-3 py-2">Actions</th>
+                  <th className="px-3 py-2 border">#</th>
+                  <th className="px-3 py-2 border">Time</th>
+                  <th className="px-3 py-2 border">Patient ID</th>
+                  <th className="px-3 py-2 border">Name</th>
+                  <th className="px-3 py-2 border">Reason</th>
+                  <th className="px-3 py-2 border">Status</th>
+                  <th className="px-3 py-2 border">Queued By</th>
+                  <th className="px-3 py-2 border">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {waitingList.map((item, i) => (
-                  <tr key={item.id} className="border-t">
-                    <td className="px-3 py-2">{i + 1}</td>
-                    <td className="px-3 py-2">{new Date(item.checked_in_at).toLocaleString()}</td>
-                    <td className="px-3 py-2">{String (item.patient_id).toUpperCase()}</td>
-                    <td className="px-3 py-2">{item.patient_fullname}</td>
-                    <td className="px-3 py-2">{item.visit_reason}</td>
-                    <td className="px-3 py-2">{item.status}</td>
-                    <td className="px-3 py-2">{item.qued_by}</td>
-                    <td className="px-3 py-2">
+                  <tr key={item.id} className="border-t bg-white">
+                    <td className="px-3 py-2 border">{i + 1}</td>
+                    <td className="px-3 py-2 border">{new Date(item.checked_in_at).toLocaleString()}</td>
+                    <td className="px-3 py-2 border">{String (item.patient_id).toUpperCase()}</td>
+                    <td className="px-3 py-2 border">{item.patient_fullname}</td>
+                    <td className="px-3 py-2 border">{item.visit_reason}</td>
+                    <td className="px-3 py-2 border">{item.status}</td>
+                    <td className="px-3 py-2 border">{item.qued_by}</td>
+                    <td className="px-3 py-2 border">
                       <div className="flex flex-wrap gap-2">
                         <Link
                           to={`/reports/${item.patient_id}`}
@@ -112,23 +112,23 @@ const QueList: React.FC = () => {
         {calledList.length === 0 ? (
           <p className="text-gray-500 italic">No called patients yet.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto ">
             <table className="w-full border rounded-md shadow-sm text-sm">
               <thead className="bg-gray-100 text-gray-700">
                 <tr>
-                  <th className="px-3 py-2">#</th>
-                  <th className="px-3 py-2">Time</th>
-                  <th className="px-3 py-2">Patient ID</th>
-                  <th className="px-3 py-2">Name</th>
-                  <th className="px-3 py-2">Reason</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2">Doctor</th>
-                  <th className="px-3 py-2">Actions</th>
+                  <th className="px-3 py-2 border">#</th>
+                  <th className="px-3 py-2 border">Time</th>
+                  <th className="px-3 py-2 border">Patient ID</th>
+                  <th className="px-3 py-2 border">Name</th>
+                  <th className="px-3 py-2 border">Reason</th>
+                  <th className="px-3 py-2 border">Status</th>
+                  <th className="px-3 py-2 border">Doctor</th>
+                  <th className="px-3 py-2 border">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {calledList.map((item, i) => (
-                  <tr key={item.id} className="border-t">
+                  <tr key={item.id} className="border-t bg-white">
                     <td className="px-3 py-2 border">{i + 1}</td>
                     <td className="px-3 py-2 border">{new Date(item.checked_in_at).toLocaleString()}</td>
                     <td className="px-3 py-2 border">{String(item.patient_id).toUpperCase()}</td>
