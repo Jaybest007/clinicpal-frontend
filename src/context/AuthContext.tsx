@@ -71,8 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(parsed);
           setUserRole(parsed.role || "");
         }
-      } catch (error) {
-        console.error("Invalid user session data:", error);
+      } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
     }
@@ -171,13 +170,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Reload to flush context
     window.location.replace("/login");
   }, []);
-
-  
-
-
-
-
-
 
   return (
     <AuthContext.Provider

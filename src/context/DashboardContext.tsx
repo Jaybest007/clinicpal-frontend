@@ -224,33 +224,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
 
     const socket = useSocket();
 
-    useEffect(() => {
-    if (!socket) return;
-
-    socket.on("connect", () => {
-      toast.success(`WebSocket connected: ${socket.id}`);
-      console.log("WebSocket connected:", socket.id);
-    });
-
-    socket.on("disconnect", () => {
-      toast.info("WebSocket disconnected");
-      console.log("WebSocket disconnected");
-    });
-
-    socket.on("message", (msg) => {
-      toast.info(`WebSocket message: ${msg}`);
-      console.log("WebSocket message:", msg);
-    });
-
-    // Emit a test message to backend
-    socket.emit("message", "Hello from DashboardContext!");
-
-    return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("message");
-    };
-  }, [socket]);
+ 
 
     //====useEffect to get token from localStorage on initial render====
     useEffect(() => {
@@ -315,6 +289,10 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
       );
       toast.success(response.data.success);
       setNewPatient(response.data.newPatient);
+      //emit websocket to notify other clients
+      if (socket) {
+        socket.emit("patientAdded", response.data.newPatient);
+      }
     } catch (err: any) {
       throw err;
     } finally {
@@ -324,7 +302,21 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
   [token]
 );
 
-    //=====send report ======
+//====socket listener for new patient====
+useEffect(() => {
+  if (!socket) return;
+
+  socket.on("patientAdded", (newPatient) => {
+    setNewPatient((prev) => [...prev, newPatient]);
+    toast.info("A new patient was added!");
+  });
+
+  return () => {
+    socket.off("patientAdded");
+  };
+}, [socket]);
+
+//==================send report ======
     const newReport = useCallback(async (credentials: report) =>{
          if (!token) return;
         try{
@@ -814,3 +806,4 @@ export const useDashboard = () => {
     if (!context) throw new Error("useDashboard must be used inside DashboardProvider");
     return context;
 }
+
