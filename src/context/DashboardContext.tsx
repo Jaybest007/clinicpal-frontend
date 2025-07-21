@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { createContext,  useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { useSocket } from "./SocketContext";
+
 
 //====New Patient data that is going to the backend interface
 interface newPatientData {
@@ -221,37 +221,6 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
     });
     const hasFetchedPatients = useRef(false);
     const hasFetchedAppointments = useRef(false);
-
-    const socket = useSocket();
-
-    // Test WebSocket connection on mount
-    useEffect(() => {
-      if (!socket) return;
-      socket.on("connect", () => {
-        toast.success(`WebSocket connected: ${socket.id}`);
-        console.log("WebSocket connected:", socket.id);
-      });
-
-      socket.on("disconnect", () => {
-        toast.info("WebSocket disconnected");
-        console.log("WebSocket disconnected");
-      });
-
-      // Optionally listen for a test event from backend
-      socket.on("message", (msg) => {
-        toast.info(`WebSocket message: ${msg}`);
-        console.log("WebSocket message:", msg);
-      });
-
-      // Emit a test message to backend
-      socket.emit("message", "Hello from DashboardContext!");
-
-      return () => {
-        socket.off("connect");
-        socket.off("disconnect");
-        socket.off("message");
-      };
-    }, [socket]);
 
 //====useEffect to get token from localStorage on initial render====
     useEffect(() => {

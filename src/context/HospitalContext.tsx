@@ -93,7 +93,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   //===========fetch all staffs ==============
   const fetchStaffs = useCallback(async () => {
-    if (!hospitalData?.token || fetchStaffsInProgress.current) return;
+    if (!hospitalData?.token || fetchStaffsInProgress.current || hospitalData.role !== "hospital") return;
     fetchStaffsInProgress.current = true;
     try {
       setLoading(true);
