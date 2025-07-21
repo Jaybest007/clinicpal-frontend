@@ -66,7 +66,7 @@ return user?.role === "unactivated" ? (
       <main className="flex-1 pt-8 px-2 md:px-8">
         <div className="max-w-6xl mx-auto space-y-10">
           {/* Sticky Action Bar */}
-          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col sm:flex-row items-center sm:justify-between px-4 md:px-8 py-3 rounded-t-xl shadow-sm mb-4 gap-3 sm:gap-4">
+          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col sm:flex-row items-center sm:justify-between px-4 md:px-8 py-3 rounded-t-xl shadow-sm mb-2 gap-3 sm:gap-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-blue-900 text-center sm:text-left">
               Welcome, {user?.name || "Doctor"}
             </h2>
