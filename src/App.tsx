@@ -32,8 +32,8 @@ function App() {
 
   return (
     <BrowserRouter>
-      <DashboardProvider>
-        <SocketProvider token={token}>
+      <SocketProvider token={token}>
+        <DashboardProvider>
           <ToastContainer position="top-right" autoClose={3000} />
           <Routes>
             <Route path="/signup" element={<SignUp />} />
@@ -56,8 +56,8 @@ function App() {
             <Route path="/hq/patients" element={<HospitalProtectedRoute><HqPatients /></HospitalProtectedRoute>} />
             <Route path="/hq/reports" element={<HospitalProtectedRoute><HqReports /></HospitalProtectedRoute>} />
           </Routes>
-        </SocketProvider>
-      </DashboardProvider>
+        </DashboardProvider>
+      </SocketProvider>
     </BrowserRouter>
   );
 }

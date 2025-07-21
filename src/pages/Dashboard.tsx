@@ -9,6 +9,7 @@ import { useDashboard } from "../context/DashboardContext";
 
 import QueList from "../components/QueList";
 import { Link } from "react-router-dom";
+import SocketTest from "../components/SocketTest";
 
 const Dashboard = () => {
   useEffect(() => {
@@ -64,6 +65,7 @@ return user?.role === "unactivated" ? (
       <NavBar />
 
       <main className="flex-1 pt-8 px-2 md:px-8">
+        <SocketTest/>
         <div className="max-w-6xl mx-auto space-y-10">
           {/* Sticky Action Bar */}
           <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col sm:flex-row items-center sm:justify-between px-4 md:px-8 py-3 rounded-t-xl shadow-sm mb-4 gap-3 sm:gap-4">
