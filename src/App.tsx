@@ -53,7 +53,7 @@ function App() {
         {/* Public Routes */}
         {/* Hospital Routes */}
 
-        <Route path="/hq_login" element={<HqLogin />} />
+        <Route path="/hq/login" element={<HqLogin />} />
         <Route path="/hq" element={<HospitalProtectedRoute><HospitalDashboard /></HospitalProtectedRoute>} />
         <Route path="/hq/patients" element={<HospitalProtectedRoute><HqPatients /></HospitalProtectedRoute>} />
         <Route path="/hq/reports" element={<HospitalProtectedRoute><HqReports /></HospitalProtectedRoute>} />

@@ -147,6 +147,18 @@ const HospitalLogin: React.FC = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+          <div className="text-center mt-4">
+            <span className="text-sm text-gray-500">
+              Yet to sign up as an hospital onboard?{" "}
+              <button
+                type="button"
+                className="text-blue-600 hover:underline font-medium"
+                onClick={() => navigate("/onboarding")}
+              >
+                Start onboarding
+              </button>
+            </span>
+          </div>
         </form>
       </div>
     </div>

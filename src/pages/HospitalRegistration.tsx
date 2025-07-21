@@ -85,7 +85,7 @@ export const HospitalRegistration = () => {
                     email: "",
                     phone: "",
                 })
-                navigate("/hq_login", {replace: true});
+                navigate("/", {replace: true});
             }catch(err: any) {
                 const serverErr =
                     err.response?.data?.error?.server ||
@@ -100,94 +100,115 @@ export const HospitalRegistration = () => {
 
        
     return(
-        <div className="min-h-screen flex justify-center items-center bg-neutral-100 px-4">
-            <div className="w-full sm:w-3/4 md:w-2/3 lg:w-1/2 bg-white rounded-xl drop-shadow-sm p-8 sm:p-10">
-                <h1 className="text-center font-bold text-3xl mb-6">Hospital's Onboarding </h1>
+        <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-blue-50 to-neutral-100 px-4">
+            <div className="w-full sm:w-3/4 md:w-2/3 lg:w-1/2 bg-white rounded-2xl shadow-lg p-8 sm:p-12">
+            <h1 className="text-center font-extrabold text-4xl mb-8 text-blue-700 tracking-tight">
+                Welcome to Hospital Onboarding
+            </h1>
+            <p className="text-center text-neutral-600 mb-6">
+                Register your hospital to unlock seamless management and patient care.
+            </p>
 
-                {error.server && (
-                <p className="text-red-800 text-center bg-red-100 p-2 mb-2 rounded border border-red-300">
-                    {error.server}
-                </p>
-                )}
+            {error.server && (
+                <div className="text-red-800 text-center bg-red-100 p-3 mb-4 rounded-lg border border-red-300 font-medium">
+                {error.server}
+                </div>
+            )}
 
-                <form className="space-y-6 max-w-2xl mx-auto" onSubmit={handleSubmit}>
-                {/* First & Last Name */}
-                <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                    <div className="w-full">
-                    <label htmlFor="firstName" className="block mb-1">Hospital's name</label>
+            <form className="space-y-8 max-w-2xl mx-auto" onSubmit={handleSubmit}>
+                {/* Hospital Name & Address */}
+                <div className="flex flex-col md:flex-row md:space-x-6 space-y-4 md:space-y-0">
+                <div className="w-full">
+                    <label htmlFor="name" className="block mb-2 font-semibold text-neutral-700">
+                    Hospital Name
+                    </label>
                     <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-neutral-100 ${
-                        error.name ? "border border-red-400" : "border-none"
-                        } focus:outline-none`}
-                        placeholder="Enter your first name"
-                        onChange={handleInputChange}
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-white ${
+                        error.name ? "border border-red-400" : "border border-neutral-300"
+                    } focus:outline-none transition`}
+                    placeholder="Enter hospital name"
+                    onChange={handleInputChange}
+                    autoComplete="organization"
                     />
                     {error.name && <p className="text-sm text-red-600 mt-1">{error.name}</p>}
-                    </div>
+                </div>
 
-                    <div className="w-full">
-                    <label htmlFor="address" className="block mb-1">Address</label>
+                <div className="w-full">
+                    <label htmlFor="address" className="block mb-2 font-semibold text-neutral-700">
+                    Address
+                    </label>
                     <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-neutral-100 ${
-                        error.address ? "border border-red-400" : "border-none"
-                        } focus:outline-none`}
-                        placeholder="Enter your last name"
-                        onChange={handleInputChange}
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-white ${
+                        error.address ? "border border-red-400" : "border border-neutral-300"
+                    } focus:outline-none transition`}
+                    placeholder="Enter hospital address"
+                    onChange={handleInputChange}
+                    autoComplete="street-address"
                     />
                     {error.address && <p className="text-sm text-red-600 mt-1">{error.address}</p>}
-                    </div>
+                </div>
                 </div>
 
                 {/* Email & Phone */}
-                <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                    <div className="w-full">
-                    <label htmlFor="email" className="block mb-1">Email</label>
+                <div className="flex flex-col md:flex-row md:space-x-6 space-y-4 md:space-y-0">
+                <div className="w-full">
+                    <label htmlFor="email" className="block mb-2 font-semibold text-neutral-700">
+                    Email Address
+                    </label>
                     <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-neutral-100 ${
-                        error.email ? "border border-red-400" : "border-none"
-                        } focus:outline-none`}
-                        placeholder="Enter your email"
-                        onChange={handleInputChange}
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-white ${
+                        error.email ? "border border-red-400" : "border border-neutral-300"
+                    } focus:outline-none transition`}
+                    placeholder="Enter hospital email"
+                    onChange={handleInputChange}
+                    autoComplete="email"
                     />
                     {error.email && <p className="text-sm text-red-600 mt-1">{error.email}</p>}
-                    </div>
+                </div>
 
-                    <div className="w-full">
-                    <label htmlFor="phone" className="block mb-1">Phone number</label>
+                <div className="w-full">
+                    <label htmlFor="phone" className="block mb-2 font-semibold text-neutral-700">
+                    Phone Number
+                    </label>
                     <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-neutral-100 ${
-                        error.phone ? "border border-red-400" : "border-none"
-                        } focus:outline-none`}
-                        placeholder="e.g. 080..."
-                        onChange={handleInputChange}
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    className={`w-full rounded-lg p-3 bg-neutral-200 focus:bg-white ${
+                        error.phone ? "border border-red-400" : "border border-neutral-300"
+                    } focus:outline-none transition`}
+                    placeholder="e.g. 08012345678"
+                    onChange={handleInputChange}
+                    autoComplete="tel"
                     />
                     {error.phone && <p className="text-sm text-red-600 mt-1">{error.phone}</p>}
-                    </div>
+                </div>
                 </div>
 
                 <button
-                    type="submit"
-                    className="w-full p-3 mt-2 font-semibold bg-blue-500 hover:bg-blue-400 text-white rounded-lg transition-colors"
+                type="submit"
+                className="w-full p-3 mt-2 font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors shadow"
+                disabled={loading}
                 >
-                    {loading ? "Signing up" : "Create account"}
+                {loading ? "Creating Account..." : "Create Hospital Account"}
                 </button>
 
-                <p className="text-center">
-                    Already had an account? <Link to="/login" className="text-blue-500">Login</Link>
+                <p className="text-center mt-6 text-neutral-700">
+                Already have an account?{" "}
+                <Link to="/hq/login" className="text-blue-600 font-semibold hover:underline">
+                    Login here
+                </Link>
                 </p>
-                </form>
+            </form>
             </div>
         </div>
     )

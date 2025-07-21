@@ -88,7 +88,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setHospitalData(null);
     localStorage.removeItem("hospital_data");
     toast.info("Logged out");
-    window.location.replace("/hq_login");
+    window.location.replace("/hq/login");
   }, []);
 
   //===========fetch all staffs ==============
