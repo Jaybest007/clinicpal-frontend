@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SignUp from '../src/pages/Signup';
 import Login from '../src/pages/Login';
@@ -18,50 +17,49 @@ import HqLogin from "./pages/HqPages/HqLogin";
 import HospitalProtectedRoute from "./utilities/HospitalProtectedRoute";
 import { HqPatients } from "./pages/HqPages/HqPatients";
 import HqReports from "./pages/HqPages/HqReports";
-import {Pharmacy} from "./pages/Pharmacy";
-import { Laboratory } from "./pages/Laboratory"; 
-import { Ultrasound } from "./pages/Ultrasound"; // Importing the Ultrasound page
+import { Pharmacy } from "./pages/Pharmacy";
+import { Laboratory } from "./pages/Laboratory";
+import { Ultrasound } from "./pages/Ultrasound";
 import DocumentationPage from "./pages/Documentation";
 import ConfirmationPage from "./pages/Confirmation";
-
+import { useAuth } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
 
 function App() {
+  // Get token from AuthContext
+  const { user } = useAuth();
+  const token = user?.token || "";
+
   return (
     <BrowserRouter>
-    <DashboardProvider>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <Routes>
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<LandingPage />} />
-        <Route path="*" element={<PageNotFound />} />
-        <Route path="/onboarding" element={<HospitalRegistration />} />
-        <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /> </ProtectedRoute> } />
-        <Route path="/patients" element={<ProtectedRoute> <Patients /> </ProtectedRoute> } />
-        <Route path="/reports/:patient_id" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
-        <Route path="/reports/" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
-        <Route path="/appointments/" element={<ProtectedRoute> <Appointment /> </ProtectedRoute> } />
-        <Route path="/pharmacy" element={<ProtectedRoute> <Pharmacy /> </ProtectedRoute>} />
-        <Route path="/laboratory" element={<ProtectedRoute> <Laboratory /> </ProtectedRoute>} />
-        <Route path="/ultrasound" element={<ProtectedRoute> <Ultrasound /> </ProtectedRoute>} />
-        <Route path="/confirmation" element={<ProtectedRoute><ConfirmationPage /></ProtectedRoute>} />
-        
-        {/* Documentation Page */}
-        <Route path="/docs" element={<DocumentationPage />} />
-
-
-        {/* Public Routes */}
-        {/* Hospital Routes */}
-
-        <Route path="/hq/login" element={<HqLogin />} />
-        <Route path="/hq" element={<HospitalProtectedRoute><HospitalDashboard /></HospitalProtectedRoute>} />
-        <Route path="/hq/patients" element={<HospitalProtectedRoute><HqPatients /></HospitalProtectedRoute>} />
-        <Route path="/hq/reports" element={<HospitalProtectedRoute><HqReports /></HospitalProtectedRoute>} />
-      </Routes>
+      <DashboardProvider>
+        <SocketProvider token={token}>
+          <ToastContainer position="top-right" autoClose={3000} />
+          <Routes>
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="*" element={<PageNotFound />} />
+            <Route path="/onboarding" element={<HospitalRegistration />} />
+            <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /> </ProtectedRoute> } />
+            <Route path="/patients" element={<ProtectedRoute> <Patients /> </ProtectedRoute> } />
+            <Route path="/reports/:patient_id" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
+            <Route path="/reports/" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />
+            <Route path="/appointments/" element={<ProtectedRoute> <Appointment /> </ProtectedRoute> } />
+            <Route path="/pharmacy" element={<ProtectedRoute> <Pharmacy /> </ProtectedRoute>} />
+            <Route path="/laboratory" element={<ProtectedRoute> <Laboratory /> </ProtectedRoute>} />
+            <Route path="/ultrasound" element={<ProtectedRoute> <Ultrasound /> </ProtectedRoute>} />
+            <Route path="/confirmation" element={<ProtectedRoute><ConfirmationPage /></ProtectedRoute>} />
+            <Route path="/docs" element={<DocumentationPage />} />
+            <Route path="/hq/login" element={<HqLogin />} />
+            <Route path="/hq" element={<HospitalProtectedRoute><HospitalDashboard /></HospitalProtectedRoute>} />
+            <Route path="/hq/patients" element={<HospitalProtectedRoute><HqPatients /></HospitalProtectedRoute>} />
+            <Route path="/hq/reports" element={<HospitalProtectedRoute><HqReports /></HospitalProtectedRoute>} />
+          </Routes>
+        </SocketProvider>
       </DashboardProvider>
     </BrowserRouter>
   );
 }
-
 
 export default App;

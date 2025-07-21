@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { createContext,  useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
-
+import { useSocket } from "./SocketContext";
 
 //====New Patient data that is going to the backend interface
 interface newPatientData {
@@ -221,6 +221,37 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
     });
     const hasFetchedPatients = useRef(false);
     const hasFetchedAppointments = useRef(false);
+
+    const socket = useSocket();
+
+    // Test WebSocket connection on mount
+    useEffect(() => {
+      if (!socket) return;
+      socket.on("connect", () => {
+        toast.success(`WebSocket connected: ${socket.id}`);
+        console.log("WebSocket connected:", socket.id);
+      });
+
+      socket.on("disconnect", () => {
+        toast.info("WebSocket disconnected");
+        console.log("WebSocket disconnected");
+      });
+
+      // Optionally listen for a test event from backend
+      socket.on("message", (msg) => {
+        toast.info(`WebSocket message: ${msg}`);
+        console.log("WebSocket message:", msg);
+      });
+
+      // Emit a test message to backend
+      socket.emit("message", "Hello from DashboardContext!");
+
+      return () => {
+        socket.off("connect");
+        socket.off("disconnect");
+        socket.off("message");
+      };
+    }, [socket]);
 
 //====useEffect to get token from localStorage on initial render====
     useEffect(() => {
@@ -695,26 +726,35 @@ const submitExternalOrder = useCallback(async (credentials: externalOrder) => {
 }, [token, fetchUltrasoundData]);
 
 //========== fetch external orer ============
-const fetchExternalOrder = useCallback( async()=> {
-    if(!token) return;
-    try{
-        setLoading(true);
-        const response = await axios.get("https://clinicpal.onrender.com/api/external/fetchOrder",
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-        });
-        setExternalOrders(response.data)
-        console.log("External:", response.data); // Debugging line to check fetched data
-    } catch (err: any) {
-        const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
-        toast.error(errorMessage);
-        throw err;
-    } finally {
-        setLoading(false);
+const fetchExternalOrder = useCallback(async () => {
+  if (!token) return;
+  try {
+    setLoading(true);
+    const response = await axios.get(
+      "https://clinicpal.onrender.com/api/external/fetchOrder",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 10000, // 10 seconds timeout for reliability
+      }
+    );
+    
+    if (Array.isArray(response.data)) {
+      setExternalOrders(response.data);
+    } else {
+      toast.error("Unexpected response format from server.");
     }
-},[token])
+    
+  } catch (err: any) {
+   
+    toast.error("Unable to fetch external orders. Please try again.");
+    
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
+
 
 
 

@@ -8,7 +8,7 @@ import {
   FiLogOut,
   FiBook,
 } from 'react-icons/fi';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, replace, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from "../assets/logo1.png";
 import { GiMedicines, GiMicroscope } from 'react-icons/gi';
@@ -16,13 +16,13 @@ import { GiMedicines, GiMicroscope } from 'react-icons/gi';
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+  
   const location = useLocation();
   const { user, logout } = useAuth();
 
 
   const currentPath = location.pathname;
-
+  const navigate = useNavigate()
   const navItems = [
     { name: 'Dashboard', icon: <FiHome />, path: '/dashboard' },
   ...(user?.role === 'doctor' ? [{ name: 'Appointments', icon: <FiCalendar />, path: '/appointments' }] : []),
@@ -31,7 +31,7 @@ const NavBar = () => {
     { name: 'Pharmacy', icon: <GiMedicines />, path: '/pharmacy' },
     { name: 'Laboratory', icon: <GiMicroscope />, path: '/laboratory' },
     { name: 'Ultrasound', icon: <FiSettings />, path: '/ultrasound' },
-    { name: 'Logout', icon: <FiLogOut />, path: '/login', action: logout },
+    { name: 'Logout', icon: <FiLogOut />, path: '/login', action: () => { logout(); navigate("/login", { replace: true }); } },
   ];
 
   // Auto-close mobile menu on route change
