@@ -8,7 +8,7 @@ import {
   FiLogOut,
   FiBook,
 } from 'react-icons/fi';
-import { Link, replace, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from "../assets/logo1.png";
 import { GiMedicines, GiMicroscope } from 'react-icons/gi';
