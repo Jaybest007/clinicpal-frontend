@@ -289,7 +289,8 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
       );
       toast.success(response.data.success);
       setNewPatient(response.data.newPatient);
-      //emit websocket to notify other clients
+
+      // Emit WebSocket event to notify other clients
       if (socket) {
         socket.emit("patientAdded", response.data.newPatient);
       }
@@ -299,7 +300,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
       setLoading(false);
     }
   },
-  [token]
+  [token, socket]
 );
 
 //====socket listener for new patient====
