@@ -1,5 +1,5 @@
 // src/context/SocketContext.tsx
-import React, { createContext, useContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 const SocketContext = createContext<Socket | null>(null);
@@ -10,22 +10,25 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children, token }) => {
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     if (token) {
-      socketRef.current = io("https://clinicpal.onrender.com", {
+      const newSocket = io("https://clinicpal.onrender.com", {
         transports: ["websocket"],
         auth: { token }
       });
-    }
+      setSocket(newSocket);
 
-    return () => {
-      socketRef.current?.disconnect();
-    };
+      return () => {
+        newSocket.disconnect();
+        setSocket(null);
+      };
+    }
+    return () => {};
   }, [token]);
 
-  return <SocketContext.Provider value={socketRef.current}>{children}</SocketContext.Provider>;
+  return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 };
 
 export const useSocket = () => useContext(SocketContext);
