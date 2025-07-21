@@ -85,7 +85,7 @@ export const HospitalRegistration = () => {
                     email: "",
                     phone: "",
                 })
-                navigate("/", {replace: true});
+                navigate("/hq/login", {replace: true});
             }catch(err: any) {
                 const serverErr =
                     err.response?.data?.error?.server ||
