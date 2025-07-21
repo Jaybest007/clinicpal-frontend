@@ -199,7 +199,7 @@ export const Appointment = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-slate-500 italic">
+                    <td colSpan={6} className="px-4 py-6 text-center text-slate-600 italic">
                       No appointments for {currentView}.
                     </td>
                   </tr>
