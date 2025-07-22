@@ -288,12 +288,7 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
         }
       );
       toast.success(response.data.success);
-      setNewPatient(response.data.newPatient);
-
-      // Emit WebSocket event to notify other clients
-      if (socket) {
-        socket.emit("patientAdded", response.data.newPatient);
-      }
+      setNewPatient(response.data.newPatient); 
     } catch (err: any) {
       throw err;
     } finally {
@@ -307,8 +302,9 @@ export const DashboardProvider: React.FC<{children: React.ReactNode}> = ({childr
 useEffect(() => {
   if (!socket) return;
 
-  socket.on("patientAdded", (newPatient) => {
-    setNewPatient((prev) => [...prev, newPatient]);
+  socket.on("patientAdded", ( {patients, next_of_kin} ) => {
+    setPatientsData(patients); // Keep as object for ConfirmationPage
+    setNextOfKinData(next_of_kin);
     toast.info("A new patient was added!");
   });
 
