@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import logo from "../assets/CP.png"; 
+
 
 interface signUpData {
   firstName: string;
@@ -167,7 +169,7 @@ const SignUp = () => {
         {/* Logo & Title */}
         <div className="flex flex-col items-center mb-8">
           <img
-            src="/logo192.png"
+            src={logo}
             alt="ClinicPal Logo"
             className="w-16 h-16 mb-2 rounded-full shadow-lg"
           />

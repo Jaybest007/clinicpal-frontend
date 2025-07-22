@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-
+import logo from "../assets/CP.png"; // Adjust the path as necessary
 interface loginCredentials {
   email: string;
   password: string;
@@ -57,7 +57,7 @@ const Login = () => {
         {/* Logo & Title */}
         <div className="flex flex-col items-center mb-8">
           <img
-            src="/logo192.png"
+            src={logo}
             alt="ClinicPal Logo"
             className="w-16 h-16 mb-2 rounded-full shadow-lg"
           />
