@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { HqNavBar } from "../../components/HqNavBar";
 import { useDashboard } from "../../context/DashboardContext";
 import PatientProfileModal from "../../components/PatientProfilemModal";
@@ -7,9 +7,16 @@ import { useHospital } from "../../context/HospitalContext";
 
 export const HqPatients: React.FC = () => {
     const { patientsData, fetchAllPatients } = useDashboard();
-    const {deletePatient} = useHospital();
+    const { deletePatient } = useHospital();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<patientInfo | null>(null);
+
+    useEffect(() => {
+        if (!patientsData || patientsData.length === 0) {
+            fetchAllPatients();
+        }
+    }, [patientsData, fetchAllPatients]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100">
         {/* =======nav bar=========== */}
@@ -36,38 +43,46 @@ export const HqPatients: React.FC = () => {
                         </tr>
                         </thead>
                         <tbody className="text-gray-800">
-                           {patientsData.map((patient, index) => (
-                            <tr className="hover:bg-gray-50 transition" key={index}>
-                                <td className="px-6 py-4 border-b">{index + 1}</td>
-                                <td className="px-6 py-4 border-b">{patient.full_name.toUpperCase()}</td>
-                                <td className="px-6 py-4 border-b">{patient.patient_id.toUpperCase()}</td>
-                                <td className="px-6 py-4 border-b">{patient.gender}</td>
-                                <td className="px-6 py-4 border-b">{patient.age}</td>
-                                <td className="px-6 py-4 border-b">{patient.phone}</td>
-                                <td className="px-6 py-4 border-b">
-                                    <div className="grid grid-cols-1 gap-2 sm:flex sm:space-x-2">
-                                        <button 
-                                            className="bg-blue-600 text-white px-2 py-1 hover:bg-blue-700 rounded w-full"
-                                            onClick={() => {
-                                                setSelectedPatient(patient);
-                                                setIsModalOpen(true);
-                                            }}
-                                        >
-                                            View
-                                        </button>
-                                        <button 
-                                            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded w-full"
-                                            onClick={async () => {
-                                                await deletePatient(patient.patient_id);
-                                                fetchAllPatients();
-                                            }}
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                </td>
+                          {(Array.isArray(patientsData) && patientsData.length > 0) ? (
+                            patientsData.map((patient, index) => (
+                              <tr className="hover:bg-gray-50 transition" key={index}>
+                                  <td className="px-6 py-4 border-b">{index + 1}</td>
+                                  <td className="px-6 py-4 border-b">{patient.full_name.toUpperCase()}</td>
+                                  <td className="px-6 py-4 border-b">{patient.patient_id.toUpperCase()}</td>
+                                  <td className="px-6 py-4 border-b">{patient.gender}</td>
+                                  <td className="px-6 py-4 border-b">{patient.age}</td>
+                                  <td className="px-6 py-4 border-b">{patient.phone}</td>
+                                  <td className="px-6 py-4 border-b">
+                                      <div className="grid grid-cols-1 gap-2 sm:flex sm:space-x-2">
+                                          <button 
+                                              className="bg-blue-600 text-white px-2 py-1 hover:bg-blue-700 rounded w-full"
+                                              onClick={() => {
+                                                  setSelectedPatient(patient);
+                                                  setIsModalOpen(true);
+                                              }}
+                                          >
+                                              View
+                                          </button>
+                                          <button 
+                                              className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded w-full"
+                                              onClick={async () => {
+                                                  await deletePatient(patient.patient_id);
+                                                  fetchAllPatients();
+                                              }}
+                                          >
+                                              Delete
+                                          </button>
+                                      </div>
+                                  </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={7} className="text-center py-6 text-gray-400">
+                                No patient records found.
+                              </td>
                             </tr>
-                           ))}
+                          )}
                             
                         </tbody>
                     </table>
