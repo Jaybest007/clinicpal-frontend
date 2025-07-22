@@ -337,20 +337,7 @@ const SignUp = () => {
               Login
             </Link>
           </div>
-        </form>
-
-        {/* Info Section */}
-        <div className="mt-8 text-xs text-gray-500 text-center">
-          <p>
-            <span className="font-semibold text-blue-700">ClinicPal</span> is an enterprise-grade platform for modern clinics and hospitals.
-          </p>
-          <p className="mt-2">
-            Secure, fast, and compliant with healthcare standards. Your data is encrypted and protected.
-          </p>
-          <p className="mt-2">
-            Need help? <a href="mailto:support@clinicpal.com" className="text-blue-600 underline">Contact Support</a>
-          </p>
-        </div>
+        </form>       
       </div>
     </div>
   );
