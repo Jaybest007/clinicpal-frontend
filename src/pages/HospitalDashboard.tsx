@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { FaSearch, FaUser, FaUserInjured } from "react-icons/fa";
 import { TiWarning } from "react-icons/ti";
@@ -8,13 +8,32 @@ import { useHospital } from "../context/HospitalContext";
 import { useDashboard } from "../context/DashboardContext";
 
 export const HospitalDashboard = () => {
-  const { hospitalData, staffs, deleteUser, updateStaffRole } = useHospital();
+  const { hospitalData, staffs, deleteUser, updateStaffRole, loading, fetchStaffs } = useHospital();
   const { patientsData = [] } = useDashboard();
 
   const [editingStaffId, setEditingStaffId] = useState<string>("");
   const [newRole, setNewRole] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const totalStaff = Array.isArray(staffs) ? staffs.length : 0;
+  // Fetch latest staff data when hospitalData changes
+  useEffect(() => {
+    if (hospitalData?.token) {
+      fetchStaffs();
+    }
+    // eslint-disable-next-line
+  }, [hospitalData?.token]);
+
+  // Filter staff by search term
+  const filteredStaffs = Array.isArray(staffs)
+    ? staffs.filter(
+        staff =>
+          staff.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          staff.lastname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          staff.id.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
+  const totalStaff = filteredStaffs.length;
   const totalPatients = patientsData.length;
   const totalAdmitted = patientsData.filter(p => p.admission_status === true).length;
 
@@ -64,12 +83,12 @@ export const HospitalDashboard = () => {
             icon={FaUser}
             value={
               patientsData.filter(patient => {
-          const visitDate = new Date(patient.visit_on);
-          const now = new Date();
-          return (
-            visitDate.getFullYear() === now.getFullYear() &&
-            visitDate.getMonth() === now.getMonth()
-          );
+                const visitDate = new Date(patient.visit_on);
+                const now = new Date();
+                return (
+                  visitDate.getFullYear() === now.getFullYear() &&
+                  visitDate.getMonth() === now.getMonth()
+                );
               }).length
             }
           />
@@ -87,6 +106,8 @@ export const HospitalDashboard = () => {
               <input
                 type="text"
                 placeholder="Search by name or ID"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full py-2 pl-10 pr-4 rounded-md border border-blue-300 bg-blue-50 text-sm text-blue-900 placeholder:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
               />
             </div>
@@ -104,7 +125,7 @@ export const HospitalDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-800">
-                {(staffs ?? []).map((staff) => (
+                {filteredStaffs.map((staff) => (
                   <tr key={staff.id} className="hover:bg-blue-50 transition">
                     <td className="px-4 py-3 font-mono text-slate-600">
                       {staff.created_at
@@ -171,11 +192,18 @@ export const HospitalDashboard = () => {
                 ))}
               </tbody>
             </table>
-            {(Array.isArray(staffs) && staffs.length === 0) && (
+            {(Array.isArray(filteredStaffs) && filteredStaffs.length === 0) && (
               <div className="text-center text-gray-500 italic py-6">No staff records found.</div>
             )}
           </div>
         </section>
+        {loading && (
+          <div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 text-blue-700 font-semibold">
+              Loading hospital data...
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

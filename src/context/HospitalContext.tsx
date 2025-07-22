@@ -43,6 +43,7 @@ interface HospitalContextType {
   logout: () => void;
   staffs: staffsData[] | null;
   deletePatient: (patient_id: string) => Promise<void>;
+  fetchStaffs: () => Promise<void>;
 }
 
 //============ context setup =============
@@ -93,27 +94,35 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   //===========fetch all staffs ==============
   const fetchStaffs = useCallback(async () => {
-    if (!hospitalData?.token || fetchStaffsInProgress.current || hospitalData.role !== "hospital") return;
+    if (!hospitalData?.token || fetchStaffsInProgress.current || hospitalData.role !== "hospital") {
+      console.warn("[fetchStaffs] Skipped fetch. Token:", hospitalData?.token, "Role:", hospitalData?.role, "InProgress:", fetchStaffsInProgress.current);
+      return;
+    }
     fetchStaffsInProgress.current = true;
     try {
       setLoading(true);
+      console.log("[fetchStaffs] Fetching staff with token:", hospitalData.token);
       const response = await axios.get("https://clinicpal.onrender.com/api/hospitals/fetchStaffs", {
-      headers: {
-        Authorization: `Bearer ${hospitalData.token}`,
-      },
+        headers: {
+          Authorization: `Bearer ${hospitalData.token}`,
+        },
       });
-      // The API returns rows directly as an array
+      console.log("[fetchStaffs] API response:", response.data);
       if (Array.isArray(response.data)) {
-      setStaffs(response.data);
+        setStaffs(response.data);
+        console.log("[fetchStaffs] Staffs set:", response.data.length);
       } else {
-      setStaffs([]);
+        setStaffs([]);
+        console.warn("[fetchStaffs] Response data not array:", response.data);
       }
     } catch (err: any) {
       const error = err.response?.data?.error || err.response?.data?.message || "An unexpected error occurred.";
+      console.error("[fetchStaffs] Error:", error, err);
       toast.error(error);
     } finally {
       setLoading(false);
       fetchStaffsInProgress.current = false;
+      console.log("[fetchStaffs] Fetch complete");
     }
   }, [hospitalData]);
 
@@ -159,11 +168,13 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const deleteUser = useCallback(
     async (credentials: deleteUser) => {
       if (!hospitalData?.token) {
+        console.warn("[deleteUser] No token found. Credentials:", credentials);
         toast.error("Unauthorized. Please login again.");
         return;
       }
       try {
         setLoading(true);
+        console.log("[deleteUser] Deleting staff with credentials:", credentials);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/hospitals/delete_staff",
           credentials,
@@ -173,13 +184,16 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             },
           }
         );
+        console.log("[deleteUser] API response:", response.data);
         toast.success(response.data.success);
         await fetchStaffs();
       } catch (err: any) {
         const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
+        console.error("[deleteUser] Error:", errorMessage, err);
         toast.error(errorMessage);
       } finally {
         setLoading(false);
+        console.log("[deleteUser] Delete complete");
       }
     },
     [hospitalData, fetchStaffs]
@@ -226,7 +240,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         hospitalData,
         logout,
         staffs,
-        deletePatient
+        deletePatient, fetchStaffs
       }}
     >
       {children}
