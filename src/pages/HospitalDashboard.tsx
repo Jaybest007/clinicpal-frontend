@@ -8,7 +8,7 @@ import { useHospital } from "../context/HospitalContext";
 import { useDashboard } from "../context/DashboardContext";
 
 export const HospitalDashboard = () => {
-  const { hospitalData, staffs = [], deleteUser, updateStaffRole } = useHospital();
+  const { hospitalData, staffs, deleteUser, updateStaffRole } = useHospital();
   const { patientsData = [] } = useDashboard();
 
   const [editingStaffId, setEditingStaffId] = useState<string>("");

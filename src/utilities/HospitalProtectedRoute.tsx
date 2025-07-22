@@ -22,7 +22,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     if (ready && !loading && !hospitalData) {
-      navigate("/hg/login", { replace: true });
+      navigate("/hq/login", { replace: true });
     }
   }, [hospitalData, loading, ready, navigate]);
 

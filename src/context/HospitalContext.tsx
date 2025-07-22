@@ -98,16 +98,16 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       setLoading(true);
       const response = await axios.get("https://clinicpal.onrender.com/api/hospitals/fetchStaffs", {
-        headers: {
-          Authorization: `Bearer ${hospitalData.token}`,
-        },
+      headers: {
+        Authorization: `Bearer ${hospitalData.token}`,
+      },
       });
-      if (response.data && Array.isArray(response.data)) {
-        setStaffs(response.data);
-      } else if (response.data?.staffs && Array.isArray(response.data.staffs)) {
-        setStaffs(response.data.staffs);
+      // The API returns rows directly as an array
+      if (Array.isArray(response.data)) {
+      setStaffs(response.data);
+      } else {
+      setStaffs([]);
       }
-      if (response.data.success) toast.success(response.data.success);
     } catch (err: any) {
       const error = err.response?.data?.error || err.response?.data?.message || "An unexpected error occurred.";
       toast.error(error);
