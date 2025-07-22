@@ -12,7 +12,7 @@ export default defineConfig({
         name: 'ClinicPal',
         short_name: 'ClinicPal',
         description: 'Digital health record system for clinics',
-        theme_color: '#007BFF',
+        theme_color: '#2563EB',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',

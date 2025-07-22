@@ -308,8 +308,14 @@ useEffect(() => {
     toast.info("A new patient was added!");
   });
 
+  socket.on("quePatient", (queList) => {
+    setQueList(queList);
+    toast.info("A patient was added to the queue!");
+  });
+  
   return () => {
     socket.off("patientAdded");
+    socket.off("quePatient");
   };
 }, [socket]);
 
