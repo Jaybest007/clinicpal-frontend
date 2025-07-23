@@ -117,6 +117,9 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
         ultrasound_order: ultrasoundOrder,
       });
       setReportData({ patient_id: "", report: "", wrote_by: user?.name || "" });
+      setOrderToLab(false);
+      setOrderToPharmacy(false);
+      setUltrasoundOrder(false);
       setError({ patient_id: "", report: "", server: "" });
       fetch_Admitted_Patient_Report();
       if (patient_id) fetchPatientReport({ patient_id });
@@ -131,7 +134,7 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm px-2 py-8 overflow-y-auto">
-      <div className="relative w-full max-w-xl mx-auto bg-white shadow-2xl rounded-2xl p-8 border border-blue-100 mt-16">
+      <div className="relative w-full max-w-xl mx-auto bg-white shadow-2xl rounded-2xl p-8 border border-blue-100 mt-4">
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
           onClick={onClose}
@@ -225,6 +228,7 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
             </div>
           )}
 
+          {/* send order section */}
           <div className="space-y-3 mt-4">
             <label className="flex items-center gap-3">
               <input
@@ -259,6 +263,7 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
             <button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg shadow font-semibold transition"
+              disabled={loading}
             >
               {loading ? "Submitting..." : "Submit Report"}
             </button>

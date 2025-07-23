@@ -4,7 +4,6 @@ import {
   FiHome,
   FiCalendar,
   FiUser,
-  FiSettings,
   FiLogOut,
   FiBook,
 } from 'react-icons/fi';
@@ -12,6 +11,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from "../assets/logo1.png";
 import { GiMedicines, GiMicroscope } from 'react-icons/gi';
+import { RiScan2Fill } from 'react-icons/ri';
 
 
 const NavBar = () => {
@@ -30,7 +30,7 @@ const NavBar = () => {
     { name: 'Reports', icon: <FiBook />, path: '/reports' },
     { name: 'Pharmacy', icon: <GiMedicines />, path: '/pharmacy' },
     { name: 'Laboratory', icon: <GiMicroscope />, path: '/laboratory' },
-    { name: 'Ultrasound', icon: <FiSettings />, path: '/ultrasound' },
+    { name: 'Ultrasound', icon: <RiScan2Fill />, path: '/ultrasound' },
     { name: 'Logout', icon: <FiLogOut />, path: '/login', action: () => { logout(); navigate("/login", { replace: true }); } },
   ];
 

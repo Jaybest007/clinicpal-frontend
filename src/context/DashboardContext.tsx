@@ -104,6 +104,7 @@ interface pharmacyData {
     patient_id: string;
     order_data: string;
     status: string;
+    result: string;
     requested_by: string;
     updated_at: string;
     created_at: string;
@@ -165,6 +166,13 @@ interface newPatient {
     phone: string;
 }
 
+interface orderResult {
+    id: string;
+    wrote_by: string;
+    patient_id: string;
+    orderResults: string;
+}
+
 interface dashboardContextType {
     addNewPatient: (credentials: newPatientData) => Promise<void>;
     patientsData: PatientsData[];
@@ -199,6 +207,7 @@ interface dashboardContextType {
     fetchExternalOrder: ()=> Promise<void>;
     newPatient: newPatient[];
     setNewPatient: React.Dispatch<React.SetStateAction<newPatient[]>>;
+    orderResult: (credentials: orderResult) => Promise<void>;
 }
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
@@ -754,7 +763,25 @@ const fetchExternalOrder = useCallback(async () => {
   }
 }, [token]);
 
-
+//============ order result ==============
+const orderResult = useCallback(async (credentials: orderResult) => {
+  if (!token) return;
+  try {
+    setLoading(true);
+    const response = await axios.post("https://clinicpal.onrender.com/api/external/submitResult", credentials, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    toast.success(response.data.success);
+  } catch (err: any) {
+    const errorMessage = err?.response?.data?.message || err?.response?.data?.error;
+    toast.error(errorMessage);
+    throw err;
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
 
 
 
@@ -777,7 +804,7 @@ const contextValue = useMemo(() => ({
   appointments,  fetchPharmacyData,pharmacyData, updatePharmacyOrderStatus, labData,
   fetchLaboratoryData, updateLaboratoryOrderStatus, quePatient, queList, QueActions, fetchQueList,fetchUltrasoundData,
   updateUltrasoundOrderStatus, submitExternalOrder,
-  ultrasoundData, externalOrder, fetchExternalOrder, newPatient, setNewPatient
+  ultrasoundData, externalOrder, fetchExternalOrder, newPatient, setNewPatient, orderResult
 }), [
   addNewPatient,
   loading,
@@ -796,7 +823,7 @@ const contextValue = useMemo(() => ({
   appointments, fetchPharmacyData,pharmacyData, 
   updatePharmacyOrderStatus, fetchLaboratoryData, labData,
   updateLaboratoryOrderStatus, quePatient , queList, QueActions, fetchQueList, fetchUltrasoundData, ultrasoundData,
-  updateUltrasoundOrderStatus, submitExternalOrder, externalOrder, fetchExternalOrder, newPatient, setNewPatient
+  updateUltrasoundOrderStatus, submitExternalOrder, externalOrder, fetchExternalOrder, newPatient, setNewPatient, orderResult
 
 
 ]);
