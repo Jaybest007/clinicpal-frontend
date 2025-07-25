@@ -181,6 +181,34 @@ interface orderResult {
     orderResults: string;
 }
 
+interface Transaction{
+  id: number;
+  amount: string;
+  created_at: string;
+  created_by: string;
+  department: string;
+  description: string;
+  hospital_id: string;
+  name: string;
+  notes: string;
+  patient_id: string;
+  patient_name: string;
+  payment_method: string;
+  payment_status: string;
+  receipt_id: string | null;
+}
+
+interface billingDetails{
+  patient_name: string;
+  patient_id : string;
+  department: string;
+  service: string;
+  amount: number;
+  payment_method: string;
+  payment_status: string;
+  notes: string;
+}
+
 interface dashboardContextType {
     addNewPatient: (credentials: newPatientData) => Promise<void>;
     patientsData: PatientsData[];
@@ -216,6 +244,10 @@ interface dashboardContextType {
     newPatient: newPatient[];
     setNewPatient: React.Dispatch<React.SetStateAction<newPatient[]>>;
     orderResult: (credentials: orderResult) => Promise<void>;
+    newBilling: (credentials: billingDetails) => Promise<void>;
+    fetchTransactions: () => Promise<void>;
+    token: string | null;
+    transactions: Transaction[];
 }
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
@@ -232,10 +264,16 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [externalOrder, setExternalOrders] = useState<fetchedExterOrder[]>([]);
   const [queList, setQueList] = useState<QueList[]>([]);
   const [newPatient, setNewPatient] = useState<newPatient[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [token, setToken] = useState<string | null>(() => {
     const stored = localStorage.getItem("clinicpal_user");
     return stored ? JSON.parse(stored).token : null;
   });
+  const [role, setRole] = useState<string | null>(() => {
+    const stored = localStorage.getItem("clinicpal_user");
+    return stored ? JSON.parse(stored).role : null;
+  });
+  
 
   // Use refs to avoid unnecessary fetches
   const hasFetchedPatients = useRef(false);
@@ -256,6 +294,19 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         } catch (err) {
           console.error("Failed to parse clinicpal_user:", err);
           setToken(null);
+        }
+      }
+    }
+
+    if(!role){
+      const stored = localStorage.getItem("clinicpal_user");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed?.role) setRole(parsed.role);
+        } catch (err) {
+          console.error("Failed to parse clinicpal_user role:", err);
+          setRole(null);
         }
       }
     }
@@ -800,6 +851,53 @@ const fetchLaboratoryData = useCallback(async () => {
     [token]
   );
 
+  // == add new billing
+  const newBilling = useCallback( async (credentials: billingDetails) => {
+    if (!token) return;
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        "https://clinicpal.onrender.com/api/cashier/addBill",
+        credentials,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(response.data.success);
+    } catch (err: any) {
+      handleApiError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  },[token]);
+
+  // ==== fetch transactions
+  const fetchTransactions = useCallback( async() => {
+    if (role !== "cashier" && role !== "super admin") return;
+    if (!token) return;
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        "https://clinicpal.onrender.com/api/cashier/fetchTransactions",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setTransactions(response.data);
+      
+    } catch (err: any) {
+      handleApiError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+  
+    //===fetch transaction===
+  useEffect(() => {
+      if (!token) return;
+      if (transactions.length === 0) {
+        fetchTransactions();
+      }
+    }, [token, transactions, fetchTransactions]);
+    
+  //===============
   // Memoize context value to avoid unnecessary rerenders
   const contextValue = useMemo(
     () => ({
@@ -837,6 +935,7 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
+      newBilling, transactions, fetchTransactions , token
     }),
     [
       addNewPatient,
@@ -873,6 +972,7 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
+      newBilling, transactions, fetchTransactions, token
     ]
   );
 

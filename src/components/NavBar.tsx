@@ -31,6 +31,7 @@ const NavBar = () => {
     { name: 'Pharmacy', icon: <GiMedicines />, path: '/pharmacy' },
     { name: 'Laboratory', icon: <GiMicroscope />, path: '/laboratory' },
     { name: 'Ultrasound', icon: <RiScan2Fill />, path: '/ultrasound' },
+    ...(user?.role === 'cashier' || user?.role === 'super admin' ? [{ name: 'Cashier', icon: <FiBook />, path: '/cashier' }] : []),
     { name: 'Logout', icon: <FiLogOut />, path: '/login', action: () => { logout(); navigate("/login", { replace: true }); } },
   ];
 
