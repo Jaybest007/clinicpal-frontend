@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useDashboard } from "../context/DashboardContext";
+import { useNavigate } from "react-router-dom";
 
 type DepartmentsReportProps = {
   department?: string;
@@ -7,6 +8,7 @@ type DepartmentsReportProps = {
 
 export const DepartmentsReport = ({ department }: DepartmentsReportProps) => {
   const { pharmacyData, labData, ultrasoundData, loading, externalOrder } = useDashboard();
+  const navigate = useNavigate();
   if (!department) return null;
 
   // Map department to correct data source
@@ -238,6 +240,18 @@ export const DepartmentsReport = ({ department }: DepartmentsReportProps) => {
             )}
           </tbody>
         </table>
+      </div>
+      <div className="mt-4">
+        <button
+          className="px-4 py-2 bg-blue-700 text-white rounded-lg font-semibold"
+          onClick={() =>
+            navigate(`/department-report/print?department=${department}`, {
+              state: { orders: filteredOrders }
+            })
+          }
+        >
+          Print Report
+        </button>
       </div>
     </div>
   );
