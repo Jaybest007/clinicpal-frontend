@@ -96,7 +96,7 @@ export const Ultrasound = () => {
       <main className="flex-1 w-full max-w-7xl mx-auto px-2 md:px-8 py-8">
         <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between px-4 py-3 rounded-t-xl shadow-sm mb-6">
           <h1 className="text-lg md:text-xl font-semibold text-blue-900">Ultrasound Orders</h1>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto mt-3 md:mt-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto mt-3 md:mt-0">
             <select
               value={viewType}
               onChange={(e) => setViewType(e.target.value)}
@@ -106,40 +106,42 @@ export const Ultrasound = () => {
               <option value="internal">Internal Orders</option>
               <option value="external">External Orders</option>
             </select>
-            <button
+            <div className="flex flex-row gap-2 w-full sm:w-auto">
+              <button
               onClick={() => setModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium w-full sm:w-auto transition duration-150"
               disabled={orderHistory}
-            >
+              >
               + New
-            </button>
-            <button
+              </button>
+              <button
               onClick={() => {
                 fetchUltrasoundData();
                 fetchExternalOrder();
               }}
               className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm font-medium w-full sm:w-auto transition duration-150"
               disabled={loading || orderHistory}
-            >
+              >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                  </svg>
-                  Loading
+                <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                Loading
                 </span>
               ) : "Refresh"}
-            </button>
-            <button
+              </button>
+              <button
               onClick={() => setOrderHistory(!orderHistory)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition duration-150 w-full sm:w-auto ${
                 orderHistory ? "bg-blue-500 hover:bg-blue-400" : "bg-blue-600 hover:bg-blue-500"
               } text-white`}
-            >
+              >
               {orderHistory ? "Hide History" : "Show History"}
-            </button>
-          </div>
+              </button>
+            </div>
+            </div>
         </div>
 
         {orderHistory ? (

@@ -150,7 +150,7 @@ export const DepartmentsReport = ({ department }: DepartmentsReportProps) => {
           placeholder="Search by date"
         />
       </div>
-      <div className="border rounded-xl overflow-hidden bg-white shadow relative">
+      <div className="border rounded-xl bg-white shadow relative overflow-x-auto">
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
             <span className="text-blue-600 flex items-center gap-2 font-semibold">
@@ -177,7 +177,7 @@ export const DepartmentsReport = ({ department }: DepartmentsReportProps) => {
             </span>
           </div>
         )}
-        <table className="w-full text-left border border-slate-300 rounded-lg overflow-hidden">
+        <table className="w-full text-left border border-slate-300 rounded-lg">
           <thead className="bg-blue-50">
             <tr>
               <th className="px-6 py-4 font-semibold text-blue-900 border-b border-slate-300">Order ID</th>
