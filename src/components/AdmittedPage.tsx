@@ -32,6 +32,13 @@ const AdmittedPage = () => {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-100">
+            {admittedPatients.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-6 py-3 text-center text-gray-500">
+                  No admitted patients found.
+                </td>
+              </tr>
+            )}
             {admittedPatients.map((patient, index) => (
                 <tr key={patient.patient_id} className="hover:bg-blue-50 transition">
                 <td className="px-6 py-3 font-mono text-blue-700 font-medium border-b border-r border-neutral-200">{patient.patient_id.toUpperCase()}</td>
