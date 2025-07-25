@@ -121,7 +121,6 @@ export const Laboratory = () => {
               value={viewType}
               onChange={(e) => setViewType(e.target.value)}
               className="text-sm px-2.5 py-1.5 border border-slate-300 rounded-md shadow-sm text-gray-700 bg-white w-full sm:w-auto focus:outline-none focus:ring-1 focus:ring-blue-300"
-              disabled={orderHistory}
             >
               <option value="internal">Internal Orders</option>
               <option value="external">External Orders</option>
@@ -130,17 +129,16 @@ export const Laboratory = () => {
               <button
               onClick={() => setModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium w-full sm:w-auto transition duration-150"
-              disabled={orderHistory}
               >
               + New
               </button>
               <button
               onClick={() => {
-                fetchUltrasoundData();
+                fetchLaboratoryData();
                 fetchExternalOrder();
               }}
               className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm font-medium w-full sm:w-auto transition duration-150"
-              disabled={loading || orderHistory}
+              disabled={loading}
               >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -158,7 +156,7 @@ export const Laboratory = () => {
                 orderHistory ? "bg-blue-500 hover:bg-blue-400" : "bg-blue-600 hover:bg-blue-500"
               } text-white`}
               >
-              {orderHistory ? "Hide History" : "Show History"}
+              {orderHistory ? "Go back" : "Order History"}
               </button>
             </div>
             </div>
