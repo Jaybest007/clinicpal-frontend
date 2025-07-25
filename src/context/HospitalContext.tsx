@@ -3,7 +3,6 @@ import React from "react";
 import { useCallback, useContext, createContext, useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 
-
 //========== interfaces ==========
 interface hospitalLogin {
   hospital_id: string;
@@ -54,12 +53,22 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [loading, setLoading] = useState<boolean>(false);
   const [hospitalData, setHospitalData] = useState<hospitalData | null>(null);
   const [staffs, setStaffs] = useState<staffsData[] | null>(null);
- 
 
   // Prevent duplicate fetches
   const fetchStaffsInProgress = useRef(false);
 
-  //======logic==========
+  // Utility: handle API errors with 403 auto-logout and no toast
+  const handleApiError = (err: any) => {
+    const code = err?.response?.status;
+    if (code === 403) {
+      localStorage.removeItem("hospital_data");
+      window.location.reload();
+      return;
+    }
+    const errorMessage = err?.response?.data?.error || err?.response?.data?.message || err?.message || "An unexpected error occurred.";
+    toast.error(errorMessage);
+  };
+
   useEffect(() => {
     const stored = localStorage.getItem("hospital_data");
     if (stored) {
@@ -76,8 +85,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setHospitalData(response.data);
       toast.success(response.data.success);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.response?.data?.message || "An unexpected error occurred.";
-      toast.error(errorMessage);
+      handleApiError(err);
       throw err;
     } finally {
       setLoading(false);
@@ -99,19 +107,18 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       setLoading(true);
       const response = await axios.get("https://clinicpal.onrender.com/api/hospitals/fetchStaffs", {
-      headers: {
-        Authorization: `Bearer ${hospitalData.token}`,
-      },
+        headers: {
+          Authorization: `Bearer ${hospitalData.token}`,
+        },
       });
-      // The API returns rows directly as an array
       if (Array.isArray(response.data)) {
-      setStaffs(response.data);
+        setStaffs(response.data);
       } else {
-      setStaffs([]);
+        setStaffs([]);
       }
     } catch (err: any) {
-      const error = err.response?.data?.error || err.response?.data?.message || "An unexpected error occurred.";
-      toast.error(error);
+      handleApiError(err);
+      throw err;
     } finally {
       setLoading(false);
       fetchStaffsInProgress.current = false;
@@ -147,8 +154,8 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         toast.success(response.data.success);
         await fetchStaffs();
       } catch (err: any) {
-        const errorMessage = err.response?.data?.error || err.response?.data?.message || "An unexpected error occurred.";
-        toast.error(errorMessage);
+        handleApiError(err);
+        throw err;
       } finally {
         setLoading(false);
       }
@@ -177,8 +184,8 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         toast.success(response.data.success);
         await fetchStaffs();
       } catch (err: any) {
-        const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
-        toast.error(errorMessage);
+        handleApiError(err);
+        throw err;
       } finally {
         setLoading(false);
       }
@@ -186,10 +193,9 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [hospitalData, fetchStaffs]
   );
 
-//===========delete patient data ===============
+  //===========delete patient data ===============
   const deletePatient = useCallback(
     async (patient_id: string) => {
-
       if (!hospitalData?.token) {
         toast.error("Unauthorized. Please login again.");
         return;
@@ -205,17 +211,15 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         );
         toast.success(response.data.success);
-        
       } catch (err: any) {
-        const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
-        toast.error(errorMessage);
+        handleApiError(err);
+        throw err;
       } finally {
         setLoading(false);
       }
     },
     [hospitalData, fetchStaffs]
   );
-
 
   return (
     <HospitalContext.Provider
@@ -227,7 +231,8 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         hospitalData,
         logout,
         staffs,
-        deletePatient, fetchStaffs
+        deletePatient,
+        fetchStaffs
       }}
     >
       {children}

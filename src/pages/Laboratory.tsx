@@ -9,6 +9,8 @@ import { AiOutlineFileDone } from "react-icons/ai";
 import { RiFileList3Fill } from "react-icons/ri";
 import OrderForm from "../components/OrderForm";
 import { useAuth } from "../context/AuthContext";
+import { DepartmentsReport } from "../components/DepartmentsReport";
+import { ExternalOrder } from "../components/ExternalOrder";
 
 // Types for lab orders and confirmation modal
 interface LabOrder {
@@ -34,7 +36,6 @@ export const Laboratory = () => {
     labData,
     updateLaboratoryOrderStatus,
     fetchExternalOrder,
-    externalOrder,
     submitExternalOrder,
     orderResult,
   } = useDashboard();
@@ -42,11 +43,13 @@ export const Laboratory = () => {
   const [selectedOrder, setSelectedOrder] = useState<LabOrder | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalState | null>(null);
-  const [viewType, setViewType] = useState("internal"); // "internal" or "external"
+  const [viewType, setViewType] = useState("internal"); 
   const [modalOpen, setModalOpen] = useState(false);
   const [orderResultModal, setOrderResultModal] = useState(false);
   const [orderResultsValue, setOrderResultsValue] = useState("");
+  const [orderHistory, setOrderHistory] = useState(false);
   const [resultLoading, setResultLoading] = useState(false);
+  // Removed unused orderPage state
   const { user } = useAuth();
 
 
@@ -111,29 +114,29 @@ export const Laboratory = () => {
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
         {/* Header and controls */}
-        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between px-4 py-4 rounded-t-xl shadow-sm">
-          <h1 className="text-xl md:text-2xl font-semibold text-blue-900">Laboratory Orders</h1>
-          <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 md:gap-4 w-full md:w-auto mt-3 md:mt-0">
+        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between px-4 py-3 rounded-t-xl shadow-sm">
+          <h1 className="text-lg md:text-xl font-semibold text-blue-900">Laboratory Orders</h1>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto mt-3 md:mt-0">
             <select
               value={viewType}
               onChange={(e) => setViewType(e.target.value)}
-              className="text-sm px-3 py-2 border rounded shadow text-gray-700 bg-white w-full xs:w-auto focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="text-sm px-2.5 py-1.5 border border-slate-300 rounded-md shadow-sm text-gray-700 bg-white w-full sm:w-auto focus:outline-none focus:ring-1 focus:ring-blue-300"
             >
               <option value="internal">Internal Orders</option>
               <option value="external">External Orders</option>
             </select>
             <button
               onClick={() => setModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm font-semibold w-full xs:w-auto transition"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium w-full sm:w-auto transition duration-150"
             >
-              + New Order
+              + New
             </button>
             <button
               onClick={() => {
                 fetchLaboratoryData();
                 fetchExternalOrder();
               }}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium transition w-full xs:w-auto"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm font-medium w-full sm:w-auto transition duration-150"
               disabled={loading}
             >
               {loading ? (
@@ -142,199 +145,161 @@ export const Laboratory = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                   </svg>
-                  Loading...
+                  Loading
                 </span>
               ) : "Refresh"}
+            </button>
+            <button
+              onClick={() => setOrderHistory(!orderHistory)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition duration-150 w-full sm:w-auto ${
+                orderHistory ? "bg-blue-500 hover:bg-blue-400" : "bg-blue-600 hover:bg-blue-500"
+              } text-white`}
+            >
+              {orderHistory ? "Go back" : "Order History"}
             </button>
           </div>
         </div>
 
-        {/* Internal Orders View */}
-        {viewType === "internal" && (
+        {/* Show only DepartmentsReport if orderHistory is true */}
+        {orderHistory ? (
+          <div className="transition-all duration-300">
+            <DepartmentsReport department={"lab"} />
+          </div>
+        ) : (
           <>
             {/* Stat cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-              <StatCard icon={RiFileList3Fill} title="Total Orders" value={labData.length} />
-              <StatCard icon={MdOutlinePendingActions} title="Pending" value={labData.filter(order => order.status === "pending").length} />
-              <StatCard icon={AiOutlineFileDone} title="Processing" value={labData.filter(order => order.status === "processing").length} />
-              <StatCard icon={BiTask} title="Completed" value={labData.filter(order => order.status === "completed").length} />
-              <StatCard icon={BiTaskX} title="Cancelled" value={labData.filter(order => order.status === "cancelled").length} />
-            </div>
+            {!orderHistory && viewType === "internal" && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                <StatCard icon={RiFileList3Fill} title="Total Orders" value={labData.length} />
+                <StatCard icon={MdOutlinePendingActions} title="Pending" value={labData.filter(order => order.status === "pending").length} />
+                <StatCard icon={AiOutlineFileDone} title="Processing" value={labData.filter(order => order.status === "processing").length} />
+                <StatCard icon={BiTask} title="Completed" value={labData.filter(order => order.status === "completed").length} />
+                <StatCard icon={BiTaskX} title="Cancelled" value={labData.filter(order => order.status === "cancelled").length} />
+              </div>
+            )}
 
-            {/* Orders Table */}
-            <section className="bg-white rounded-xl shadow border border-slate-200 p-4 md:p-6 overflow-x-auto relative mt-4">
-              {/* Loading overlay */}
-              {loading && (
-                <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
-                  <span className="text-blue-600 flex items-center gap-2 font-semibold">
-                    <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
-                    Loading...
-                  </span>
-                </div>
-              )}
+            {/* Internal Orders Table */}
+            {viewType === "internal" && (
+              <section className="bg-white rounded-xl shadow border border-slate-200 p-4 md:p-6 overflow-x-auto relative mt-4">
+                {/* Loading overlay */}
+                {loading && (
+                  <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
+                    <span className="text-blue-600 flex items-center gap-2 font-semibold">
+                      <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                      Loading...
+                    </span>
+                  </div>
+                )}
 
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
-                  <tr>
-                    <th className="px-4 py-3 text-left">D/T</th>
-                    <th className="px-4 py-3 text-left">Name</th>
-                    <th className="px-4 py-3 text-left">Patient ID</th>
-                    <th className="px-4 py-3 text-left">Order</th>
-                    <th className="px-4 py-3 text-left">Status</th>
-                    <th className="px-4 py-3 text-left">Sent by</th>
-                    <th className="px-4 py-3 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {labData.filter(order => order.status === "pending" || order.status === "processing").length === 0 ? (
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
                     <tr>
-                      <td colSpan={7} className="text-gray-500 py-6 text-center">No orders found.</td>
+                      <th className="px-4 py-3 text-left">D/T</th>
+                      <th className="px-4 py-3 text-left">Name</th>
+                      <th className="px-4 py-3 text-left">Patient ID</th>
+                      <th className="px-4 py-3 text-left">Order</th>
+                      <th className="px-4 py-3 text-left">Status</th>
+                      <th className="px-4 py-3 text-left">Sent by</th>
+                      <th className="px-4 py-3 text-left">Actions</th>
                     </tr>
-                  ) : (
-                    labData
-                      .filter(order => order.status === "pending" || order.status === "processing")
-                      .map(order => (
-                        <tr className="hover:bg-blue-50 transition border-b border-gray-200" key={order.id}>
-                          <td className="px-4 py-3 font-mono text-blue-700 border">{new Date(order.created_at).toLocaleString()}</td>
-                          <td className="px-4 py-3 font-medium text-gray-900 border">{order.full_name?.toUpperCase()}</td>
-                          <td className="px-4 py-3 font-mono text-blue-700 border">{order.patient_id?.toUpperCase()}</td>
-                          <td className="px-4 py-3 text-gray-700 border truncate max-w-[200px]" title={order.order_data}>{order.order_data}</td>
-                            <td className="px-4 py-3 border">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              order.status === "completed"
-                              ? "bg-green-100 text-green-700"
-                              : order.status === "processing"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-gray-100 text-gray-700"
-                            }`}>
-                              {order.status.toUpperCase()}
-                            </span>
-                            </td>
-                            <td className="px-4 py-3 text-gray-700 border">{order.requested_by}</td>
-                            <td className="px-4 py-3 border-r">
-                            <div className="flex flex-wrap gap-2 sm:gap-3 justify-start items-center">
-                              <button
-                              className="flex-1 min-w-[80px] sm:min-w-[90px] text-white bg-blue-600 hover:bg-blue-800 text-xs sm:text-sm px-2 py-1 rounded transition"
-                              onClick={() => openModal(order)}
-                              title="View Order Details"
-                              disabled={loading}
-                              >
-                              View
-                              </button>
-                              {order.status === "processing" && (
-                              <button
-                                className="flex-1 min-w-[80px] sm:min-w-[110px] bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm px-2 py-1 rounded transition flex items-center justify-center gap-1"
-                                onClick={() => {
-                                setSelectedOrder(order);
-                                setOrderResultModal(true);
-                                }}
-                                title="Add/View Results"
+                  </thead>
+                  <tbody>
+                    {labData.filter(order => order.status === "pending" || order.status === "processing").length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="text-gray-500 py-6 text-center">No orders found.</td>
+                      </tr>
+                    ) : (
+                      labData
+                        .filter(order => order.status === "pending" || order.status === "processing")
+                        .map(order => (
+                          <tr className="hover:bg-blue-50 transition border-b border-gray-200" key={order.id}>
+                            <td className="px-4 py-3 font-mono text-blue-700 border">{new Date(order.created_at).toLocaleString()}</td>
+                            <td className="px-4 py-3 font-medium text-gray-900 border">{order.full_name?.toUpperCase()}</td>
+                            <td className="px-4 py-3 font-mono text-blue-700 border">{order.patient_id?.toUpperCase()}</td>
+                            <td className="px-4 py-3 text-gray-700 border truncate max-w-[200px]" title={order.order_data}>{order.order_data}</td>
+                              <td className="px-4 py-3 border">
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                order.status === "completed"
+                                ? "bg-green-100 text-green-700"
+                                : order.status === "processing"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-700"
+                              }`}>
+                                {order.status.toUpperCase()}
+                              </span>
+                              </td>
+                              <td className="px-4 py-3 text-gray-700 border">{order.requested_by}</td>
+                              <td className="px-4 py-3 border-r">
+                              <div className="flex flex-wrap gap-2 sm:gap-3 justify-start items-center">
+                                <button
+                                className="flex-1 min-w-[80px] sm:min-w-[90px] text-white bg-blue-600 hover:bg-blue-800 text-xs sm:text-sm px-2 py-1 rounded transition"
+                                onClick={() => openModal(order)}
+                                title="View Order Details"
                                 disabled={loading}
-                              >
-                                <RiFileList3Fill className="inline-block text-base sm:text-lg" /> Results
-                              </button>
-                              )}
-                              {order.status === "pending" && (
-                              <button
-                                className="flex-1 min-w-[80px] sm:min-w-[110px] bg-yellow-600 hover:bg-yellow-500 text-white text-xs sm:text-sm px-2 py-1 rounded transition"
-                                onClick={() => setConfirmModal({ order, type: "processing" })}
-                                title="Mark as Processing"
+                                >
+                                View
+                                </button>
+                                {order.status === "processing" && (
+                                <button
+                                  className="flex-1 min-w-[80px] sm:min-w-[110px] bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm px-2 py-1 rounded transition flex items-center justify-center gap-1"
+                                  onClick={() => {
+                                  setSelectedOrder(order);
+                                  setOrderResultModal(true);
+                                  }}
+                                  title="Add/View Results"
+                                  disabled={loading}
+                                >
+                                  <RiFileList3Fill className="inline-block text-base sm:text-lg" /> Results
+                                </button>
+                                )}
+                                {order.status === "pending" && (
+                                <button
+                                  className="flex-1 min-w-[80px] sm:min-w-[110px] bg-yellow-600 hover:bg-yellow-500 text-white text-xs sm:text-sm px-2 py-1 rounded transition"
+                                  onClick={() => setConfirmModal({ order, type: "processing" })}
+                                  title="Mark as Processing"
+                                  disabled={loading}
+                                >
+                                  Process
+                                </button>
+                                )}
+                                {order.status === "processing" && (
+                                <button
+                                  className="flex-1 min-w-[80px] sm:min-w-[110px] bg-green-600 hover:bg-green-500 text-white text-xs sm:text-sm px-2 py-1 rounded transition"
+                                  onClick={() => setConfirmModal({ order, type: "completed" })}
+                                  title="Mark as Completed"
+                                  disabled={loading}
+                                >
+                                  Complete
+                                </button>
+                                )}
+                                <button
+                                className="flex-1 min-w-[80px] sm:min-w-[100px] bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm px-2 py-1 rounded transition"
+                                onClick={() => setConfirmModal({ order, type: "cancelled" })}
+                                title="Cancel Order"
                                 disabled={loading}
-                              >
-                                Process
-                              </button>
-                              )}
-                              {order.status === "processing" && (
-                              <button
-                                className="flex-1 min-w-[80px] sm:min-w-[110px] bg-green-600 hover:bg-green-500 text-white text-xs sm:text-sm px-2 py-1 rounded transition"
-                                onClick={() => setConfirmModal({ order, type: "completed" })}
-                                title="Mark as Completed"
-                                disabled={loading}
-                              >
-                                Complete
-                              </button>
-                              )}
-                              <button
-                              className="flex-1 min-w-[80px] sm:min-w-[100px] bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm px-2 py-1 rounded transition"
-                              onClick={() => setConfirmModal({ order, type: "cancelled" })}
-                              title="Cancel Order"
-                              disabled={loading}
-                              >
-                              Cancel
-                              </button>
-                            </div>
-                            </td>
-                        </tr>
-                      ))
-                  )}
-                </tbody>
-              </table>
-            </section>
+                                >
+                                Cancel
+                                </button>
+                              </div>
+                              </td>
+                          </tr>
+                        ))
+                    )}
+                  </tbody>
+                </table>
+              </section>
+            )}
+
+            {/* External Orders View */}
+            {viewType === "external" && (
+              <ExternalOrder loading={loading} orderType="lab" />
+            )}
           </>
         )}
-
-        {/* External Orders View */}
-        {viewType === "external" && (
-          <div>
-            {/* Stat card for external orders */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-              <StatCard
-                icon={RiFileList3Fill}
-                title="Total Orders"
-                value={externalOrder.filter(order => order.order_type === "lab").length}
-              />
-            </div>
-            {/* External orders table */}
-            <section className="bg-white rounded-xl shadow border border-slate-200 p-4 md:p-6 overflow-x-auto relative">
-              {loading && (
-                <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
-                  <span className="text-blue-600 flex items-center gap-2 font-semibold">
-                    <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
-                    Loading...
-                  </span>
-                </div>
-              )}
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
-                  <tr>
-                    <th className="px-4 py-3 text-left">NA</th>
-                    <th className="px-4 py-3 text-left">D/T</th>
-                    <th className="px-4 py-3 text-left">Name</th>
-                    <th className="px-4 py-3 text-left">Order</th>
-                    <th className="px-4 py-3 text-left">Order details</th>
-                    <th className="px-4 py-3 text-left">Sent by</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {externalOrder.filter(order => order.order_type === "lab").length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-gray-500 py-6 text-center">No orders found.</td>
-                    </tr>
-                  ) : (
-                    externalOrder
-                      .filter(order => order.order_type === "lab")
-                      .map((order, index) => (
-                        <tr className="hover:bg-blue-50 transition border-b border-gray-200" key={order.id}>
-                          <td className="px-4 py-3 font-mono text-blue-700 border">{index + 1}</td>
-                          <td className="px-4 py-3 font-mono text-blue-700 border">{new Date(order.created_on).toLocaleString()}</td>
-                          <td className="px-4 py-3 font-medium text-gray-900 border">{order.name?.toUpperCase()}</td>
-                          <td className="px-4 py-3 font-mono text-blue-700 border">{order.order_type}</td>
-                          <td className="px-4 py-3 text-gray-700 border truncate max-w-[200px]" title={order.order_data}>{order.order_data}</td>
-                          <td className="px-4 py-3 text-gray-700 border">{order.hospital}</td>
-                        </tr>
-                      ))
-                  )}
-                </tbody>
-              </table>
-            </section>
-          </div>
-        )}
+        
       </main>
 
       {/* Order Details Modal */}
