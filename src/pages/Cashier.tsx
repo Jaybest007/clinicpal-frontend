@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { FiSearch, FiPlus, FiRefreshCw, FiDownload, FiPrinter, FiEdit, FiX, FiLoader } from "react-icons/fi";
+import {  FiPlus, FiRefreshCw, FiDownload, FiPrinter, FiEdit, FiX, FiLoader } from "react-icons/fi";
 import { BsReceipt, BsCheckCircle, BsXCircle, BsFileText, BsFileEarmark, BsBuilding } from "react-icons/bs";
 import { useDashboard } from "../context/DashboardContext";
 import StatCard from "../components/StatCard";
 import NavBar from "../components/NavBar";
+import SearchPatientReport from "../components/SearchPatientReport";
+
 
 
 
@@ -25,13 +27,16 @@ interface BillingErrors {
   service: string;
   amount: string;
   payment_method: string;
+  searchValue?: string;
 }
+
+
 
 
 
 export const Cashier = () => {
   
-  const { newBilling, loading, token, transactions, fetchTransactions } = useDashboard();
+  const { newBilling, loading, token, transactions, fetchTransactions, } = useDashboard();
   const [billingData, setBillingData] = useState<BillingDetails>({
     patient_name: "",
     patient_id: "",
@@ -49,6 +54,7 @@ export const Cashier = () => {
     service: "",
     amount: "",
     payment_method: "",
+    searchValue: "",
   });
 
   //===fetch transaction===
@@ -107,6 +113,7 @@ export const Cashier = () => {
 
     try {
       await newBilling(billingData);
+      fetchTransactions();
       setBillingData({
         patient_name: "",
         patient_id: "",
@@ -132,6 +139,8 @@ export const Cashier = () => {
     }
   };
 
+  
+  
   return (
     <div className="bg-[#F7F9FC] text-gray-900 min-h-screen">
 
@@ -142,34 +151,27 @@ export const Cashier = () => {
       <main className="max-w-7xl mx-auto px-2 md:px-6 py-6">
         {/* Stats: Use horizontal scroll on mobile */}
         <section className="flex gap-3 mb-8 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
-          <StatCard title="Total Collected" value="₦35,000" icon={BsReceipt} />
-          <StatCard title="Bills Created" value="17" icon={BsFileText} />
-          <StatCard title="Unpaid Bills" value="3" icon={BsFileEarmark} />
-          <StatCard title="Departments Covered" value="5" icon={BsBuilding} />
+          <StatCard
+            title="Total Collected"
+            value={`₦${(
+              transactions
+                .filter((tx) => String(tx.payment_status).toLowerCase() === "paid")
+                .reduce((sum, tx) => sum + (typeof tx.amount === "number" ? tx.amount : Number(tx.amount) || 0), 0)
+            ).toLocaleString()}`}
+            icon={BsReceipt}
+          />
+
+          <StatCard title="Bills Created" value={`${transactions.length}`} icon={BsFileText} />
+          <StatCard title="Unpaid Bills" value={`${transactions.filter(tx => tx.payment_status === 'unpaid').length}`} icon={BsFileEarmark} />
+          <StatCard title="Departments Covered" value={`${new Set(transactions.map(tx => tx.department)).size}`} icon={BsBuilding} />
         </section>
 
         {/* Section 1: Search & Add Billing */}
         <section className="flex flex-col md:grid md:grid-cols-2 gap-6 mb-8">
           {/* Search Patient */}
-          <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-4">
-            <h2 className="font-semibold text-lg mb-2">Search Patient</h2>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                placeholder="Search by Name / Phone / Patient ID"
-                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#2788E3] text-sm"
-              />
-              <select className="px-2 py-2 border border-slate-300 rounded-lg text-sm">
-                <option>All Departments</option>
-                <option>Lab</option>
-                <option>Pharmacy</option>
-                <option>Consult</option>
-              </select>
-              <button className="bg-[#2788E3] hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-1">
-                <FiSearch /> <span className="hidden sm:inline">Search</span>
-              </button>
-            </div>
-          </div>
+            <SearchPatientReport />
+
+          
           {/* Add New Billing */}
           <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-4">
             <h2 className="font-semibold text-lg mb-2">Add New Billing</h2>
@@ -209,6 +211,9 @@ export const Cashier = () => {
                   <option value="lab">Lab</option>
                   <option value="pharmacy">Pharmacy</option>
                   <option value="consult">Consult</option>
+                  <option value="ultrasound">Ultrasound</option>
+                  <option value="radiology">Radiology</option>
+                  <option value="mortuary">Mortuary</option>
                 </select>
                 {errors.department && (
                   <span className="text-xs text-red-600 mt-1">{errors.department}</span>
@@ -293,8 +298,11 @@ export const Cashier = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
             <h2 className="font-semibold text-lg">Today's Transactions</h2>
             <div className="flex flex-wrap gap-2">
-              <button className="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1 text-sm">
-                <FiRefreshCw /> <span className="hidden sm:inline">Refresh</span>
+              <button className="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1 text-sm"
+                onClick={fetchTransactions}
+                disabled={loading}
+              >
+                {loading ? <FiRefreshCw className="animate-spin" /> : <FiRefreshCw />} <span className="hidden sm:inline">Refresh</span>
               </button>
               <button className="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1 text-sm">
                 <FiDownload /> <span className="hidden sm:inline">Export CSV</span>
@@ -308,6 +316,7 @@ export const Cashier = () => {
             <table className="min-w-full text-sm border border-slate-200 rounded-lg">
               <thead>
                 <tr className="bg-blue-50">
+                  <th className="px-4 py-2 border-b border-slate-200">#</th>
                   <th className="px-4 py-2 border-b border-slate-200">Patient Name</th>
                   <th className="px-4 py-2 border-b border-slate-200">Dept.</th>
                   <th className="px-4 py-2 border-b border-slate-200">Service</th>
@@ -319,38 +328,52 @@ export const Cashier = () => {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx) => (
-                  <tr key={tx.id} className="even:bg-slate-50">
-                    <td className="px-4 py-2">{tx.patient_name}</td>
-                    <td className="px-4 py-2">{tx.department}</td>
-                    <td className="px-4 py-2">{tx.description}</td>
-                    <td className="px-4 py-2 font-semibold">₦{tx.amount.toLocaleString()}</td>
-                    <td className="px-4 py-2">
-                      {tx.payment_status === "paid" ? (
-                        <span className="inline-flex items-center gap-1 text-green-600 font-medium">
-                          <BsCheckCircle className="text-lg" /> Yes
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-red-500 font-medium">
-                          <BsXCircle className="text-lg" /> No
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2">{tx.payment_method}</td>
-                    <td className="px-4 py-2">{tx.created_at}</td>
-                    <td className="px-4 py-2 flex flex-wrap gap-2">
-                      <button className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded flex items-center gap-1 text-xs">
-                        <FiPrinter /> <span className="hidden sm:inline">Print</span>
-                      </button>
-                      <button className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-2 py-1 rounded flex items-center gap-1 text-xs">
-                        <FiEdit /> <span className="hidden sm:inline">Edit</span>
-                      </button>
-                      <button className="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded flex items-center gap-1 text-xs">
-                        <FiX /> <span className="hidden sm:inline">Cancel</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {transactions
+                  .filter(tx => {
+                    const txDate = new Date(tx.created_at);
+                    const today = new Date();
+                    return (
+                      txDate.getFullYear() === today.getFullYear() &&
+                      txDate.getMonth() === today.getMonth() &&
+                      txDate.getDate() === today.getDate()
+                    );
+                  })
+                  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                  .map((tx, index) => (
+                    <tr key={tx.id} className="even:bg-slate-50">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{tx.patient_name}</td>
+                      <td className="px-4 py-2">{tx.department}</td>
+                      <td className="px-4 py-2">{tx.description}</td>
+                      <td className="px-4 py-2 font-semibold">₦{Number(tx.amount).toLocaleString()}</td>
+                      <td className="px-4 py-2">
+                        {tx.payment_status === "paid" ? (
+                          <span className="inline-flex items-center gap-1 text-green-600 font-medium">
+                            <BsCheckCircle className="text-lg" /> Yes
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-red-500 font-medium">
+                            <BsXCircle className="text-lg" /> No
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">{tx.payment_method?.toUpperCase()}</td>
+                      <td className="px-4 py-2">
+                        {new Date(tx.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                      </td>
+                      <td className="px-4 py-2 flex flex-wrap gap-2">
+                        <button className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded flex items-center gap-1 text-xs">
+                          <FiPrinter /> <span className="hidden sm:inline">Print</span>
+                        </button>
+                        <button className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-2 py-1 rounded flex items-center gap-1 text-xs">
+                          <FiEdit /> <span className="hidden sm:inline">Edit</span>
+                        </button>
+                        <button className="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded flex items-center gap-1 text-xs">
+                          <FiX /> <span className="hidden sm:inline">Cancel</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

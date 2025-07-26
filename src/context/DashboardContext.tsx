@@ -283,7 +283,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const socket = useSocket();
 
-  // Only set token on mount if not already set
+  //============ Only set token on mount if not already set
   useEffect(() => {
     if (!token) {
       const stored = localStorage.getItem("clinicpal_user");
@@ -313,7 +313,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // eslint-disable-next-line
   }, []);
 
-  // Fetch all patients only once per session
+  // ================ Fetch all patients only once per session
   const fetchAllPatients = useCallback(async () => {
     if (!token) return;
     try {
@@ -356,7 +356,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // eslint-disable-next-line
   }, [fetchAllPatients, token]);
 
-  // Add new patient
+  //============ Add new patient
   const addNewPatient = useCallback(
     async (credentials: newPatientData) => {
       if (!token) return;
@@ -379,7 +379,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [token, socket]
   );
 
-  // Socket listeners
+  //=========== Socket listeners
   useEffect(() => {
     if (!socket) return;
 
@@ -408,7 +408,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, [socket]);
 
-  // New report
+  //=============== New report
   const newReport = useCallback(
     async (credentials: report) => {
       if (!token) return;
@@ -430,7 +430,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [token]
   );
 
-  // Admit patient
+  //================= Admit patient
   const admitPatient = useCallback(
     async (credentials: admission) => {
       if (!token) return;
@@ -454,7 +454,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [fetchAllPatients, token]
   );
 
-  // Queue patient
+  //================ Queue patient
   const quePatient = useCallback(
     async (credentials: admission) => {
       if (!token) return;
@@ -478,7 +478,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [fetchAllPatients, token]
   );
 
-  // Fetch queue list only once per session
+  //================= Fetch queue list only once per session
   const fetchQueList = useCallback(async () => {
     if (!token) return;
     try {
@@ -503,7 +503,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // eslint-disable-next-line
   }, [token, fetchQueList]);
 
-  // Queue actions
+  //================= Queue actions
   const QueActions = useCallback(
     async (credentials: QueActions) => {
       if (!token) return;
@@ -574,7 +574,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [token]
   );
 
-  // Discharge patient
+  //================== Discharge patient
   const dischargePatient = useCallback(
     async (credentials: discharge) => {
       if (!token) return;
@@ -597,7 +597,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [fetchAllPatients, token]
   );
 
-  // Add appointment
+  //================ Add appointment
   const addAppointment = useCallback(
     async (credentials: appointment) => {
       if (!token) return;
@@ -618,7 +618,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [token]
   );
 
-  // Fetch appointments only once per session
+  //============== Fetch appointments only once per session
   const fetchAppointment = useCallback(async () => {
     if (!token) return;
     try {
@@ -642,7 +642,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // eslint-disable-next-line
   }, [fetchAppointment, token]);
 
-  // Fetch pharmacy data
+  //================ Fetch pharmacy data
   const fetchPharmacyData = useCallback(async () => {
     if (!token) return;
     try {
@@ -661,7 +661,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [token]);
 
   // Fetch laboratory data
-// Utility: handle API errors with 403 auto-logout and no toast
+//============= Utility: handle API errors with 403 auto-logout and no toast
 const handleApiError = (err: any) => {
     const code = err?.response?.status;
     if (code === 403) {
@@ -675,6 +675,7 @@ const handleApiError = (err: any) => {
     toast.error(errorMessage);
 };
 
+//=========== fetch lab data
 const fetchLaboratoryData = useCallback(async () => {
   if (!token) return;
   try {
@@ -692,7 +693,7 @@ const fetchLaboratoryData = useCallback(async () => {
   }
 }, [token]);
 
-  // Update pharmacy order status
+  //=========== Update pharmacy order status
   const updatePharmacyOrderStatus = useCallback(
     async (credentials: pharmacyOrderStatus) => {
       if (!token) return;
@@ -716,7 +717,7 @@ const fetchLaboratoryData = useCallback(async () => {
     [token, fetchPharmacyData, fetchLaboratoryData]
   );
 
-  // Update laboratory order status
+  //================ Update laboratory order status
   const updateLaboratoryOrderStatus = useCallback(
     async (credentials: labOrderderStatus) => {
       if (!token) return;
@@ -758,7 +759,7 @@ const fetchLaboratoryData = useCallback(async () => {
     }
   }, [token]);
 
-  // Update ultrasound order status
+  //================= Update ultrasound order status
   const updateUltrasoundOrderStatus = useCallback(
     async (credentials: labOrderderStatus) => {
       if (!token) return;
@@ -781,7 +782,7 @@ const fetchLaboratoryData = useCallback(async () => {
     [token, fetchUltrasoundData]
   );
 
-  // Submit external order
+  //===================== Submit external order
   const submitExternalOrder = useCallback(
     async (credentials: externalOrder) => {
       if (!token) return;
@@ -804,7 +805,7 @@ const fetchLaboratoryData = useCallback(async () => {
     [token, fetchUltrasoundData]
   );
 
-  // Fetch external orders
+  // ======================Fetch external orders
   const fetchExternalOrder = useCallback(async () => {
     if (!token) return;
     try {
@@ -828,7 +829,7 @@ const fetchLaboratoryData = useCallback(async () => {
     }
   }, [token]);
 
-  // Order result
+  //================Order result
   const orderResult = useCallback(
     async (credentials: orderResult) => {
       if (!token) return;
@@ -851,7 +852,7 @@ const fetchLaboratoryData = useCallback(async () => {
     [token]
   );
 
-  // == add new billing
+  // =============== add new billing
   const newBilling = useCallback( async (credentials: billingDetails) => {
     if (!token) return;
     try {
@@ -870,7 +871,7 @@ const fetchLaboratoryData = useCallback(async () => {
     }
   },[token]);
 
-  // ==== fetch transactions
+  // ============ fetch transactions
   const fetchTransactions = useCallback( async() => {
     if (role !== "cashier" && role !== "super admin") return;
     if (!token) return;
@@ -889,7 +890,7 @@ const fetchLaboratoryData = useCallback(async () => {
     }
   }, [token]);
   
-    //===fetch transaction===
+    //================fetch transaction===
   useEffect(() => {
       if (!token) return;
       if (transactions.length === 0) {
@@ -898,6 +899,12 @@ const fetchLaboratoryData = useCallback(async () => {
     }, [token, transactions, fetchTransactions]);
     
   //===============
+
+
+
+
+
+
   // Memoize context value to avoid unnecessary rerenders
   const contextValue = useMemo(
     () => ({
@@ -935,7 +942,7 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions , token
+      newBilling, transactions, fetchTransactions , token, 
     }),
     [
       addNewPatient,
@@ -972,7 +979,7 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions, token
+      newBilling, transactions, fetchTransactions, token,
     ]
   );
 
