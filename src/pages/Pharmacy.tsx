@@ -6,7 +6,7 @@ import { useDashboard } from "../context/DashboardContext";
 import OrderModal from "../components/OrderModal"; //  Corrected component import
 import { BiTask, BiTaskX } from "react-icons/bi";
 import { DepartmentsReport } from "../components/DepartmentsReport";
-import { FiLoader } from "react-icons/fi";
+import { FiLoader, FiRefreshCw } from "react-icons/fi";
 
 type PharmacyOrder = {
   id: string;
@@ -75,9 +75,17 @@ export const Pharmacy = () => {
               className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-md text-sm font-medium transition"
               disabled={loading}
             >
-              {loading ? 
-              <FiLoader className="animate-spin" />
-              : "Refresh"}
+              {loading ? (
+                <>
+                  <FiLoader className="inline mr-1  mb-1 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <FiRefreshCw className="inline mr-2 mb-1"   />
+                  Refresh
+                </>
+              )}
             </button>
 
             <button

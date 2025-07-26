@@ -7,6 +7,7 @@ import type { patientInfo } from "../components/PatientProfilemModal";
 import { useDashboard } from "../context/DashboardContext";
 import AdmittedPage from "../components/AdmittedPage";
 import { useAuth } from "../context/AuthContext";
+import { FiPlus } from "react-icons/fi";
 
 interface PatientInfo {
   full_name: string;
@@ -71,13 +72,13 @@ const Patients = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-blue-900 tracking-tight">
             Patient Records
           </h1>
-          <button
+            <button
             onClick={() => setShowNewPatient((prev) => !prev)}
-            className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none text-white px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base rounded-lg shadow transition-all font-semibold"
+            className="col-span-2 mt-2 bg-[#2788E3] hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 justify-center font-semibold text-sm sm:px-4 sm:py-2 sm:text-base"
             aria-label={showNewPatient ? "Close registration form" : "Register new patient"}
-          >
-            {showNewPatient ? "Close Form" : "Register Patient"}
-          </button>
+            >
+            {showNewPatient ? "Close Form" : <FiPlus />} Register Patient
+            </button>
         </div>
 
         <section className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 md:p-8 space-y-8">

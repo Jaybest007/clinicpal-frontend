@@ -11,6 +11,7 @@ import { RiFileList3Fill } from "react-icons/ri";
 import { useAuth } from "../context/AuthContext";
 import {ExternalOrder} from "../components/ExternalOrder";
 import { DepartmentsReport } from "../components/DepartmentsReport";
+import { FiLoader, FiRefreshCcw } from "react-icons/fi";
 
 interface ultrasound_order {
   id: string;
@@ -109,7 +110,7 @@ export const Ultrasound = () => {
             <div className="flex flex-row gap-2 w-full sm:w-auto">
               <button
               onClick={() => setModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium w-full sm:w-auto transition duration-150"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded flex items-center gap-1 text-xs font-medium w-full sm:w-auto transition duration-150 border border-blue-300"
               disabled={orderHistory}
               >
               + New
@@ -119,18 +120,20 @@ export const Ultrasound = () => {
                 fetchUltrasoundData();
                 fetchExternalOrder();
               }}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm font-medium w-full sm:w-auto transition duration-150"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded flex items-center gap-1 text-xs font-medium w-full sm:w-auto transition duration-150 border border-blue-300"
               disabled={loading || orderHistory}
               >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-                Loading
-                </span>
-              ) : "Refresh"}
+                {loading ? (
+                <>
+                  <FiLoader className="inline mr-1 mb-1 animate-spin" />
+                  Loading...
+                </>
+                ) : (
+                <>
+                  <FiRefreshCcw className="inline mr-1 " />
+                  Refresh
+                </>
+                )}
               </button>
               <button
               onClick={() => setOrderHistory(!orderHistory)}
