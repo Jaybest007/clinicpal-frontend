@@ -192,14 +192,14 @@ interface Transaction{
   name: string;
   notes: string;
   patient_id: string;
-  patient_name: string;
+  payers_name: string;
   payment_method: string;
   payment_status: string;
   receipt_id: string | null;
 }
 
 interface billingDetails{
-  patient_name: string;
+  payers_name: string;
   patient_id : string;
   department: string;
   service: string;
@@ -248,6 +248,7 @@ interface dashboardContextType {
     fetchTransactions: () => Promise<void>;
     token: string | null;
     transactions: Transaction[];
+    setPatientReport: React.Dispatch<React.SetStateAction<fetchReport[]>>;
 }
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
@@ -942,7 +943,7 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions , token, 
+      newBilling, transactions, fetchTransactions , token, setPatientReport
     }),
     [
       addNewPatient,
@@ -979,7 +980,7 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions, token,
+      newBilling, transactions, fetchTransactions, token, setPatientReport
     ]
   );
 

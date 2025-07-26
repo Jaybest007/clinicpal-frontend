@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useDashboard } from "../context/DashboardContext";
-import { FiLoader, FiSearch } from "react-icons/fi";
-
-
+import { FiLoader, FiSearch, FiXCircle } from "react-icons/fi";
 
 export default function SearchPatientReport() {
   const [errors, setErrors] = useState<{ searchValue?: string }>({});
   const [searchValue, setSearchValue] = useState("");
-  const { patientReport, fetchPatientReport, loading } = useDashboard();
+  const { patientReport, fetchPatientReport, loading, setPatientReport } = useDashboard();
 
   // Fetch patient reports
   const handleFetchReport = async (e: React.FormEvent) => {
@@ -30,9 +28,27 @@ export default function SearchPatientReport() {
     }
   };
 
+  // Clear search and patient report
+  const handleClear = () => {
+    setSearchValue("");
+    setErrors({});
+    setPatientReport([]);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-4 max-h-[420px] overflow-y-auto">
-      <h2 className="font-semibold text-lg mb-2">Search Patient</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="font-semibold text-lg">Search Patient</h2>
+        <button
+          type="button"
+          onClick={handleClear}
+          className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition"
+          title="Clear search"
+        >
+          <FiXCircle className="text-lg" />
+          <span className="hidden sm:inline">Clear</span>
+        </button>
+      </div>
       <form onSubmit={handleFetchReport}>
         <div className="flex flex-col sm:flex-row gap-2 sticky">
           <input
