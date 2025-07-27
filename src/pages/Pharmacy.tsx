@@ -3,7 +3,6 @@ import { MdOutlineInventory } from "react-icons/md";
 import NavBar from "../components/NavBar";
 import StatCard from "../components/StatCard";
 import { useDashboard } from "../context/DashboardContext";
-import OrderModal from "../components/OrderModal"; //  Corrected component import
 import { BiTask, BiTaskX } from "react-icons/bi";
 import { DepartmentsReport } from "../components/DepartmentsReport";
 import { FiLoader, FiRefreshCw } from "react-icons/fi";
