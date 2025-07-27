@@ -61,6 +61,7 @@ interface report{
     order_to_pharmacy: boolean;
     order_to_lab: boolean;
     ultrasound_order: boolean; 
+    xray_order: boolean;
 }
 
 //interface for admission
@@ -249,6 +250,8 @@ interface dashboardContextType {
     token: string | null;
     transactions: Transaction[];
     setPatientReport: React.Dispatch<React.SetStateAction<fetchReport[]>>;
+    xrayData: pharmacyData[];
+    fetchXrayData: () => Promise<void>;
 }
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
@@ -262,6 +265,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [pharmacyData, setPharmacyData] = useState<pharmacyData[]>([]);
   const [labData, setLabData] = useState<pharmacyData[]>([]);
   const [ultrasoundData, setUltrasoundData] = useState<pharmacyData[]>([]);
+  const [xrayData, setXrayData] = useState<pharmacyData[]>([]);
   const [externalOrder, setExternalOrders] = useState<fetchedExterOrder[]>([]);
   const [queList, setQueList] = useState<QueList[]>([]);
   const [newPatient, setNewPatient] = useState<newPatient[]>([]);
@@ -783,6 +787,25 @@ const fetchLaboratoryData = useCallback(async () => {
     [token, fetchUltrasoundData]
   );
 
+  //================fetch x-ray ==========
+  const fetchXrayData = useCallback(async () => {
+  
+    if (!token) return;
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        "https://clinicpal.onrender.com/api/x-ray/fetchXrayData",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setXrayData(response.data);
+    } catch (err: any) {
+       handleApiError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
   //===================== Submit external order
   const submitExternalOrder = useCallback(
     async (credentials: externalOrder) => {
@@ -943,7 +966,7 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions , token, setPatientReport
+      newBilling, transactions, fetchTransactions , token, setPatientReport, fetchXrayData, xrayData
     }),
     [
       addNewPatient,
@@ -980,7 +1003,7 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions, token, setPatientReport
+      newBilling, transactions, fetchTransactions, token, setPatientReport, fetchXrayData, xrayData
     ]
   );
 

@@ -25,6 +25,7 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
   const [orderToPharmacy, setOrderToPharmacy] = useState(false);
   const [orderToLab, setOrderToLab] = useState(false);
   const [ultrasoundOrder, setUltrasoundOrder] = useState(false);
+  const [xrayOrder, setXrayOrder] = useState(false);
   const [error, setError] = useState({ patient_id: "", report: "", server: "" });
 
   const {
@@ -115,11 +116,10 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
         order_to_pharmacy: orderToPharmacy,
         order_to_lab: orderToLab,
         ultrasound_order: ultrasoundOrder,
+        xray_order: xrayOrder,
       });
       setReportData({ patient_id: "", report: "", wrote_by: user?.name || "" });
-      setOrderToLab(false);
-      setOrderToPharmacy(false);
-      setUltrasoundOrder(false);
+      resetOrderCheckboxes();
       setError({ patient_id: "", report: "", server: "" });
       fetch_Admitted_Patient_Report();
       if (patient_id) fetchPatientReport({ patient_id });
@@ -130,6 +130,13 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
     }
   };
 
+  const resetOrderCheckboxes = () => {
+    setOrderToPharmacy(false);
+    setOrderToLab(false);
+    setUltrasoundOrder(false);
+    setXrayOrder(false);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -137,7 +144,10 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
       <div className="relative w-full max-w-xl mx-auto bg-white shadow-2xl rounded-2xl p-8 border border-blue-100 mt-4">
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
-          onClick={onClose}
+          onClick={() => {
+            resetOrderCheckboxes(); // <-- Reset checkboxes on close
+            onClose();
+          }}
         >
           <FaTimes className="w-6 h-6" />
         </button>
@@ -229,35 +239,55 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
           )}
 
           {/* send order section */}
-          <div className="space-y-3 mt-4">
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={orderToPharmacy}
-                onChange={() => setOrderToPharmacy(prev => !prev)}
-                className="accent-blue-600 w-4 h-4"
-              />
-              <span className="text-sm text-blue-900">Forward prescription to Pharmacy</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={orderToLab}
-                onChange={() => setOrderToLab(prev => !prev)}
-                className="accent-blue-600 w-4 h-4"
-              />
-              <span className="text-sm text-blue-900">Forward test request to Laboratory</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={ultrasoundOrder}
-                onChange={() => setUltrasoundOrder(prev => !prev)}
-                className="accent-blue-600 w-4 h-4"
-              />
-              <span className="text-sm text-blue-900">Forward test request to Ultrasound</span>
-            </label>
-          </div>
+          <details className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 group">
+            <summary className="flex items-center justify-between cursor-pointer select-none text-blue-900 font-semibold text-sm md:text-base">
+              Forward Orders To Departments
+              <span className="ml-2 transition-transform group-open:rotate-180">&#9660;</span>
+            </summary>
+
+            <div className="grid sm:grid-cols-2 gap-4 mt-4 text-sm text-blue-900">
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={orderToPharmacy}
+                  onChange={() => setOrderToPharmacy(prev => !prev)}
+                  className="accent-blue-600 w-4 h-4"
+                />
+                Pharmacy
+              </label>
+
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={orderToLab}
+                  onChange={() => setOrderToLab(prev => !prev)}
+                  className="accent-blue-600 w-4 h-4"
+                />
+                Laboratory
+              </label>
+
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={ultrasoundOrder}
+                  onChange={() => setUltrasoundOrder(prev => !prev)}
+                  className="accent-blue-600 w-4 h-4"
+                />
+                Ultrasound
+              </label>
+
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={xrayOrder}
+                  onChange={() => setXrayOrder(prev => !prev)}
+                  className="accent-blue-600 w-4 h-4"
+                />
+                X-Ray
+              </label>
+            </div>
+          </details>
+
 
           <div className="text-right">
             <button

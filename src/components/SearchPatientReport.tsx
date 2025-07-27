@@ -79,15 +79,19 @@ export default function SearchPatientReport() {
 
       {errors.searchValue && (
         <span className="text-xs text-red-600 mt-1">{errors.searchValue}</span>
-      )}
+            )}
 
-      {Array.isArray(patientReport) && patientReport.length === 0 && (
-        <div className="text-gray-500 text-sm mt-4">
-          No reports found for this patient ID.
-        </div>
-      )}
+            {/* Show "No reports found" only after a search has been performed */}
+            {searchValue.trim() !== "" &&
+              !loading &&
+              Array.isArray(patientReport) &&
+              patientReport.length === 0 && (
+                <div className="text-gray-500 text-md mt-4">
+                  No reports found for this patient ID.
+                </div>
+              )}
 
-      {Array.isArray(patientReport) &&
+            {Array.isArray(patientReport) &&
         patientReport.length > 0 &&
         patientReport.map((report: any, idx: number) => (
           <div

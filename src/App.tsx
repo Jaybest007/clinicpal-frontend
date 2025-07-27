@@ -27,7 +27,7 @@ import { SocketProvider } from "./context/SocketContext";
 import { DepartmentsReportPrint } from "./components/DepartmentsReportPrint";
 import { Cashier } from "./pages/Cashier";
 import { BillReceipt } from "./components/BillReceipt";
-
+import { Xray } from "./pages/Xray";
 function App() {
   // Get token from AuthContext
   const { user } = useAuth();
@@ -61,6 +61,7 @@ function App() {
             <Route path="/department-report/print" element={<DepartmentsReportPrint />} />
             <Route path="/cashier" element={<ProtectedRoute><Cashier /></ProtectedRoute>} />
             <Route path="/bill-receipt" element={<ProtectedRoute><BillReceipt /></ProtectedRoute>} />
+            <Route path="/xray" element={<ProtectedRoute><Xray /></ProtectedRoute>} />
           </Routes>
         </DashboardProvider>
       </SocketProvider>

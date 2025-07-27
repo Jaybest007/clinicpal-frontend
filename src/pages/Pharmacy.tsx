@@ -7,6 +7,7 @@ import OrderModal from "../components/OrderModal"; //  Corrected component impor
 import { BiTask, BiTaskX } from "react-icons/bi";
 import { DepartmentsReport } from "../components/DepartmentsReport";
 import { FiLoader, FiRefreshCw } from "react-icons/fi";
+import { ViewOrderDetail } from "../components/ViewOrderDetail";
 
 type PharmacyOrder = {
   id: string;
@@ -226,32 +227,8 @@ export const Pharmacy = () => {
 
       {/* Modal */}
       {showModal && selectedOrder && (
-        <OrderModal onClose={closeModal}>
-          <h2 className="text-lg font-semibold text-blue-800 mb-2">Order Details</h2>
-
-          <ul className="text-sm space-y-2">
-            <li><strong>Date:</strong> {new Date(selectedOrder.created_at).toLocaleString()}</li>
-            <li><strong>Patient:</strong> {selectedOrder.full_name.toUpperCase()}</li>
-            <li><strong>Patient ID:</strong> {selectedOrder.patient_id.toUpperCase()}</li>
-            <li><strong>Status:</strong> {selectedOrder.status}</li>
-            <li><strong>Requested By:</strong> {selectedOrder.requested_by}</li>
-          </ul>
-
-          <div className="mt-4 bg-slate-50 border border-slate-200 p-3 rounded">
-            <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
-              {selectedOrder.order_data || "No order details available."}
-            </p>
-          </div>
-
-          <div className="flex justify-end mt-6">
-            <button
-              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm"
-              onClick={closeModal}
-            >
-              Close
-            </button>
-          </div>
-        </OrderModal>
+        <ViewOrderDetail open={showModal} order={selectedOrder} onClose={closeModal} />
+        
       )}
 
       {/* 🔒 Confirmation Modal */}

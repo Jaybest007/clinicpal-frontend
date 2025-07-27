@@ -5,7 +5,7 @@ import { useDashboard } from "../context/DashboardContext";
 
 type ExternalOrderProps = {
   loading: boolean;
-  orderType: "lab" | "pharmacy" | "ultrasound";
+  orderType: "lab" | "pharmacy" | "ultrasound" | "xray";
 };
 
 export const ExternalOrder: React.FC<ExternalOrderProps> = ({
