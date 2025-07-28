@@ -182,7 +182,7 @@ interface orderResult {
     orderResults: string;
 }
 
-interface Transaction{
+export interface Transaction{
   id: number;
   amount: string;
   created_at: string;

@@ -3,11 +3,14 @@ import { HqNavBar } from "../../components/hq_components/HqNavBar";
 import StatCard from "../../components/StatCard";
 import { useDashboard } from "../../context/DashboardContext"
 import { TodaysTransaction } from "../../components/TodaysTransaction";
+import { PatientPaymentHistory } from "../../components/PatientPaymentHistory";
+import { useState } from "react";
 
 
 
 export function HqTransactions() {
         const {loading, transactions} = useDashboard()
+        const [patientHistory, setPatientHistory] = useState(false);
     return(
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100">
                 {/* =======nav bar=========== */}
@@ -16,6 +19,9 @@ export function HqTransactions() {
             {/* Overview Header */}
             <div className="bg-white rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 sm:px-6 py-4">
             <h1 className="text-xl sm:text-2xl font-semibold text-blue-900">Hospital transactions</h1>
+            <button onClick={() => setPatientHistory(true)} className="text-sm text-blue-600 hover:underline">
+              View Patient Payment History
+            </button>
             </div>
 
             {/* Transactions Section */}
@@ -49,6 +55,12 @@ export function HqTransactions() {
             )}
 
         </main>
+
+        {patientHistory && (
+            <PatientPaymentHistory
+              onClose={() => setPatientHistory(false)}
+            />
+        )}
     </div>
   )
 }

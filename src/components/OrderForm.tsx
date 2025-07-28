@@ -10,7 +10,7 @@ interface OrderFormProps {
 interface OrderData {
   full_name: string;
   age: string;
-  order_type: "lab" | "xray" | "ultrasound" | "motuary";
+  order_type?: "lab" | "xray" | "ultrasound" | "motuary" | "";
   description: string;
   sent_by: string;
 }
@@ -19,7 +19,7 @@ const OrderForm = ({ isOpen, onClose, onSubmit }: OrderFormProps) => {
   const [formData, setFormData] = useState<OrderData>({
     full_name: "",
     age: "",
-    order_type: "lab",
+    order_type: "",
     description: "",
     sent_by: "",
   });
@@ -38,6 +38,7 @@ const OrderForm = ({ isOpen, onClose, onSubmit }: OrderFormProps) => {
     const newErrors: Partial<Record<keyof OrderData, string>> = {};
     if (!formData.full_name.trim()) newErrors.full_name = "Full name is required.";
     if (!formData.age.trim()) newErrors.age = "Age is required.";
+    if (!formData.order_type || formData.order_type.trim() === "") newErrors.order_type = "Order type is required.";
     if (!formData.description.trim()) newErrors.description = "Order details are required.";
     if (!formData.sent_by.trim()) newErrors.sent_by = "Sent by is required.";
     return newErrors;
@@ -114,6 +115,7 @@ const OrderForm = ({ isOpen, onClose, onSubmit }: OrderFormProps) => {
               onChange={handleChange}
               className="w-full p-2 border rounded bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
+              <option value="" disabled>Select Department</option>
               <option value="lab">Lab</option>
               <option value="xray">X-Ray</option>
               <option value="ultrasound">Ultrasound</option>

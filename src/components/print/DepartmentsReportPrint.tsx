@@ -16,9 +16,9 @@ export const DepartmentsReportPrint = () => {
   const orders: Order[] = location.state?.orders || [];
 
   return (
-    <div className="bg-white text-gray-900 font-sans px-10 py-12 max-w-6xl mx-auto">
+    <div className="bg-white text-gray-900 px-10 py-12 max-w-6xl mx-auto">
       <header className="mb-10 border-b pb-4">
-        <h1 className="text-2xl font-bold">{department} Department Report</h1>
+        <h1 className="text-2xl font-bold">{department.toUpperCase()} Department Report</h1>
         <p className="text-sm text-gray-500 mt-2">
           Generated on{" "}
           <span className="inline-block min-w-[200px]">

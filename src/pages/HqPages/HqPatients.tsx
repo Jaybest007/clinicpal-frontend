@@ -4,18 +4,29 @@ import { useDashboard } from "../../context/DashboardContext";
 import PatientProfileModal from "../../components/PatientProfilemModal";
 import type { patientInfo } from "../../components/PatientProfilemModal";
 import { useHospital } from "../../context/HospitalContext";
+import ConfirmActionModal from "../../components/ConfirmActionModal";
 
 export const HqPatients: React.FC = () => {
     const { patientsData, fetchAllPatients } = useDashboard();
     const { deletePatient } = useHospital();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<patientInfo | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ order: any; type: string } | null>(null);
 
     useEffect(() => {
         if (!patientsData || patientsData.length === 0) {
             fetchAllPatients();
         }
     }, [patientsData, fetchAllPatients]);
+
+    const handleActionConfirm = async () => {
+        if (!confirmModal) return;
+        if (confirmModal.type === "delete") {
+            await deletePatient(confirmModal.order.patient_id);
+            fetchAllPatients();
+        }
+        setConfirmModal(null);
+    };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100">
@@ -65,10 +76,7 @@ export const HqPatients: React.FC = () => {
                                           </button>
                                           <button 
                                               className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded w-full"
-                                              onClick={async () => {
-                                                  await deletePatient(patient.patient_id);
-                                                  fetchAllPatients();
-                                              }}
+                                              onClick={() => setConfirmModal({ order: patient, type: "delete" })}
                                           >
                                               Delete
                                           </button>
@@ -90,10 +98,19 @@ export const HqPatients: React.FC = () => {
             </div>
         </main>
         <PatientProfileModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                patient={selectedPatient}
-              />
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            patient={selectedPatient}
+        />
+
+        {/* confirmation modal */}
+        <ConfirmActionModal
+          open={!!confirmModal}
+          order={confirmModal?.order}
+          type={confirmModal?.type ?? ""}
+          onCancel={() => setConfirmModal(null)}
+          onConfirm={handleActionConfirm}
+        />
     </div>
   );
 }

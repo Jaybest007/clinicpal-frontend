@@ -61,7 +61,10 @@ export function TodaysTransaction() {
             <button className="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1 text-sm">
               <FiDownload /> <span className="hidden sm:inline">Export CSV</span>
             </button>
-            <button className="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1 text-sm">
+            <button
+              className="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1 text-sm"
+              onClick={() => navigate("/sales-report", { state: filteredTransactions })}
+            >
               <BsReceipt /> <span className="hidden sm:inline">Print Summary</span>
             </button>
           </div>

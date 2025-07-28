@@ -207,17 +207,23 @@ export const Laboratory = () => {
       {/* New Order Form Modal */}
       <OrderForm
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={async (data) => {
-          await submitExternalOrder({
-            full_name: data.full_name,
-            age: data.age,
-            order_type: data.order_type,
-            order_data: data.description,
-            sent_by: data.sent_by,
-          });
-          setModalOpen(false);
-        }}
+              onClose={() => setModalOpen(false)}
+              onSubmit={async (data) => {
+              if (
+                data.order_type === "lab" ||
+                data.order_type === "xray" ||
+                data.order_type === "ultrasound" ||
+                data.order_type === "motuary"
+              ) {
+                await submitExternalOrder({
+                  full_name: data.full_name,
+                  age: data.age,
+                  order_type: data.order_type,
+                  order_data: data.description,
+                  sent_by: data.sent_by
+                });
+              }
+              }}
       />
     </div>
   );

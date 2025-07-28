@@ -1,4 +1,5 @@
 import React from "react";
+import { useDashboard } from "../context/DashboardContext";
 
 interface Order {
   id: string;
@@ -27,7 +28,7 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
   onConfirm,
 }) => {
   if (!open || !order) return null;
-
+  const {loading} = useDashboard()
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-sm p-6">
@@ -39,12 +40,14 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
           <button
             className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded transition"
             onClick={onCancel}
+            disabled={loading}
           >
             No
           </button>
           <button
             className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition"
             onClick={onConfirm}
+            disabled={loading}
           >
             Yes
           </button>

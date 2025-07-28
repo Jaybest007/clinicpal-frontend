@@ -4,7 +4,7 @@ import { useDashboard } from "../context/DashboardContext";
 import { useAuth } from "../context/AuthContext";
 
 const QueList: React.FC = () => {
-  const { queList, QueActions, fetchQueList } = useDashboard();
+  const { queList, QueActions, fetchQueList, loading } = useDashboard();
   const { user } = useAuth();
 
   const [confirmModal, setConfirmModal] = React.useState<null | {
@@ -47,7 +47,6 @@ const QueList: React.FC = () => {
                 <tr>
                   <th className="px-3 py-2 border">#</th>
                   <th className="px-3 py-2 border">Time</th>
-                  <th className="px-3 py-2 border">Patient ID</th>
                   <th className="px-3 py-2 border">Name</th>
                   <th className="px-3 py-2 border">Reason</th>
                   <th className="px-3 py-2 border">Status</th>
@@ -60,7 +59,6 @@ const QueList: React.FC = () => {
                   <tr key={item.id} className="border-t bg-white">
                     <td className="px-3 py-2 border">{i + 1}</td>
                     <td className="px-3 py-2 border">{new Date(item.checked_in_at).toLocaleString()}</td>
-                    <td className="px-3 py-2 border">{String (item.patient_id).toUpperCase()}</td>
                     <td className="px-3 py-2 border">{item.patient_fullname}</td>
                     <td className="px-3 py-2 border">{item.visit_reason}</td>
                     <td className="px-3 py-2 border">{item.status}</td>
@@ -118,7 +116,6 @@ const QueList: React.FC = () => {
                 <tr>
                   <th className="px-3 py-2 border">#</th>
                   <th className="px-3 py-2 border">Time</th>
-                  <th className="px-3 py-2 border">Patient ID</th>
                   <th className="px-3 py-2 border">Name</th>
                   <th className="px-3 py-2 border">Reason</th>
                   <th className="px-3 py-2 border">Status</th>
@@ -131,7 +128,6 @@ const QueList: React.FC = () => {
                   <tr key={item.id} className="border-t bg-white">
                     <td className="px-3 py-2 border">{i + 1}</td>
                     <td className="px-3 py-2 border">{new Date(item.checked_in_at).toLocaleString()}</td>
-                    <td className="px-3 py-2 border">{String(item.patient_id).toUpperCase()}</td>
                     <td className="px-3 py-2 border">{item.patient_fullname}</td>
                     <td className="px-3 py-2 border">{item.visit_reason}</td>
                     <td className="px-3 py-2 border">{item.status}</td>
@@ -173,8 +169,20 @@ const QueList: React.FC = () => {
             <h3 className="text-lg font-medium mb-2">Confirm Action</h3>
             <p className="text-sm mb-4">Are you sure you want to <strong>{confirmModal.type}</strong> <strong>{confirmModal.full_name}</strong>?</p>
             <div className="flex justify-end space-x-4">
-              <button onClick={() => setConfirmModal(null)} className="bg-gray-300 text-gray-700 px-3 py-1 rounded">Cancel</button>
-              <button onClick={handleAction} className="bg-blue-600 text-white px-3 py-1 rounded">Confirm</button>
+              <button 
+                onClick={() => setConfirmModal(null)} 
+                className="bg-gray-300 text-gray-700 px-3 py-1 rounded" 
+                disabled={loading}
+                >
+                  Cancel
+                </button>
+              <button 
+                onClick={handleAction} 
+                className="bg-blue-600 text-white px-3 py-1 rounded" 
+                disabled={loading}
+              >
+                Confirm
+              </button>
             </div>
           </div>
         </div>

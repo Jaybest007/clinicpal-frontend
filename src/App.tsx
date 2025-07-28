@@ -24,12 +24,12 @@ import DocumentationPage from "./pages/Documentation";
 import ConfirmationPage from "./pages/Confirmation";
 import { useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
-import { DepartmentsReportPrint } from "./components/DepartmentsReportPrint";
+import { DepartmentsReportPrint } from "./components/print/DepartmentsReportPrint";
 import { Cashier } from "./pages/Cashier";
-import { BillReceipt } from "./components/BillReceipt";
+import { BillReceipt } from "./components/print/BillReceipt";
 import { Xray } from "./pages/Xray";
 import { HqTransactions } from "./pages/HqPages/HqTransactions";
-
+import { SalesReportPrint } from "./components/print/SalesReportPrint";
 
 function App() {
   // Get token from AuthContext
@@ -57,6 +57,10 @@ function App() {
             <Route path="/ultrasound" element={<ProtectedRoute> <Ultrasound /> </ProtectedRoute>} />
             <Route path="/confirmation" element={<ProtectedRoute><ConfirmationPage /></ProtectedRoute>} />
             <Route path="/docs" element={<DocumentationPage />} />
+
+            <Route path="/sales-report" element={<ProtectedRoute><SalesReportPrint /></ProtectedRoute>} />
+            
+            {/* Hospital Routes */}
             <Route path="/hq/login" element={<HqLogin />} />
             <Route path="/hq" element={<HospitalProtectedRoute><HospitalDashboard /></HospitalProtectedRoute>} />
             <Route path="/hq/patients" element={<HospitalProtectedRoute><HqPatients /></HospitalProtectedRoute>} />

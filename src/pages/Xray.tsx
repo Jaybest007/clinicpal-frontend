@@ -14,6 +14,7 @@ import { OrderResult } from "../components/OrderResult";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 
 import { ViewOrderDetail } from "../components/ViewOrderDetail";
+import OrderForm from "../components/OrderForm";
 
 type Order = {
   id: string;
@@ -35,7 +36,8 @@ export function Xray() {
     loading,
     fetchExternalOrder,
     fetchXrayData,
-    updateUltrasoundOrderStatus, // assumed action method in your DashboardContext
+    updateUltrasoundOrderStatus, 
+    submitExternalOrder,
     xrayData,
   } = useDashboard();
 
@@ -102,7 +104,7 @@ export function Xray() {
 
         {orderHistory ? (
           <div className="transition-all duration-300">
-            <DepartmentsReport department="x-Ray" />
+            <DepartmentsReport department="xray" />
           </div>
         ) : (
           <>
@@ -138,6 +140,28 @@ export function Xray() {
         {modalOpen && selectedOrder && (
           <ViewOrderDetail open={modalOpen} order={selectedOrder} onClose={closeModal} />  
         )}
+
+        {/* Order form */}
+        <OrderForm
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              onSubmit={async (data) => {
+              if (
+                data.order_type === "lab" ||
+                data.order_type === "xray" ||
+                data.order_type === "ultrasound" ||
+                data.order_type === "motuary"
+              ) {
+                await submitExternalOrder({
+                  full_name: data.full_name,
+                  age: data.age,
+                  order_type: data.order_type,
+                  order_data: data.description,
+                  sent_by: data.sent_by
+                });
+              } 
+              }}
+        />
 
         {/* Result Modal */}
         {orderResultModal && selectedOrder && (
