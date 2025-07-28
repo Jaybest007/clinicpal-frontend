@@ -7,6 +7,8 @@ import NavBar from "../components/NavBar";
 import SearchPatientReport from "../components/SearchPatientReport";
 import { TodaysTransaction } from "../components/TodaysTransaction";
 
+import { ExternalBilling } from "../components/ExternalBilling";
+
 
 interface BillingDetails {
   payers_name: string;
@@ -31,6 +33,7 @@ interface BillingErrors {
 
 export const Cashier = () => {
   
+  const [externalBilling, setExternalBilling] = useState(false);
   const { newBilling, loading, token, transactions, fetchTransactions, } = useDashboard();
   const [billingData, setBillingData] = useState<BillingDetails>({
     payers_name: "",
@@ -144,6 +147,27 @@ export const Cashier = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-2 md:px-6 py-6">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-30 bg-white shadow flex flex-col md:flex-row items-center justify-between px-4 py-3 mb-6 rounded-xl">
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <h1 className="text-2xl font-bold text-[#2788E3]">Cashier</h1>
+        </div>
+        <div className="flex flex-row items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+          <button
+        onClick={() => setExternalBilling(true)}
+        className="px-3 py-1.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium shadow-sm transition-colors flex-1 md:flex-none"
+          >
+        External Billing
+          </button>
+          <button
+        onClick={() => alert("Feature coming soon!")}
+        className="px-3 py-1.5 rounded-md bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium shadow-sm transition-colors flex-1 md:flex-none"
+          >
+        Patient history
+          </button>
+        </div>
+      </header>
+
         {/* Stats: Use horizontal scroll on mobile */}
         <section className="flex gap-6 mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
           <StatCard
@@ -169,7 +193,8 @@ export const Cashier = () => {
           
           {/* Add New Billing */}
           <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-4">
-            <h2 className="font-semibold text-lg mb-2">Add New Billing</h2>
+            <h2 className="font-semibold text-lg">Add New Billing</h2>
+            
             <form className="grid grid-cols-1 md:grid-cols-2 gap-3" onSubmit={handleBillingSubmit}>
               <div className="flex flex-col">
                 <input
@@ -207,7 +232,7 @@ export const Cashier = () => {
                   <option value="pharmacy">Pharmacy</option>
                   <option value="consult">Consult</option>
                   <option value="ultrasound">Ultrasound</option>
-                  <option value="radiology">Radiology</option>
+                  <option value="xray">X-Ray</option>
                   <option value="mortuary">Mortuary</option>
                 </select>
                 {errors.department && (
@@ -291,7 +316,13 @@ export const Cashier = () => {
         {/* Section 2: Today's Transactions */}
         <TodaysTransaction/>
 
-        
+        {/* external bill modal */}
+        {externalBilling && (
+          <ExternalBilling 
+          onClose={() => setExternalBilling(false)} 
+          />
+        )}
+
       </main>
     </div>
   );
