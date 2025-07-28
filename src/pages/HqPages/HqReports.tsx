@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import {AdmittedReport} from "../../components/AdmittedReports";
 import { HqNavBar } from "../../components/hq_components/HqNavBar";
 import SearchPatientReport from "../../components/SearchPatientReport";
 
