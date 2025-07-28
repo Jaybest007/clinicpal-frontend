@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {AdmittedReport} from "../../components/AdmittedReports";
-import { HqNavBar } from "../../components/HqNavBar";
+import { HqNavBar } from "../../components/hq_components/HqNavBar";
+import SearchPatientReport from "../../components/SearchPatientReport";
 
 
 
@@ -29,7 +30,7 @@ const HqReports = () => {
           <section className="flex-1 w-full">
             <div className="bg-white border border-slate-200 rounded-xl shadow-lg p-6 space-y-4">
               
-             <AdmittedReport />
+             <SearchPatientReport/>
             </div>
           </section>
         </div>

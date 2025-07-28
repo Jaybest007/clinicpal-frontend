@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/logo.png";
-import { useHospital } from "../context/HospitalContext";
+import logo from "../../assets/logo.png";
+import { useHospital } from "../../context/HospitalContext";
 import { FiMenu, FiX } from "react-icons/fi";
 
 export const HqNavBar: React.FC = () => {
@@ -12,6 +12,7 @@ export const HqNavBar: React.FC = () => {
     { to: "/hq", label: "Dashboard" },
     { to: "/hq/patients", label: "Patients" },
     { to: "/hq/reports", label: "Reports" },
+    { to: "/hq/transactions", label: "Transactions" },
     { to: "#contact", label: "Manage Staffs" },
     { to: "#contact", label: "Settings" },
   ];

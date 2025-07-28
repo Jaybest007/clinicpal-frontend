@@ -71,152 +71,152 @@ export function ExternalBilling({ onClose }: ExternalBillingProps) {
       </h2>
       <form
         onSubmit={handleExternalBillingSubmit}
-        className="max-w-5xl mx-auto bg-white p-10 rounded-2xl shadow-lg border border-slate-200"
+        className="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-slate-200"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Payer's Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Payer's Name
-            </label>
-            <input
-              type="text"
-              name="payers_name"
-              placeholder="e.g., John Doe"
-              value={billingData.payers_name}
-              onChange={handleInputChange}
-              autoComplete="off"
-              className={`w-full px-4 py-2 text-sm border ${
-                errors.payers_name ? "border-red-500" : "border-slate-300"
-              } rounded-md focus:ring-2 focus:ring-blue-200 outline-none`}
-            />
-            {errors.payers_name && (
-              <p className="text-xs text-red-500 mt-1">{errors.payers_name}</p>
-            )}
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Payer's Name
+        </label>
+        <input
+          type="text"
+          name="payers_name"
+          placeholder="e.g., John Doe"
+          value={billingData.payers_name}
+          onChange={handleInputChange}
+          autoComplete="off"
+          className={`w-full px-3 py-2 text-sm border ${
+            errors.payers_name ? "border-red-500" : "border-slate-300"
+          } rounded-md focus:ring-2 focus:ring-blue-200 outline-none`}
+        />
+        {errors.payers_name && (
+          <p className="text-xs text-red-500 mt-1">{errors.payers_name}</p>
+        )}
           </div>
 
           {/* Department */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Department
-            </label>
-            <select
-              name="department"
-              value={billingData.department}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 text-sm border ${
-                errors.department ? "border-red-500" : "border-slate-300"
-              } rounded-md focus:ring-2 focus:ring-blue-200 outline-none bg-white`}
-            >
-              <option value="" disabled>Select department</option>
-              <option value="lab">Lab</option>
-              <option value="pharmacy">Pharmacy</option>
-              <option value="ultrasound">Ultrasound</option>
-              <option value="radiology">Radiology</option>
-              <option value="mortuary">Mortuary</option>
-            </select>
-            {errors.department && (
-              <p className="text-xs text-red-500 mt-1">{errors.department}</p>
-            )}
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Department
+        </label>
+        <select
+          name="department"
+          value={billingData.department}
+          onChange={handleInputChange}
+          className={`w-full px-3 py-2 text-sm border ${
+            errors.department ? "border-red-500" : "border-slate-300"
+          } rounded-md focus:ring-2 focus:ring-blue-200 outline-none bg-white`}
+        >
+          <option value="" disabled>Select department</option>
+          <option value="lab">Lab</option>
+          <option value="pharmacy">Pharmacy</option>
+          <option value="ultrasound">Ultrasound</option>
+          <option value="radiology">Radiology</option>
+          <option value="mortuary">Mortuary</option>
+        </select>
+        {errors.department && (
+          <p className="text-xs text-red-500 mt-1">{errors.department}</p>
+        )}
           </div>
 
           {/* Service */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Service
-            </label>
-            <input
-              type="text"
-              name="service"
-              placeholder="e.g., X-ray, Lab Test"
-              value={billingData.service}
-              onChange={handleInputChange}
-              autoComplete="off"
-              className={`w-full px-4 py-2 text-sm border ${
-                errors.service ? "border-red-500" : "border-slate-300"
-              } rounded-md focus:ring-2 focus:ring-blue-200 outline-none`}
-            />
-            {errors.service && (
-              <p className="text-xs text-red-500 mt-1">{errors.service}</p>
-            )}
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Service
+        </label>
+        <input
+          type="text"
+          name="service"
+          placeholder="e.g., X-ray, Lab Test"
+          value={billingData.service}
+          onChange={handleInputChange}
+          autoComplete="off"
+          className={`w-full px-3 py-2 text-sm border ${
+            errors.service ? "border-red-500" : "border-slate-300"
+          } rounded-md focus:ring-2 focus:ring-blue-200 outline-none`}
+        />
+        {errors.service && (
+          <p className="text-xs text-red-500 mt-1">{errors.service}</p>
+        )}
           </div>
 
           {/* Amount */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Amount (₦)
-            </label>
-            <input
-              type="text"
-              name="amount"
-              placeholder="₦ 0.00"
-              value={billingData.amount === 0 ? "" : billingData.amount}
-              onChange={handleInputChange}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              autoComplete="off"
-              className={`w-full px-4 py-2 text-sm border ${
-                errors.amount ? "border-red-500" : "border-slate-300"
-              } rounded-md focus:ring-2 focus:ring-blue-200 outline-none`}
-            />
-            {errors.amount && (
-              <p className="text-xs text-red-500 mt-1">{errors.amount}</p>
-            )}
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Amount (₦)
+        </label>
+        <input
+          type="text"
+          name="amount"
+          placeholder="₦ 0.00"
+          value={billingData.amount === 0 ? "" : billingData.amount}
+          onChange={handleInputChange}
+          inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete="off"
+          className={`w-full px-3 py-2 text-sm border ${
+            errors.amount ? "border-red-500" : "border-slate-300"
+          } rounded-md focus:ring-2 focus:ring-blue-200 outline-none`}
+        />
+        {errors.amount && (
+          <p className="text-xs text-red-500 mt-1">{errors.amount}</p>
+        )}
           </div>
 
           {/* Payment Method */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Payment Method
-            </label>
-            <select
-              name="payment_method"
-              value={billingData.payment_method}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 text-sm border ${
-                errors.payment_method ? "border-red-500" : "border-slate-300"
-              } rounded-md focus:ring-2 focus:ring-blue-200 outline-none bg-white`}
-            >
-              <option value="" disabled>Select payment method</option>
-              <option value="cash">Cash</option>
-              <option value="pos">POS</option>
-              <option value="transfer">Transfer</option>
-              <option value="other">Other</option>
-            </select>
-            {errors.payment_method && (
-              <p className="text-xs text-red-500 mt-1">{errors.payment_method}</p>
-            )}
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Payment Method
+        </label>
+        <select
+          name="payment_method"
+          value={billingData.payment_method}
+          onChange={handleInputChange}
+          className={`w-full px-3 py-2 text-sm border ${
+            errors.payment_method ? "border-red-500" : "border-slate-300"
+          } rounded-md focus:ring-2 focus:ring-blue-200 outline-none bg-white`}
+        >
+          <option value="" disabled>Select payment method</option>
+          <option value="cash">Cash</option>
+          <option value="pos">POS</option>
+          <option value="transfer">Transfer</option>
+          <option value="other">Other</option>
+        </select>
+        {errors.payment_method && (
+          <p className="text-xs text-red-500 mt-1">{errors.payment_method}</p>
+        )}
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notes <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <input
-              type="text"
-              name="notes"
-              placeholder="Any remarks..."
-              value={billingData.notes}
-              onChange={handleInputChange}
-              autoComplete="off"
-              className="w-full px-4 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-200 outline-none"
-            />
-            {errors.notes && (
-              <p className="text-xs text-red-500 mt-1">{errors.notes}</p>
-            )}
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Notes <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <input
+          type="text"
+          name="notes"
+          placeholder="Any remarks..."
+          value={billingData.notes}
+          onChange={handleInputChange}
+          autoComplete="off"
+          className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-200 outline-none"
+        />
+        {errors.notes && (
+          <p className="text-xs text-red-500 mt-1">{errors.notes}</p>
+        )}
           </div>
         </div>
 
         {/* Submit Button */}
-        <div className="mt-6">
+        <div className="mt-4">
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50"
+        type="submit"
+        disabled={loading}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50"
           >
-            {loading ? <FiLoader className="animate-spin" /> : <FiPlus />}
-            <span>Add Billing Entry</span>
+        {loading ? <FiLoader className="animate-spin" /> : <FiPlus />}
+        <span>Add Billing Entry</span>
           </button>
         </div>
       </form>

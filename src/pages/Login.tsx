@@ -3,6 +3,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/CP.png"; // Adjust the path as necessary
+import { FiLoader } from "react-icons/fi";
 interface loginCredentials {
   email: string;
   password: string;
@@ -130,15 +131,21 @@ const Login = () => {
           </div>
 
           {/* Login Button */}
-          <button
+            <button
             type="submit"
             disabled={loading}
             className={`w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold rounded-lg py-3 shadow-md transition-colors ${
               loading ? "opacity-60 cursor-not-allowed" : "hover:from-blue-400 hover:to-indigo-400"
             }`}
-          >
-            {loading ? "Signing in..." : "Login"}
-          </button>
+            >
+            {loading ? (
+              <span className="flex justify-center items-center">
+              <FiLoader className="animate-spin" aria-label="Loading" />Logging in...
+              </span>
+            ) : (
+              "Login"
+            )}
+            </button>
         </form>
 
         {/* Divider */}

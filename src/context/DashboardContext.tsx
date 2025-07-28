@@ -252,6 +252,8 @@ interface dashboardContextType {
     setPatientReport: React.Dispatch<React.SetStateAction<fetchReport[]>>;
     xrayData: pharmacyData[];
     fetchXrayData: () => Promise<void>;
+    patientPaymentHistory: Transaction[];
+    fetchPatientPaymentHistory: (patient_id: string) => Promise<void>;
 }
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
@@ -270,6 +272,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [queList, setQueList] = useState<QueList[]>([]);
   const [newPatient, setNewPatient] = useState<newPatient[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [patientPaymentHistory, setPatientPaymentHistory] = useState<Transaction[]>([]);
   const [token, setToken] = useState<string | null>(() => {
     const stored = localStorage.getItem("clinicpal_user");
     return stored ? JSON.parse(stored).token : null;
@@ -924,6 +927,27 @@ const fetchLaboratoryData = useCallback(async () => {
     
   //===============
 
+  // ========= fetch a particular patient's payment history
+  const fetchPatientPaymentHistory = useCallback(
+    async (patientId: string) => {
+      if (!token) return;
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `https://clinicpal.onrender.com/api/cashier/fetchPatientPaymentHistory/${patientId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setPatientPaymentHistory(response.data); // Return the payment history
+
+      } catch (err: any) {
+        handleApiError(err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
 
 
@@ -966,7 +990,8 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions , token, setPatientReport, fetchXrayData, xrayData
+      newBilling, transactions, fetchTransactions , token, setPatientReport, 
+      fetchXrayData, xrayData, patientPaymentHistory, fetchPatientPaymentHistory
     }),
     [
       addNewPatient,
@@ -1003,7 +1028,8 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions, token, setPatientReport, fetchXrayData, xrayData
+      newBilling, transactions, fetchTransactions, token, setPatientReport,
+      fetchXrayData, xrayData, patientPaymentHistory, fetchPatientPaymentHistory
     ]
   );
 

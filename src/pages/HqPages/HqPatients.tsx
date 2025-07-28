@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { HqNavBar } from "../../components/HqNavBar";
+import { HqNavBar } from "../../components/hq_components/HqNavBar";
 import { useDashboard } from "../../context/DashboardContext";
 import PatientProfileModal from "../../components/PatientProfilemModal";
 import type { patientInfo } from "../../components/PatientProfilemModal";

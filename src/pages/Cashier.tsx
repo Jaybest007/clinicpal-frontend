@@ -9,6 +9,8 @@ import { TodaysTransaction } from "../components/TodaysTransaction";
 
 import { ExternalBilling } from "../components/ExternalBilling";
 
+import { PatientPaymentHistory } from "../components/PatientPaymentHistory";
+
 
 interface BillingDetails {
   payers_name: string;
@@ -34,6 +36,7 @@ interface BillingErrors {
 export const Cashier = () => {
   
   const [externalBilling, setExternalBilling] = useState(false);
+  const [patientHistory, setPatientHistory] = useState(false);
   const { newBilling, loading, token, transactions, fetchTransactions, } = useDashboard();
   const [billingData, setBillingData] = useState<BillingDetails>({
     payers_name: "",
@@ -160,7 +163,7 @@ export const Cashier = () => {
         External Billing
           </button>
           <button
-        onClick={() => alert("Feature coming soon!")}
+        onClick={() => setPatientHistory(true)}
         className="px-3 py-1.5 rounded-md bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium shadow-sm transition-colors flex-1 md:flex-none"
           >
         Patient history
@@ -320,6 +323,12 @@ export const Cashier = () => {
         {externalBilling && (
           <ExternalBilling 
           onClose={() => setExternalBilling(false)} 
+          />
+        )}
+
+        {patientHistory && (
+          <PatientPaymentHistory
+            onClose={() => setPatientHistory(false)}
           />
         )}
 
