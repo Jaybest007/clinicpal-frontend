@@ -3,6 +3,8 @@ import { FaTimes } from "react-icons/fa";
 import { useDashboard } from "../context/DashboardContext";
 import { useAuth } from "../context/AuthContext";
 import {  useNavigate } from "react-router-dom";
+import { addPatientToLocalDB } from "../db/patientHelpers";
+import { toast } from "react-toastify";
 
 interface PatientsData {
   full_name: string;
@@ -26,7 +28,8 @@ const NewPatient = ({ isOpen, onClose }: NewPatientProps) => {
   const { addNewPatient, loading, fetchAllPatients } = useDashboard();
   const { user } = useAuth();
   const name = user?.name || "";
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const isOnline = navigator.onLine;
 
   const [patientData, setPatientData] = useState<PatientsData>({
     full_name: "",
@@ -72,6 +75,8 @@ const NewPatient = ({ isOpen, onClose }: NewPatientProps) => {
       setError(prev => ({ ...prev, [name]: "" }));
     }
   };
+
+  
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -122,10 +127,14 @@ const NewPatient = ({ isOpen, onClose }: NewPatientProps) => {
       done_by: "",
     });
 
-    try {
-      await addNewPatient(patientData);
-      setError(prev => ({ ...prev, server: "" }));
-
+    if (!isOnline) {
+      try {
+      toast.info("You are not online, saving locally");
+      addPatientToLocalDB({
+        ...patientData,
+        created_at: new Date().toISOString(),
+      } as PatientsData & { created_at: string });
+      toast.success("Patient data saved locally");
       setPatientData({
         full_name: "",
         address: "",
@@ -138,19 +147,46 @@ const NewPatient = ({ isOpen, onClose }: NewPatientProps) => {
         nok_relationship: "",
         done_by: name,
       });
+      onClose();
+      return;
+      } catch (error) {
+      console.error("Error adding patient to local DB:", error);
+      setError(prev => ({ ...prev, server: "Failed to save locally." }));
+      return;
+      }
+    }
+
+    try {
+      await addNewPatient(patientData);
+      setError(prev => ({ ...prev, server: "" }));
+
+      setPatientData({
+      full_name: "",
+      address: "",
+      gender: "",
+      age: "",
+      phone: "",
+      nok_full_name: "",
+      nok_address: "",
+      nok_phone: "",
+      nok_relationship: "",
+      done_by: name,
+      });
 
       fetchAllPatients();
-      navigate("/confirmation", {replace:true});
+      navigate("/confirmation", { replace: true });
       onClose(); // Close modal after successful submit
     } catch (err: any) {
       const errorMessage =
-        err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Something went wrong. Please try again.";
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      "Something went wrong. Please try again.";
 
       setError(prev => ({ ...prev, server: errorMessage }));
     }
   };
+
+  
 
   if (!isOpen) return null;
 

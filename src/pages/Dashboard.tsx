@@ -9,6 +9,9 @@ import { useDashboard } from "../context/DashboardContext";
 
 import QueList from "../components/QueList";
 import { Link } from "react-router-dom";
+import { syncLocalPatientsToBackend, fetchAllPatients } from "../db/patientHelpers";
+import { toast } from "react-toastify";
+import type { PatientsData } from "../context/DashboardContext"; // Adjust the path if PatientsData is defined elsewhere
 
 const Dashboard = () => {
   useEffect(() => {
@@ -18,7 +21,9 @@ const Dashboard = () => {
   const [showNewPatient, setShowNewPatient] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const { user, logout } = useAuth();
-  const { patientsData, queList } = useDashboard();
+  const { patientsData, queList, addNewPatient } = useDashboard();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [localPatients, setLocalPatients] = useState<PatientsData[]>([]);
   const Total_admitted = Array.isArray(patientsData)
     ? patientsData.filter((p) => p.admission_status === true).length
     : 0;
@@ -34,36 +39,77 @@ const Dashboard = () => {
     setShowNewPatient((prev) => !prev);
     if (showReportModal) setShowReportModal(false);
   };
+  
+useEffect(() => {
+    if (isOnline) {
+      syncLocalPatientsToBackend(addNewPatient, fetchAllPatients);
+    }else{
+      toast.info("You are offline. Local changes will sync when back online.");
+    }
+  }, [isOnline, addNewPatient, fetchAllPatients]);
 
 
+useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success("You are online. Data is synced.");
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.warn("You are offline. Using locally saved data.");
+    };
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
+  useEffect(() => {
+    if (!isOnline) {
+      fetchAllPatients().then(setLocalPatients);
+    }
+  }, [isOnline]);
 
-return user?.role === "unactivated" ? (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-slate-200">
-    <div className="bg-white shadow-lg rounded-xl p-8 text-center max-w-md mx-auto border border-red-200">
-      <h1 className="text-2xl font-semibold text-red-600 mb-4">Access Restricted</h1>
-      <p className="text-gray-700 mb-6">
-        Your account is inactive. Please contact your hospital administrator to activate access to the dashboard.
-      </p>
-      <button
-        className="px-5 py-2 mr-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        onClick={() => window.location.reload()}
-      >
-        Retry
-      </button>
-      <button
-        className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        onClick={() => logout()}
-      >
-        Log out
-      </button>
+  const patientsList = isOnline ? patientsData : localPatients;
+
+  return user?.role === "unactivated" ? (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-slate-200">
+      <div className="bg-white shadow-lg rounded-xl p-8 text-center max-w-md mx-auto border border-red-200">
+        <h1 className="text-2xl font-semibold text-red-600 mb-4">Access Restricted</h1>
+        <p className="text-gray-700 mb-6">
+          Your account is inactive. Please contact your hospital administrator to activate access to the dashboard.
+        </p>
+        <button
+          className="px-5 py-2 mr-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
+        <button
+          className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          onClick={() => logout()}
+        >
+          Log out
+        </button>
+      </div>
     </div>
-  </div>
-) : (
-  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
+  ) : (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
       <NavBar />
-
-      <main className="flex-1 pt-8 px-2 md:px-8">
+      {/* Status Indicator */}
+      <div className="flex justify-end px-4 pt-2">
+        <span
+          className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold
+            ${isOnline ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}
+          `}
+        >
+          <span className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-yellow-500"} inline-block`} />
+          {isOnline ? "Online - Live Data" : "Offline - Local Data"}
+        </span>
+      </div>
+      <main className="flex-1 pt-2 px-2 md:px-8">
         <div className="max-w-6xl mx-auto space-y-10">
           {/* Sticky Action Bar */}
           <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col sm:flex-row items-center sm:justify-between px-4 md:px-8 py-3 rounded-t-xl shadow-sm mb-2 gap-3 sm:gap-4">
@@ -93,7 +139,7 @@ return user?.role === "unactivated" ? (
 
           {/* Stat Cards */}
           <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 p-2">
-            <StatCard title="All Patients" icon={FaUser} value={patientsData.length} />
+            <StatCard title="All Patients" icon={FaUser} value={patientsList.length} />
             <StatCard title="Admitted" icon={FaUserInjured} value={Total_admitted} />
             <StatCard title="Discharged" icon={FaUserInjured} value={Total_Discharged} />
             <StatCard title="Que List" icon={FaUser} value={queList.length} />
@@ -145,10 +191,7 @@ return user?.role === "unactivated" ? (
         </div>
       </main>
     </div>
-);
-
-      
-  
+  );
 };
 
 export default Dashboard;

@@ -27,7 +27,7 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
   const [ultrasoundOrder, setUltrasoundOrder] = useState(false);
   const [xrayOrder, setXrayOrder] = useState(false);
   const [error, setError] = useState({ patient_id: "", report: "", server: "" });
-
+ 
   const {
     transcript,
     interimTranscript,
@@ -95,6 +95,8 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
     setReportData((prev) => ({ ...prev, [name]: value }));
     setError((prev) => ({ ...prev, [name]: "" }));
   };
+
+  
 
   //========handle submit========
   const handleSubmit = async (event: React.FormEvent) => {

@@ -8,6 +8,8 @@ import { useDashboard } from "../context/DashboardContext";
 import AdmittedPage from "../components/AdmittedPage";
 import { useAuth } from "../context/AuthContext";
 import { FiPlus } from "react-icons/fi";
+import { fetchAllPatients } from "../db/patientHelpers";
+import { toast } from "react-toastify";
 
 interface PatientInfo {
   full_name: string;
@@ -30,12 +32,46 @@ const Patients = () => {
   const [showNewPatient, setShowNewPatient] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { patientsData } = useDashboard();
-  const {user} = useAuth()
+  const { user } = useAuth();
+
+  // Online/offline and local patients state
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [localPatients, setLocalPatients] = useState<PatientInfo[]>([]);
+
+  // Listen for online/offline changes
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success("You are online. Using live data.");
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.warn("You are offline. Using locally saved data.");
+    };
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Fetch local patients when offline
+  useEffect(() => {
+    if (!isOnline) {
+      fetchAllPatients().then(setLocalPatients);
+    }
+  }, [isOnline]);
+
+  // Use correct patients list
+  const patientsList = isOnline ? patientsData : localPatients;
+
+  // Search logic
   function searchPatient(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target.value;
     setSearchTerm(input);
 
-    const matches = patientsData.filter((patient) =>
+    const matches = patientsList.filter((patient) =>
       patient.full_name.toLowerCase().includes(input.toLowerCase()) ||
       patient.patient_id.toLowerCase().includes(input.toLowerCase())
     );
@@ -48,23 +84,35 @@ const Patients = () => {
   }, []);
 
   return user?.role === "unactivated" ? (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-slate-200">
-    <div className="bg-white shadow-lg rounded-xl p-8 text-center max-w-md mx-auto border border-red-200">
-      <h1 className="text-2xl font-semibold text-red-600 mb-4">Access Restricted</h1>
-      <p className="text-gray-700 mb-6">
-        Your account is inactive. Please contact your hospital administrator to activate access to the dashboard.
-      </p>
-      <button
-        className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        onClick={() => window.location.reload()}
-      >
-        Retry
-      </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-slate-200">
+      <div className="bg-white shadow-lg rounded-xl p-8 text-center max-w-md mx-auto border border-red-200">
+        <h1 className="text-2xl font-semibold text-red-600 mb-4">Access Restricted</h1>
+        <p className="text-gray-700 mb-6">
+          Your account is inactive. Please contact your hospital administrator to activate access to the dashboard.
+        </p>
+        <button
+          className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
+      </div>
     </div>
-  </div>
-) : (
+  ) : (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100">
       <NavBar />
+
+      {/* Online/Offline Status Indicator */}
+      <div className="flex justify-end px-4 pt-2">
+        <span
+          className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold
+            ${isOnline ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}
+          `}
+        >
+          <span className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-yellow-500"} inline-block`} />
+          {isOnline ? "Online - Live Data" : "Offline - Local Data"}
+        </span>
+      </div>
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-2 md:px-8 py-8">
         {/* Sticky Action Bar */}
@@ -72,13 +120,13 @@ const Patients = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-blue-900 tracking-tight">
             Patient Records
           </h1>
-            <button
+          <button
             onClick={() => setShowNewPatient((prev) => !prev)}
             className="col-span-2 mt-2 bg-[#2788E3] hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 justify-center font-semibold text-sm sm:px-4 sm:py-2 sm:text-base"
             aria-label={showNewPatient ? "Close registration form" : "Register new patient"}
-            >
+          >
             {showNewPatient ? "Close Form" : <FiPlus />} Register Patient
-            </button>
+          </button>
         </div>
 
         <section className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 md:p-8 space-y-8">
@@ -91,30 +139,30 @@ const Patients = () => {
 
           {/* Search Bar */}
           {(user?.role === "nurse" || user?.role === "doctor" || user?.role === "super admin") && (
-             <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <div className="relative w-full md:w-96">
-              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={searchPatient}
-                placeholder="Search by name or ID"
-                className="bg-blue-100 text-black outline-none p-2 pl-10 rounded-md w-full pr-10 focus:ring-2 ring-blue-400 transition"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    setFilteredPatients([]);
-                  }}
-                  className="absolute top-1/2 right-2 -translate-y-1/2 text-blue-400 hover:text-blue-600"
-                  aria-label="Clear search"
-                >
-                  <FaTimes />
-                </button>
-              )}
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="relative w-full md:w-96">
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={searchPatient}
+                  placeholder="Search by name or ID"
+                  className="bg-blue-100 text-black outline-none p-2 pl-10 rounded-md w-full pr-10 focus:ring-2 ring-blue-400 transition"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setFilteredPatients([]);
+                    }}
+                    className="absolute top-1/2 right-2 -translate-y-1/2 text-blue-400 hover:text-blue-600"
+                    aria-label="Clear search"
+                  >
+                    <FaTimes />
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
           )}
 
           {/* Search Results */}
@@ -189,7 +237,7 @@ const Patients = () => {
           </div>
         </section>
       </main>
-          
+
       <PatientProfileModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

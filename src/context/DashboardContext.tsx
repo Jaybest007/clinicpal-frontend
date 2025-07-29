@@ -10,9 +10,10 @@ import React, {
 } from "react";
 import { toast } from "react-toastify";
 import { useSocket } from "./SocketContext";
+import { clinipalDB } from "../db/clinipal-db";
 
 //====New Patient data that is going to the backend interface
-interface newPatientData {
+export interface newPatientData {
         full_name: string;
         address: string;
         gender: string;
@@ -26,7 +27,7 @@ interface newPatientData {
 }
 
 //===fetched patients data interface
-interface PatientsData {
+export interface PatientsData {
   id: number;
   patient_id: string;
   full_name: string;
@@ -44,7 +45,7 @@ interface PatientsData {
 }
 
 //interface for next of kin data
-interface nextOfKinData {
+export interface nextOfKinData {
   id: number;
   full_name: string;
   address: string;
@@ -54,7 +55,7 @@ interface nextOfKinData {
 }
 
 //interface for report 
-interface report{
+export interface report{
     patient_id: string;
     report: string;
     wrote_by: string;
@@ -334,7 +335,19 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       );
       setPatientsData(response.data.patients);
       setNextOfKinData(response.data.next_of_kin);
-    } catch (err: any) {
+
+      // Save to Dexie for offline use
+      if (response.data.patients?.length) {
+        clinipalDB.patientsData.clear().then(() => {
+          clinipalDB.patientsData.bulkAdd(response.data.patients);
+        });
+      }
+      if (response.data.next_of_kin?.length) {
+        clinipalDB.nextOfKin.clear().then(() => {
+          clinipalDB.nextOfKin.bulkAdd(response.data.next_of_kin);
+        });
+      }
+          } catch (err: any) {
         
       // Utility: handle API errors with 403 auto-logout and no toast
     const handleApiError = (err: any) => {

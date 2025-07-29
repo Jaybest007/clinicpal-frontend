@@ -34,9 +34,10 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   patient: patientInfo | null;
+  nextOfKinList?: nextOfKinData[]; // <-- Accept nextOfKinList as prop
 }
 
-const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
+const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props) => {
   const {
     nextOfKinData,
     admitPatient,
@@ -53,6 +54,34 @@ const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
   const [wrote_by, setWrote_by] = useState("");
   const [error, setError] = useState("");
 
+  // Online/offline state
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Listen for online/offline changes
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // toast.success("You are online. Using live data.");
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      // toast.warn("You are offline. Using locally saved data.");
+    };
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Fetch local patients when offline
+  // Fetch local patients when offline
+  useEffect(() => {
+    if (!isOnline) {
+      fetchAllPatients();
+    }
+  }, [isOnline]);
   useEffect(() => {
     if (user?.name) {
       setWrote_by(user.name);
@@ -60,19 +89,21 @@ const PatientProfileModal = ({ isOpen, onClose, patient }: Props) => {
   }, [user?.name]);
 
   useEffect(() => {
-  if (!isOpen || !patient?.patient_id || !nextOfKinData) {
-    setNextOfKin(null);
-    setAdmissionReason("");
-    setVisitationReason("");
-    setError("");
-    return;
-  }
+    if (!isOpen || !patient?.patient_id) {
+      setNextOfKin(null);
+      setAdmissionReason("");
+      setVisitationReason("");
+      setError("");
+      return;
+    }
 
-  const match = nextOfKinData.find(
-    (kin) => kin.patient_id.toLowerCase() === patient.patient_id.toLowerCase()
-  );
-  setNextOfKin(match || null);
-}, [isOpen, patient, nextOfKinData]);
+    // Use local nextOfKinList if offline, else use context nextOfKinData
+    const kinSource = !isOnline && nextOfKinList ? nextOfKinList : nextOfKinData;
+    const match = kinSource?.find(
+      (kin) => kin.patient_id.toLowerCase() === patient.patient_id.toLowerCase()
+    );
+    setNextOfKin(match || null);
+  }, [isOpen, patient, nextOfKinData, nextOfKinList, isOnline]);
 
 
   if (!isOpen || !patient) return null;

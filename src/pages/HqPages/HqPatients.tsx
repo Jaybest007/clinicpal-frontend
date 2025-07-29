@@ -12,6 +12,7 @@ export const HqPatients: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<patientInfo | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ order: any; type: string } | null>(null);
+    
 
     useEffect(() => {
         if (!patientsData || patientsData.length === 0) {
