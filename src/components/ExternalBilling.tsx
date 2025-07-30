@@ -26,7 +26,7 @@ type ExternalBillingProps = {
 };
 
 export function ExternalBilling({ onClose }: ExternalBillingProps) {
-  const { loading } = useDashboard();
+  const { loading, externalBilling, fetchExternalBilling } = useDashboard();
 
   const [errors, setErrors] = useState<Errors>({});
   const [billingData, setBillingData] = useState<BillingData>({
@@ -48,7 +48,7 @@ export function ExternalBilling({ onClose }: ExternalBillingProps) {
     }));
   }
 
-  function handleExternalBillingSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleExternalBillingSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const newErrors: Errors = {};
     if (!billingData.payers_name) newErrors.payers_name = "Payer's name is required";
@@ -60,7 +60,24 @@ export function ExternalBilling({ onClose }: ExternalBillingProps) {
 
     if (Object.keys(newErrors).length === 0) {
       // Submit logic here
-      console.log("Submitting billing data:", billingData);
+      
+      try {
+        await externalBilling(billingData);
+        setBillingData({
+          payers_name: "",
+          department: "",
+          service: "",
+          amount: 0,
+          payment_method: "",
+          notes: ""
+        });
+        setErrors({});
+        await fetchExternalBilling();
+        onClose();
+      } catch (error) {
+        
+        // Handle error appropriately, e.g., show a notification
+      }
     }
   }
 

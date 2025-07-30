@@ -20,6 +20,19 @@ export function BillReceipt() {
     );
   }
 
+  // Fallbacks for external billing data
+  const patientId = tx.patient_id ? tx.patient_id.toUpperCase() : "N/A";
+  const createdBy = tx.created_by || tx.receipt_by || "N/A";
+  const hospitalId = tx.hospital_id || "External";
+  const department = tx.department || "N/A";
+  const payersName = tx.payers_name || "N/A";
+  const description = tx.description || tx.service || "N/A";
+  const paymentMethod = tx.payment_method || "N/A";
+  const paymentStatus = tx.payment_status || "paid";
+  const amount = tx.amount || 0;
+  const createdAt = tx.created_at ? new Date(tx.created_at).toLocaleString() : "N/A";
+  const referenceId = tx.id || tx.reference_id || "N/A";
+
   return (
     <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg border border-gray-300 print:shadow-none print:border-0 print:rounded-none print:max-w-full print:mt-0 print:p-0">
       {/* Header Branding */}
@@ -27,22 +40,22 @@ export function BillReceipt() {
         <span className="text-2xl font-bold tracking-wide text-gray-900">
           ClinicPal Health Services
         </span>
-        <span className="text-xs text-gray-500 italic">{tx.hospital_id}</span>
+        <span className="text-xs text-gray-500 italic">{hospitalId}</span>
       </div>
 
       {/* Meta Info */}
       <div className="mb-4 text-sm text-gray-600 space-y-1">
         <div className="flex justify-between">
           <span>Date</span>
-          <span>{new Date(tx.created_at).toLocaleString()}</span>
+          <span>{createdAt}</span>
         </div>
         <div className="flex justify-between">
           <span>Receipt By</span>
-          <span>{tx.created_by}</span>
+          <span>{createdBy}</span>
         </div>
         <div className="flex justify-between">
           <span>Reference ID</span>
-          <span className="text-xs text-gray-400 italic">{tx.id}</span>
+          <span className="text-xs text-gray-400 italic">{referenceId}</span>
         </div>
       </div>
 
@@ -52,15 +65,15 @@ export function BillReceipt() {
       <div className="mb-4 space-y-1">
         <div className="flex justify-between text-base font-semibold text-gray-700">
           <span>Payers's Name</span>
-          <span>{tx.payers_name}</span>
+          <span>{payersName}</span>
         </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Patient ID</span>
-          <span>{tx.patient_id.toUpperCase()}</span>
+          <span>{patientId}</span>
         </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Department</span>
-          <span>{tx.department}</span>
+          <span>{department}</span>
         </div>
       </div>
 
@@ -70,29 +83,27 @@ export function BillReceipt() {
       <div className="mb-4 space-y-1 text-sm text-gray-600">
         <div className="flex justify-between">
           <span>Description</span>
-          <span>{tx.description}</span>
+          <span>{description}</span>
         </div>
         <div className="flex justify-between">
           <span>Payment Method</span>
-          <span className="capitalize">{tx.payment_method}</span>
+          <span className="capitalize">{paymentMethod}</span>
         </div>
         <div className="flex justify-between font-semibold">
           <span>Status</span>
-          <span
-            className= "text-gray-600"
-          >
+          <span className="text-gray-600">
             <span className="flex items-center gap-1">
-                {tx.payment_status && tx.payment_status === "paid" ? (
-                    <>
-                        <BsCheckCircle className="text-green-600 text-lg" />
-                        <span>PAID</span>
-                    </>
-                ) : (
-                    <>
-                        <BsXCircle className="text-red-500 text-lg" />
-                        <span>UNPAID</span>
-                    </>
-                )}
+              {paymentStatus === "paid" ? (
+                <>
+                  <BsCheckCircle className="text-green-600 text-lg" />
+                  <span>PAID</span>
+                </>
+              ) : (
+                <>
+                  <BsXCircle className="text-red-500 text-lg" />
+                  <span>UNPAID</span>
+                </>
+              )}
             </span>
           </span>
         </div>
@@ -103,7 +114,7 @@ export function BillReceipt() {
       {/* Total */}
       <div className="flex justify-between items-center mt-4 font-bold text-lg text-gray-800">
         <span>Total</span>
-        <span>₦{Number(tx.amount).toLocaleString()}</span>
+        <span>₦{Number(amount).toLocaleString()}</span>
       </div>
 
       {/* Footer Branding */}

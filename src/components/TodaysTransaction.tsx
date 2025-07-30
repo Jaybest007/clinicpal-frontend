@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useMemo, useState } from "react";
 import { FiRefreshCw, FiDownload, FiPrinter, FiEdit, FiX } from "react-icons/fi";
 import { BsReceipt, BsCheckCircle, BsXCircle } from "react-icons/bs";
 import { useDashboard } from "../context/DashboardContext";
@@ -7,13 +7,33 @@ import { useNavigate } from "react-router-dom";
 type FilterType = "today" | "yesterday" | "search";
 
 export function TodaysTransaction() {
-  const { transactions, loading, fetchTransactions } = useDashboard();
+  const { transactions, loading, fetchTransactions, externalBillingData } = useDashboard();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<FilterType>("today");
   const [search, setSearch] = useState("");
 
-  // Helper to filter transactions
-  const filteredTransactions = transactions.filter((tx) => {
+  // 1. Map externalBillingData to match transactions structure
+  const mappedExternal = useMemo(() => externalBillingData.map((ext, idx) => ({
+    id: ext.id || `external-${idx}`,
+    payers_name: ext.payers_name,
+    department: ext.department,
+    description:  ext.service || "",
+    amount: ext.amount,
+    payment_method: ext.payment_method,
+    created_at: ext.created_at,
+    payment_status: "paid", // Default to "paid" for external data
+    // ...add any other fields needed for display/actions
+    isExternal: true, // flag if you want to distinguish
+  })), [externalBillingData]);
+
+  // 2. Merge transactions and mappedExternal
+  const allTransactions = useMemo(
+    () => [...transactions, ...mappedExternal],
+    [transactions, mappedExternal]
+  );
+
+  // 3. Filtering logic (unchanged)
+  const filteredTransactions = allTransactions.filter((tx) => {
     const txDate = new Date(tx.created_at);
     const today = new Date();
     const yesterday = new Date();
@@ -34,7 +54,6 @@ export function TodaysTransaction() {
       );
     }
     if (filter === "search" && search.trim()) {
-      // You can change this to search by ID, name, etc.
       return (
         tx.id?.toString().includes(search.trim()) ||
         tx.payers_name?.toLowerCase().includes(search.trim().toLowerCase())

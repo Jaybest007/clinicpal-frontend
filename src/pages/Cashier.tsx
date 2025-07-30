@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import {  FiPlus,  FiLoader } from "react-icons/fi";
-import { BsReceipt,BsFileText, BsFileEarmark, BsBuilding } from "react-icons/bs";
+
 import { useDashboard } from "../context/DashboardContext";
-import StatCard from "../components/StatCard";
+
 import NavBar from "../components/NavBar";
 import SearchPatientReport from "../components/SearchPatientReport";
 import { TodaysTransaction } from "../components/TodaysTransaction";
@@ -10,6 +10,7 @@ import { TodaysTransaction } from "../components/TodaysTransaction";
 import { ExternalBilling } from "../components/ExternalBilling";
 
 import { PatientPaymentHistory } from "../components/PatientPaymentHistory";
+import { CashierStatCard } from "../components/cashier/CashierStatCard";
 
 
 interface BillingDetails {
@@ -37,7 +38,7 @@ export const Cashier = () => {
   
   const [externalBilling, setExternalBilling] = useState(false);
   const [patientHistory, setPatientHistory] = useState(false);
-  const { newBilling, loading, token, transactions, fetchTransactions, } = useDashboard();
+  const { newBilling, loading, token, transactions, fetchTransactions, fetchExternalBilling,  } = useDashboard();
   const [billingData, setBillingData] = useState<BillingDetails>({
     payers_name: "",
     patient_id: "",
@@ -63,9 +64,11 @@ export const Cashier = () => {
       if (!token) return;
       if (transactions.length === 0) {
         fetchTransactions();
+        fetchExternalBilling();
       }
-    }, [token, transactions, fetchTransactions]);
+    }, [token, transactions, fetchTransactions, fetchExternalBilling]);
   //===============
+  
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -95,6 +98,7 @@ export const Cashier = () => {
     }
   };
 
+  //======= handle billing submit =======
   const handleBillingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -172,21 +176,7 @@ export const Cashier = () => {
       </header>
 
         {/* Stats: Use horizontal scroll on mobile */}
-        <section className="flex gap-6 mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
-          <StatCard
-            title="Total Collected"
-            value={`₦${(
-              transactions
-                .filter((tx) => String(tx.payment_status).toLowerCase() === "paid")
-                .reduce((sum, tx) => sum + (typeof tx.amount === "number" ? tx.amount : Number(tx.amount) || 0), 0)
-            ).toLocaleString()}`}
-            icon={BsReceipt}
-          />
-
-          <StatCard title="Bills Created" value={`${transactions.length}`} icon={BsFileText} />
-          <StatCard title="Unpaid Bills" value={`${transactions.filter(tx => tx.payment_status === 'unpaid').length}`} icon={BsFileEarmark} />
-          <StatCard title="Departments Covered" value={`${new Set(transactions.map(tx => tx.department)).size}`} icon={BsBuilding} />
-        </section>
+        <CashierStatCard/>
 
         {/* Section 1: Search & Add Billing */}
         <section className="flex flex-col md:grid md:grid-cols-2 gap-6 mb-8">

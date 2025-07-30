@@ -211,6 +211,29 @@ interface billingDetails{
   notes: string;
 }
 
+interface externalBilling{
+  payers_name: string;
+  department: string;
+  service: string;
+  amount: number;
+  payment_method: string;
+  notes: string;
+}
+
+export interface externalBillingData {
+  id: number;
+  payers_name: string;
+  department: string;
+  service: string;
+  amount: number;
+  payment_method: string;
+  notes: string;
+  created_at: string;
+  created_by: string;
+
+}
+
+
 interface dashboardContextType {
     addNewPatient: (credentials: newPatientData) => Promise<void>;
     patientsData: PatientsData[];
@@ -255,6 +278,9 @@ interface dashboardContextType {
     fetchXrayData: () => Promise<void>;
     patientPaymentHistory: Transaction[];
     fetchPatientPaymentHistory: (patient_id: string) => Promise<void>;
+    externalBilling: (credentials: externalBilling) => Promise<void>;
+    fetchExternalBilling: () => Promise<void>;
+    externalBillingData: externalBillingData[];
 }
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
@@ -274,6 +300,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [newPatient, setNewPatient] = useState<newPatient[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [patientPaymentHistory, setPatientPaymentHistory] = useState<Transaction[]>([]);
+  const [externalBillingData, setExternalBillingData] = useState<externalBillingData[]>([]);
   const [token, setToken] = useState<string | null>(() => {
     const stored = localStorage.getItem("clinicpal_user");
     return stored ? JSON.parse(stored).token : null;
@@ -962,9 +989,47 @@ const fetchLaboratoryData = useCallback(async () => {
     [token]
   );
 
+  //======== external billing ===============
+  const externalBilling = useCallback(
+    async (credentials: externalBilling) => {
+      if (!token) return;
+      try {
+        setLoading(true);
+        const response = await axios.post(
+          "https://clinicpal.onrender.com/api/cashier/externalBilling",
+          credentials,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        toast.success(response.data.success);
+      } catch (err: any) {
+        handleApiError(err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
-
-
+  //================= fetch external billing records =================
+  const fetchExternalBilling = useCallback(
+    async () => {
+      if (!token) return;
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          "https://clinicpal.onrender.com/api/cashier/fetchExternalBilling",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setExternalBillingData(response.data);
+      } catch (err: any) {
+        handleApiError(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
   // Memoize context value to avoid unnecessary rerenders
   const contextValue = useMemo(
@@ -1004,7 +1069,8 @@ const fetchLaboratoryData = useCallback(async () => {
       setNewPatient,
       orderResult,
       newBilling, transactions, fetchTransactions , token, setPatientReport, 
-      fetchXrayData, xrayData, patientPaymentHistory, fetchPatientPaymentHistory
+      fetchXrayData, xrayData, patientPaymentHistory, fetchPatientPaymentHistory, externalBilling,
+      fetchExternalBilling, externalBillingData
     }),
     [
       addNewPatient,
@@ -1042,7 +1108,7 @@ const fetchLaboratoryData = useCallback(async () => {
       setNewPatient,
       orderResult,
       newBilling, transactions, fetchTransactions, token, setPatientReport,
-      fetchXrayData, xrayData, patientPaymentHistory, fetchPatientPaymentHistory
+      fetchXrayData, xrayData, patientPaymentHistory, fetchPatientPaymentHistory, externalBilling, fetchExternalBilling, externalBillingData
     ]
   );
 
