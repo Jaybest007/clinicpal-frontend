@@ -80,11 +80,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (credentials: LoginData): Promise<AuthUser> => {
     setLoading(true);
     try {
-      // 1. Login (cookie set automatically)
-      await axios.post("https://clinicpal.onrender.com/api/auth/login", credentials);
-
-      // 2. Fetch user info
-      const response = await axios.get<AuthUser>("https://clinicpal.onrender.com/api/auth/protected");
+      // 1. Login (cookie set automatically, user info returned)
+      const response = await axios.post<AuthUser>("https://clinicpal.onrender.com/api/auth/login", credentials);
       const loggedInUser = response.data;
 
       setUser(loggedInUser);
