@@ -22,7 +22,6 @@ import { Laboratory } from "./pages/Laboratory";
 import { Ultrasound } from "./pages/Ultrasound";
 import DocumentationPage from "./pages/Documentation";
 import ConfirmationPage from "./pages/Confirmation";
-import { useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import { DepartmentsReportPrint } from "./components/print/DepartmentsReportPrint";
 import { Cashier } from "./pages/Cashier";
@@ -32,13 +31,9 @@ import { HqTransactions } from "./pages/HqPages/HqTransactions";
 import { SalesReportPrint } from "./components/print/SalesReportPrint";
 
 function App() {
-  // Get token from AuthContext
-  const { user } = useAuth();
-  const token = user?.token || "";
-
   return (
     <BrowserRouter>
-      <SocketProvider token={token}>
+      <SocketProvider>
         <DashboardProvider>
           <ToastContainer position="top-right" autoClose={3000} />
           <Routes>
