@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import axios from "axios";
 import { toast } from "react-toastify";
 
+// Ensure axios sends cookies with every request
+axios.defaults.withCredentials = true;
+
 // ================= Interfaces =================
 interface LoginData {
   email: string;
@@ -11,7 +14,6 @@ interface LoginData {
 interface AuthUser {
   id: string;
   name: string;
-  token: string;
   role?: string;
   hospital_id: string;
 }
@@ -43,14 +45,11 @@ interface AuthContextType {
   userRole: string;
   login: (credentials: LoginData) => Promise<AuthUser>;
   signup: (data: SignUpData) => Promise<AuthUser>;
-  logout: () => void;
+  logout: () => Promise<void>;
   hospital_Signup: (data: HospitalSignupData) => Promise<void>;
   tempInfo: tempInfo[];
   setTempInfo: React.Dispatch<React.SetStateAction<tempInfo[]>>;
 }
-
-// ================= Constants =================
-const STORAGE_KEY = "clinicpal_user";
 
 // ================= Context Setup =================
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,38 +59,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
-  const [tempInfo, setTempInfo] = useState<tempInfo[]>([])
-  // ==== Rehydrate from localStorage ====
+  const [tempInfo, setTempInfo] = useState<tempInfo[]>([]);
+
+  // ==== Hydrate user from backend (not localStorage) ====
   useEffect(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEY);
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        if (parsed?.token) {
-          setUser(parsed);
-          setUserRole(parsed.role || "");
-        }
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
+    setLoading(true);
+    axios.get<AuthUser>("https://clinicpal.onrender.com/api/auth/protected")
+      .then((response) => {
+        setUser(response.data);
+        setUserRole(response.data.role || "");
+      })
+      .catch(() => {
+        setUser(null);
+        setUserRole("");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   // ==== Login ====
   const login = useCallback(async (credentials: LoginData): Promise<AuthUser> => {
     setLoading(true);
     try {
-      const response = await axios.post<AuthUser>("https://clinicpal.onrender.com/api/auth/login", credentials);
+      // 1. Login (cookie set automatically)
+      await axios.post("https://clinicpal.onrender.com/api/auth/login", credentials);
+
+      // 2. Fetch user info
+      const response = await axios.get<AuthUser>("https://clinicpal.onrender.com/api/auth/protected");
       const loggedInUser = response.data;
 
-      // Save to state and localStorage
       setUser(loggedInUser);
       setUserRole(loggedInUser.role || "");
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedInUser));
-
       toast.success("Login successful");
 
-      // Hard refresh to clear stale context
       setTimeout(() => {
         window.location.replace("/dashboard");
       }, 100);
@@ -113,12 +112,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = useCallback(async (data: SignUpData): Promise<AuthUser> => {
     setLoading(true);
     try {
-      const response = await axios.post<AuthUser>("https://clinicpal.onrender.com/api/auth/signup", data);
+      await axios.post("https://clinicpal.onrender.com/api/auth/signup", data);
+
+      // Fetch user info after signup
+      const response = await axios.get<AuthUser>("https://clinicpal.onrender.com/api/auth/protected");
       const newUser = response.data;
 
       setUser(newUser);
       setUserRole(newUser.role || "");
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
       toast.success("Signup successful");
 
       setTimeout(() => {
@@ -160,14 +161,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // ==== Logout ====
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await axios.post("https://clinicpal.onrender.com/api/auth/logout");
+    } catch {}
     setUser(null);
     setUserRole("");
-    localStorage.removeItem(STORAGE_KEY);
-
     toast.info("Logged out");
-
-    // Reload to flush context
     window.location.replace("/login");
   }, []);
 

@@ -19,7 +19,6 @@ interface deleteUser {
 interface hospitalData {
   name: string;
   hospital_id: string;
-  token: string;
   role: string;
 }
 interface staffsData {
@@ -48,6 +47,9 @@ interface HospitalContextType {
 //============ context setup =============
 const HospitalContext = createContext<HospitalContextType | undefined>(undefined);
 
+// Ensure axios sends cookies with every request
+axios.defaults.withCredentials = true;
+
 // ========== Provider ============
 export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -61,7 +63,6 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const handleApiError = (err: any) => {
     const code = err?.response?.status;
     if (code === 403) {
-      localStorage.removeItem("hospital_data");
       window.location.reload();
       return;
     }
@@ -69,21 +70,27 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     toast.error(errorMessage);
   };
 
+  // Hydrate hospital data from backend (not localStorage)
   useEffect(() => {
-    const stored = localStorage.getItem("hospital_data");
-    if (stored) {
-      setHospitalData(JSON.parse(stored));
-    }
+    axios.get<hospitalData>("https://clinicpal.onrender.com/api/protected", { withCredentials: true })
+      .then((response) => {
+        setHospitalData(response.data);
+      })
+      .catch(() => {
+        setHospitalData(null);
+      });
   }, []);
 
   //============== login hospital =============
   const hospitalLogin = useCallback(async (credentials: hospitalLogin) => {
     try {
       setLoading(true);
-      const response = await axios.post("https://clinicpal.onrender.com/api/auth/hospital_login", credentials);
-      localStorage.setItem("hospital_data", JSON.stringify(response.data));
+      await axios.post("https://clinicpal.onrender.com/api/auth/hospital_login", credentials, { withCredentials: true });
+      // After login, fetch hospital info
+      const response = await axios.get<hospitalData>("https://clinicpal.onrender.com/api/hospitals/me", { withCredentials: true });
       setHospitalData(response.data);
-      toast.success(response.data.success);
+      toast.success("Login successful");
+      window.location.replace("/hq/dashboard");
     } catch (err: any) {
       handleApiError(err);
       throw err;
@@ -95,22 +102,19 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   //============log out ==============
   const logout = useCallback(() => {
     setHospitalData(null);
-    localStorage.removeItem("hospital_data");
-    toast.info("Logged out");
-    window.location.replace("/hq/login");
+    axios.post("https://clinicpal.onrender.com/api/auth/logout", { withCredentials: true }).finally(() => {
+      toast.info("Logged out");
+      window.location.replace("/hq/login");
+    });
   }, []);
 
   //===========fetch all staffs ==============
   const fetchStaffs = useCallback(async () => {
-    if (!hospitalData?.token || fetchStaffsInProgress.current || hospitalData.role !== "hospital") return;
+    if (fetchStaffsInProgress.current || !hospitalData || hospitalData.role !== "hospital") return;
     fetchStaffsInProgress.current = true;
     try {
       setLoading(true);
-      const response = await axios.get("https://clinicpal.onrender.com/api/hospitals/fetchStaffs", {
-        headers: {
-          Authorization: `Bearer ${hospitalData.token}`,
-        },
-      });
+      const response = await axios.get("https://clinicpal.onrender.com/api/hospitals/fetchStaffs", { withCredentials: true });
       if (Array.isArray(response.data)) {
         setStaffs(response.data);
       } else {
@@ -125,18 +129,18 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [hospitalData]);
 
-  // Only fetch staffs if not already loaded and token is present
+  // Only fetch staffs if not already loaded and hospitalData is present
   useEffect(() => {
-    if (hospitalData?.token && !staffs) {
+    if (hospitalData && !staffs) {
       fetchStaffs();
     }
     // eslint-disable-next-line
-  }, [hospitalData?.token]);
+  }, [hospitalData]);
 
   //=========== Give staff role =============
   const updateStaffRole = useCallback(
     async (credentials: updateStaffRole) => {
-      if (!hospitalData?.token) {
+      if (!hospitalData) {
         toast.error("Unauthorized. Please login again.");
         return;
       }
@@ -145,11 +149,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/hospitals/update_staff_role",
           credentials,
-          {
-            headers: {
-              Authorization: `Bearer ${hospitalData.token}`,
-            },
-          }
+          { withCredentials: true }
         );
         toast.success(response.data.success);
         await fetchStaffs();
@@ -166,7 +166,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   //=========== delete staff ===============
   const deleteUser = useCallback(
     async (credentials: deleteUser) => {
-      if (!hospitalData?.token) {
+      if (!hospitalData) {
         toast.error("Unauthorized. Please login again.");
         return;
       }
@@ -174,12 +174,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/hospitals/delete_staff",
-          credentials,
-          {
-            headers: {
-              Authorization: `Bearer ${hospitalData.token}`,
-            },
-          }
+          credentials, { withCredentials: true }
         );
         toast.success(response.data.success);
         await fetchStaffs();
@@ -196,19 +191,14 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   //===========delete patient data ===============
   const deletePatient = useCallback(
     async (patient_id: string) => {
-      if (!hospitalData?.token) {
+      if (!hospitalData) {
         toast.error("Unauthorized. Please login again.");
         return;
       }
       try {
         setLoading(true);
         const response = await axios.delete(
-          `https://clinicpal.onrender.com/api/hospitals/delete_patient/${patient_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${hospitalData.token}`,
-            },
-          }
+          `https://clinicpal.onrender.com/api/hospitals/delete_patient/${patient_id}`, { withCredentials: true }
         );
         toast.success(response.data.success);
       } catch (err: any) {

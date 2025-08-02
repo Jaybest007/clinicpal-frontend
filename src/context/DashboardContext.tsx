@@ -235,53 +235,53 @@ export interface externalBillingData {
 
 
 interface dashboardContextType {
-    addNewPatient: (credentials: newPatientData) => Promise<void>;
-    patientsData: PatientsData[];
-    nextOfKinData: nextOfKinData[];
-    loading: boolean;
-    fetchAllPatients: () => Promise<void>;
-    newReport: (credentials: report) => Promise<void>;
-    admitPatient: (credentials: admission) => Promise<void>;
-    fetch_Admitted_Patient_Report: () => Promise<void>;
-    admittedPatientReport: fetchReport[];
-    dischargePatient: (credentials: discharge) => Promise<void>;
-    patientReport: fetchReport[];
-    fetchPatientReport: (credentials: discharge) => Promise<void>;
-    addAppointment: (credentials: appointment) => Promise<void>;
-    fetchAppointment: () => Promise<void>;
-    appointments: fetchedAppointment[];
-    pharmacyData: pharmacyData[];
-    fetchPharmacyData: () => Promise<void>;
-    updatePharmacyOrderStatus: (credentials: pharmacyOrderStatus) => Promise<void>;
-    fetchLaboratoryData: () => Promise<void>;
-    labData: pharmacyData[];
-    updateLaboratoryOrderStatus: (credentials: labOrderderStatus) => Promise<void>;
-    quePatient: (credentials: admission) => Promise<void>;
-    queList: QueList[];
-    QueActions: (credentials: QueActions) => Promise<void>;
-    fetchQueList: () => Promise<void>;
-    fetchUltrasoundData: () => Promise<void>;
-    ultrasoundData: pharmacyData[];
-    updateUltrasoundOrderStatus: (credentials: labOrderderStatus) => Promise<void>;
-    submitExternalOrder: (credentials: externalOrder) => Promise<void>;
-    externalOrder: fetchedExterOrder[];
-    fetchExternalOrder: ()=> Promise<void>;
-    newPatient: newPatient[];
-    setNewPatient: React.Dispatch<React.SetStateAction<newPatient[]>>;
-    orderResult: (credentials: orderResult) => Promise<void>;
-    newBilling: (credentials: billingDetails) => Promise<void>;
-    fetchTransactions: () => Promise<void>;
-    token: string | null;
-    transactions: Transaction[];
-    setPatientReport: React.Dispatch<React.SetStateAction<fetchReport[]>>;
-    xrayData: pharmacyData[];
-    fetchXrayData: () => Promise<void>;
-    patientPaymentHistory: Transaction[];
-    fetchPatientPaymentHistory: (patient_id: string) => Promise<void>;
-    externalBilling: (credentials: externalBilling) => Promise<void>;
-    fetchExternalBilling: () => Promise<void>;
-    externalBillingData: externalBillingData[];
+  addNewPatient: (credentials: newPatientData) => Promise<void>;
+  patientsData: PatientsData[];
+  nextOfKinData: nextOfKinData[];
+  loading: boolean;
+  fetchAllPatients: () => Promise<void>;
+  newReport: (credentials: report) => Promise<void>;
+  admitPatient: (credentials: admission) => Promise<void>;
+  fetch_Admitted_Patient_Report: () => Promise<void>;
+  admittedPatientReport: fetchReport[];
+  dischargePatient: (credentials: discharge) => Promise<void>;
+  patientReport: fetchReport[];
+  fetchPatientReport: (credentials: discharge) => Promise<void>;
+  addAppointment: (credentials: appointment) => Promise<void>;
+  fetchAppointment: () => Promise<void>;
+  appointments: fetchedAppointment[];
+  pharmacyData: pharmacyData[];
+  fetchPharmacyData: () => Promise<void>;
+  updatePharmacyOrderStatus: (credentials: pharmacyOrderStatus) => Promise<void>;
+  fetchLaboratoryData: () => Promise<void>;
+  labData: pharmacyData[];
+  updateLaboratoryOrderStatus: (credentials: labOrderderStatus) => Promise<void>;
+  quePatient: (credentials: admission) => Promise<void>;
+  queList: QueList[];
+  QueActions: (credentials: QueActions) => Promise<void>;
+  fetchQueList: () => Promise<void>;
+  fetchUltrasoundData: () => Promise<void>;
+  ultrasoundData: pharmacyData[];
+  updateUltrasoundOrderStatus: (credentials: labOrderderStatus) => Promise<void>;
+  submitExternalOrder: (credentials: externalOrder) => Promise<void>;
+  externalOrder: fetchedExterOrder[];
+  fetchExternalOrder: () => Promise<void>;
+  newPatient: newPatient[];
+  setNewPatient: React.Dispatch<React.SetStateAction<newPatient[]>>;
+  orderResult: (credentials: orderResult) => Promise<void>;
+  newBilling: (credentials: billingDetails) => Promise<void>;
+  fetchTransactions: () => Promise<void>;
+  transactions: Transaction[];
+  setPatientReport: React.Dispatch<React.SetStateAction<fetchReport[]>>;
+  xrayData: pharmacyData[];
+  fetchXrayData: () => Promise<void>;
+  patientPaymentHistory: Transaction[];
+  fetchPatientPaymentHistory: (patient_id: string) => Promise<void>;
+  externalBilling: (credentials: externalBilling) => Promise<void>;
+  fetchExternalBilling: () => Promise<void>;
+  externalBillingData: externalBillingData[];
 }
+
 const dashboardContext = createContext<dashboardContextType | undefined>(undefined);
 
 export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -301,15 +301,6 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [patientPaymentHistory, setPatientPaymentHistory] = useState<Transaction[]>([]);
   const [externalBillingData, setExternalBillingData] = useState<externalBillingData[]>([]);
-  const [token, setToken] = useState<string | null>(() => {
-    const stored = localStorage.getItem("clinicpal_user");
-    return stored ? JSON.parse(stored).token : null;
-  });
-  const [role, setRole] = useState<string | null>(() => {
-    const stored = localStorage.getItem("clinicpal_user");
-    return stored ? JSON.parse(stored).role : null;
-  });
-  
 
   // Use refs to avoid unnecessary fetches
   const hasFetchedPatients = useRef(false);
@@ -319,46 +310,15 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const socket = useSocket();
 
-  //============ Only set token on mount if not already set
-  useEffect(() => {
-    if (!token) {
-      const stored = localStorage.getItem("clinicpal_user");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed?.token) setToken(parsed.token);
-        } catch (err) {
-          console.error("Failed to parse clinicpal_user:", err);
-          setToken(null);
-        }
-      }
-    }
-
-    if(!role){
-      const stored = localStorage.getItem("clinicpal_user");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed?.role) setRole(parsed.role);
-        } catch (err) {
-          console.error("Failed to parse clinicpal_user role:", err);
-          setRole(null);
-        }
-      }
-    }
-    // eslint-disable-next-line
-  }, []);
+  // Ensure axios sends cookies with every request
+  axios.defaults.withCredentials = true;
 
   // ================ Fetch all patients only once per session
   const fetchAllPatients = useCallback(async () => {
-    if (!token) return;
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://clinicpal.onrender.com/api/patients/fetchPatients",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        "https://clinicpal.onrender.com/api/patients/fetchPatients"
       );
       setPatientsData(response.data.patients);
       setNextOfKinData(response.data.next_of_kin);
@@ -374,46 +334,28 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           clinipalDB.nextOfKin.bulkAdd(response.data.next_of_kin);
         });
       }
-          } catch (err: any) {
-        
-      // Utility: handle API errors with 403 auto-logout and no toast
-    const handleApiError = (err: any) => {
-        const code = err?.response?.status;
-        if (code === 403) {
-            // Remove token and reload to force logout
-            localStorage.removeItem("clinicpal_user");
-            window.location.reload();
-            return;
-        }
-        // Only toast if not 403
-        const errorMessage = err?.response?.data?.message || err?.response?.data?.error || err?.message || "An error occurred";
-        toast.error(errorMessage);
-    };
-
+    } catch (err: any) {
       handleApiError(err);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (!token || hasFetchedPatients.current) return;
+    if (hasFetchedPatients.current) return;
     fetchAllPatients();
     hasFetchedPatients.current = true;
-    // eslint-disable-next-line
-  }, [fetchAllPatients, token]);
+  }, [fetchAllPatients]);
 
   //============ Add new patient
   const addNewPatient = useCallback(
     async (credentials: newPatientData) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/patients/addPatient",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
         setNewPatient(response.data.newPatient);
@@ -424,7 +366,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [token, socket]
+    [socket]
   );
 
   //=========== Socket listeners
@@ -459,13 +401,11 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //=============== New report
   const newReport = useCallback(
     async (credentials: report) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/reports/newReport",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
       } catch (err: any) {
@@ -475,19 +415,17 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
   //================= Admit patient
   const admitPatient = useCallback(
     async (credentials: admission) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/patients/admitPatient",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
         fetchAllPatients();
@@ -499,68 +437,61 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchAllPatients, token]
+    [fetchAllPatients]
   );
 
   //================ Queue patient
   const quePatient = useCallback(
     async (credentials: admission) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/patients/quePatient",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
-        setQueList((prev: any) => [...prev, response.data.queList]);
+        setQueList((prev: QueList[]) => [...prev, response.data.queList]);
         fetchAllPatients();
       } catch (err: any) {
-         handleApiError(err);
+        handleApiError(err);
         throw err;
       } finally {
         setLoading(false);
       }
     },
-    [fetchAllPatients, token]
+    [fetchAllPatients]
   );
 
   //================= Fetch queue list only once per session
   const fetchQueList = useCallback(async () => {
-    if (!token) return;
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://clinicpal.onrender.com/api/patients/fetchQueue",
-        { headers: { Authorization: `Bearer ${token}` } }
+        "https://clinicpal.onrender.com/api/patients/fetchQueue"
       );
       setQueList(response.data);
     } catch (err: any) {
-       handleApiError(err);
+      handleApiError(err);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (!token || hasFetchedQueue.current) return;
+    if (hasFetchedQueue.current) return;
     fetchQueList();
     hasFetchedQueue.current = true;
-    // eslint-disable-next-line
-  }, [token, fetchQueList]);
+  }, [fetchQueList]);
 
   //================= Queue actions
   const QueActions = useCallback(
     async (credentials: QueActions) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/patients/queActions",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
         fetchQueList();
@@ -572,17 +503,15 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [token, fetchQueList]
+    [fetchQueList]
   );
 
   // Fetch admitted patient report only once per session
   const fetch_Admitted_Patient_Report = useCallback(async () => {
-    if (!token) return;
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://clinicpal.onrender.com/api/reports/fetch_admitted_patient_reports",
-        { headers: { Authorization: `Bearer ${token}` } }
+        "https://clinicpal.onrender.com/api/reports/fetch_admitted_patient_reports"
       );
       setAdmittedPatientReport(response.data);
     } catch (err: any) {
@@ -591,47 +520,42 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (!token || hasFetchedAdmittedReports.current) return;
+    if (hasFetchedAdmittedReports.current) return;
     fetch_Admitted_Patient_Report();
     hasFetchedAdmittedReports.current = true;
-    // eslint-disable-next-line
-  }, [fetch_Admitted_Patient_Report, token]);
+  }, [fetch_Admitted_Patient_Report]);
 
   // Fetch patient report
   const fetchPatientReport = useCallback(
     async (credentials: discharge) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/reports/fetchPatientReport",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         setPatientReport(response.data);
       } catch (err: any) {
-         handleApiError(err);
+        handleApiError(err);
         throw err;
       } finally {
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
   //================== Discharge patient
   const dischargePatient = useCallback(
     async (credentials: discharge) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/patients/dischargePatient",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
         fetchAllPatients();
@@ -642,19 +566,17 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchAllPatients, token]
+    [fetchAllPatients]
   );
 
   //================ Add appointment
   const addAppointment = useCallback(
     async (credentials: appointment) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/appointments/addAppointment",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
       } catch (err: any) {
@@ -663,17 +585,15 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
   //============== Fetch appointments only once per session
   const fetchAppointment = useCallback(async () => {
-    if (!token) return;
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://clinicpal.onrender.com/api/appointments/fetchAppointments",
-        { headers: { Authorization: `Bearer ${token}` } }
+        "https://clinicpal.onrender.com/api/appointments/fetchAppointments"
       );
       setAppointments(response.data);
     } catch (err: any) {
@@ -681,23 +601,20 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (!token || hasFetchedAppointments.current) return;
+    if (hasFetchedAppointments.current) return;
     fetchAppointment();
     hasFetchedAppointments.current = true;
-    // eslint-disable-next-line
-  }, [fetchAppointment, token]);
+  }, [fetchAppointment]);
 
   //================ Fetch pharmacy data
   const fetchPharmacyData = useCallback(async () => {
-    if (!token) return;
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://clinicpal.onrender.com/api/pharmacy/fetchPharmacyData",
-        { headers: { Authorization: `Bearer ${token}` } }
+        "https://clinicpal.onrender.com/api/pharmacy/fetchPharmacyData"
       );
       setPharmacyData(response.data);
     } catch (err: any) {
@@ -706,51 +623,43 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   // Fetch laboratory data
-//============= Utility: handle API errors with 403 auto-logout and no toast
-const handleApiError = (err: any) => {
+  const handleApiError = (err: any) => {
     const code = err?.response?.status;
     if (code === 403) {
-        // Remove token and reload to force logout
-        localStorage.removeItem("clinicpal_user");
-        window.location.reload();
-        return;
+      window.location.reload();
+      return;
     }
-    // Only toast if not 403
     const errorMessage = err?.response?.data?.message || err?.response?.data?.error || err?.message || "An error occurred";
     toast.error(errorMessage);
-};
+  };
 
-//=========== fetch lab data
-const fetchLaboratoryData = useCallback(async () => {
-  if (!token) return;
-  try {
-    setLoading(true);
-    const response = await axios.get(
-      "https://clinicpal.onrender.com/api/laboratory/fetchLaboratoryData",
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setLabData(response.data);
-  } catch (err: any) {
-    handleApiError(err);
-    throw err;
-  } finally {
-    setLoading(false);
-  }
-}, [token]);
+  //=========== fetch lab data
+  const fetchLaboratoryData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        "https://clinicpal.onrender.com/api/laboratory/fetchLaboratoryData"
+      );
+      setLabData(response.data);
+    } catch (err: any) {
+      handleApiError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   //=========== Update pharmacy order status
   const updatePharmacyOrderStatus = useCallback(
     async (credentials: pharmacyOrderStatus) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/pharmacy/updateOrderStatus",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
         fetchPharmacyData();
@@ -762,19 +671,17 @@ const fetchLaboratoryData = useCallback(async () => {
         setLoading(false);
       }
     },
-    [token, fetchPharmacyData, fetchLaboratoryData]
+    [fetchPharmacyData, fetchLaboratoryData]
   );
 
   //================ Update laboratory order status
   const updateLaboratoryOrderStatus = useCallback(
     async (credentials: labOrderderStatus) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/laboratory/updateOrderStatus",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
         fetchLaboratoryData();
@@ -786,37 +693,33 @@ const fetchLaboratoryData = useCallback(async () => {
         setLoading(false);
       }
     },
-    [token, fetchLaboratoryData]
+    [fetchLaboratoryData]
   );
 
   // Fetch ultrasound data
   const fetchUltrasoundData = useCallback(async () => {
-    if (!token) return;
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://clinicpal.onrender.com/api/ultrasound/fetchUltrasoundData",
-        { headers: { Authorization: `Bearer ${token}` } }
+        "https://clinicpal.onrender.com/api/ultrasound/fetchUltrasoundData"
       );
       setUltrasoundData(response.data);
     } catch (err: any) {
-       handleApiError(err);
+      handleApiError(err);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   //================= Update ultrasound order status
   const updateUltrasoundOrderStatus = useCallback(
     async (credentials: labOrderderStatus) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/ultrasound/updateOrderStatus",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
         fetchUltrasoundData();
@@ -827,38 +730,33 @@ const fetchLaboratoryData = useCallback(async () => {
         setLoading(false);
       }
     },
-    [token, fetchUltrasoundData]
+    [fetchUltrasoundData]
   );
 
   //================fetch x-ray ==========
   const fetchXrayData = useCallback(async () => {
-  
-    if (!token) return;
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://clinicpal.onrender.com/api/x-ray/fetchXrayData",
-        { headers: { Authorization: `Bearer ${token}` } }
+        "https://clinicpal.onrender.com/api/x-ray/fetchXrayData"
       );
       setXrayData(response.data);
     } catch (err: any) {
-       handleApiError(err);
+      handleApiError(err);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   //===================== Submit external order
   const submitExternalOrder = useCallback(
     async (credentials: externalOrder) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/external/submitExternalOrder",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
         fetchUltrasoundData();
@@ -869,20 +767,16 @@ const fetchLaboratoryData = useCallback(async () => {
         setLoading(false);
       }
     },
-    [token, fetchUltrasoundData]
+    [fetchUltrasoundData]
   );
 
   // ======================Fetch external orders
   const fetchExternalOrder = useCallback(async () => {
-    if (!token) return;
     try {
       setLoading(true);
       const response = await axios.get(
         "https://clinicpal.onrender.com/api/external/fetchOrder",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 10000,
-        }
+        { timeout: 10000 }
       );
       if (Array.isArray(response.data)) {
         setExternalOrders(response.data);
@@ -894,19 +788,16 @@ const fetchLaboratoryData = useCallback(async () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   //================Order result
   const orderResult = useCallback(
     async (credentials: orderResult) => {
-      if (!token) return;
       try {
         setLoading(true);
-        // TODO: Update endpoint if needed for ultrasound/lab
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/external/submitResult",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
       } catch (err: any) {
@@ -916,18 +807,16 @@ const fetchLaboratoryData = useCallback(async () => {
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
   // =============== add new billing
-  const newBilling = useCallback( async (credentials: billingDetails) => {
-    if (!token) return;
+  const newBilling = useCallback(async (credentials: billingDetails) => {
     try {
       setLoading(true);
       const response = await axios.post(
         "https://clinicpal.onrender.com/api/cashier/addBill",
-        credentials,
-        { headers: { Authorization: `Bearer ${token}` } }
+        credentials
       );
       toast.success(response.data.success);
     } catch (err: any) {
@@ -936,49 +825,38 @@ const fetchLaboratoryData = useCallback(async () => {
     } finally {
       setLoading(false);
     }
-  },[token]);
+  }, []);
 
   // ============ fetch transactions
-  const fetchTransactions = useCallback( async() => {
-    if (role !== "cashier" && role !== "super admin") return;
-    if (!token) return;
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://clinicpal.onrender.com/api/cashier/fetchTransactions",
-        { headers: { Authorization: `Bearer ${token}` } }
+        "https://clinicpal.onrender.com/api/cashier/fetchTransactions"
       );
       setTransactions(response.data);
-      
     } catch (err: any) {
       handleApiError(err);
     } finally {
       setLoading(false);
     }
-  }, [token]);
-  
-    //================fetch transaction===
+  }, []);
+
   useEffect(() => {
-      if (!token) return;
-      if (transactions.length === 0) {
-        fetchTransactions();
-      }
-    }, [token, transactions, fetchTransactions]);
-    
-  //===============
+    if (transactions.length === 0) {
+      fetchTransactions();
+    }
+  }, [transactions, fetchTransactions]);
 
   // ========= fetch a particular patient's payment history
   const fetchPatientPaymentHistory = useCallback(
     async (patientId: string) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://clinicpal.onrender.com/api/cashier/fetchPatientPaymentHistory/${patientId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `https://clinicpal.onrender.com/api/cashier/fetchPatientPaymentHistory/${patientId}`
         );
-        setPatientPaymentHistory(response.data); // Return the payment history
-
+        setPatientPaymentHistory(response.data);
       } catch (err: any) {
         handleApiError(err);
         throw err;
@@ -986,19 +864,17 @@ const fetchLaboratoryData = useCallback(async () => {
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
   //======== external billing ===============
   const externalBilling = useCallback(
     async (credentials: externalBilling) => {
-      if (!token) return;
       try {
         setLoading(true);
         const response = await axios.post(
           "https://clinicpal.onrender.com/api/cashier/externalBilling",
-          credentials,
-          { headers: { Authorization: `Bearer ${token}` } }
+          credentials
         );
         toast.success(response.data.success);
       } catch (err: any) {
@@ -1008,28 +884,23 @@ const fetchLaboratoryData = useCallback(async () => {
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
   //================= fetch external billing records =================
-  const fetchExternalBilling = useCallback(
-    async () => {
-      if (!token) return;
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          "https://clinicpal.onrender.com/api/cashier/fetchExternalBilling",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setExternalBillingData(response.data);
-      } catch (err: any) {
-        handleApiError(err);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
-  );
+  const fetchExternalBilling = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        "https://clinicpal.onrender.com/api/cashier/fetchExternalBilling"
+      );
+      setExternalBillingData(response.data);
+    } catch (err: any) {
+      handleApiError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Memoize context value to avoid unnecessary rerenders
   const contextValue = useMemo(
@@ -1068,9 +939,17 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions , token, setPatientReport, 
-      fetchXrayData, xrayData, patientPaymentHistory, fetchPatientPaymentHistory, externalBilling,
-      fetchExternalBilling, externalBillingData
+      newBilling,
+      transactions,
+      fetchTransactions,
+      setPatientReport,
+      fetchXrayData,
+      xrayData,
+      patientPaymentHistory,
+      fetchPatientPaymentHistory,
+      externalBilling,
+      fetchExternalBilling,
+      externalBillingData
     }),
     [
       addNewPatient,
@@ -1107,15 +986,24 @@ const fetchLaboratoryData = useCallback(async () => {
       newPatient,
       setNewPatient,
       orderResult,
-      newBilling, transactions, fetchTransactions, token, setPatientReport,
-      fetchXrayData, xrayData, patientPaymentHistory, fetchPatientPaymentHistory, externalBilling, fetchExternalBilling, externalBillingData
+      newBilling,
+      transactions,
+      fetchTransactions,
+      setPatientReport,
+      fetchXrayData,
+      xrayData,
+      patientPaymentHistory,
+      fetchPatientPaymentHistory,
+      externalBilling,
+      fetchExternalBilling,
+      externalBillingData
     ]
   );
 
   return <dashboardContext.Provider value={contextValue}>{children}</dashboardContext.Provider>;
 };
 
-export const useDashboard = () => {
+export const useDashboard = (): dashboardContextType => {
   const context = useContext(dashboardContext);
   if (!context) throw new Error("useDashboard must be used inside DashboardProvider");
   return context;

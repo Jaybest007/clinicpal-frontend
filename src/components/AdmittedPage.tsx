@@ -50,7 +50,7 @@ const AdmittedPage = () => {
                 <td className="px-6 py-3 text-gray-700 border-b border-r border-neutral-200">{patient.admission_reason || "N/A"}</td>
                 <td className="px-6 py-3 text-gray-700 border-b border-neutral-200">
                   <div className="flex flex-row gap-3">
-                  {user?.role === "doctor" && (
+                  {user?.role === "doctor" || user?.role === "super admin" && (
                     <button
                     className="bg-lime-600 hover:bg-lime-500 px-5 py-3 rounded-md text-white"
                     onClick={() => setConfirmPage(true)}

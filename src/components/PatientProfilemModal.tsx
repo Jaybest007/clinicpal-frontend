@@ -249,7 +249,7 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
           </section>
          
 
-          {user?.role === "doctor" && (
+          {user?.role === "doctor" || user?.role === "super admin" && (
             <section className="space-y-3 border-t pt-4">
               <form onSubmit={handleAdmit} className="space-y-2">
                 <label htmlFor="admissionReason" className="block text-sm text-gray-600">Admission Condition <span className="text-red-500">*</span></label>
