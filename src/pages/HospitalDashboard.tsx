@@ -18,11 +18,12 @@ export const HospitalDashboard = () => {
 
   // Fetch latest staff data when hospitalData changes
   useEffect(() => {
-    if (hospitalData?.token && (!staffs || staffs.length === 0)) {
+    // REMOVE token dependency
+    if (hospitalData && (!staffs || staffs.length === 0)) {
       fetchStaffs();
     }
     // eslint-disable-next-line
-  }, []);
+  }, [hospitalData, staffs, fetchStaffs]);
 
   // Filter staff by search term
   const filteredStaffs = Array.isArray(staffs)

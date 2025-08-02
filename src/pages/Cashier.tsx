@@ -38,7 +38,7 @@ export const Cashier = () => {
   
   const [externalBilling, setExternalBilling] = useState(false);
   const [patientHistory, setPatientHistory] = useState(false);
-  const { newBilling, loading, token, transactions, fetchTransactions, fetchExternalBilling,  } = useDashboard();
+  const { newBilling, loading, transactions, fetchTransactions, fetchExternalBilling } = useDashboard();
   const [billingData, setBillingData] = useState<BillingDetails>({
     payers_name: "",
     patient_id: "",
@@ -61,12 +61,11 @@ export const Cashier = () => {
 
   //===fetch transaction===
   useEffect(() => {
-      if (!token) return;
       if (transactions.length === 0) {
         fetchTransactions();
         fetchExternalBilling();
       }
-    }, [token, transactions, fetchTransactions, fetchExternalBilling]);
+    }, [transactions, fetchTransactions, fetchExternalBilling]);
   //===============
   
 
