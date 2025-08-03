@@ -11,6 +11,7 @@ import React, {
 import { toast } from "react-toastify";
 import { useSocket } from "./SocketContext";
 import { clinipalDB } from "../db/clinipal-db";
+import { useAuth } from "./AuthContext";
 
 //====New Patient data that is going to the backend interface
 export interface newPatientData {
@@ -301,7 +302,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [patientPaymentHistory, setPatientPaymentHistory] = useState<Transaction[]>([]);
   const [externalBillingData, setExternalBillingData] = useState<externalBillingData[]>([]);
-
+  const { user } = useAuth(); 
   // Use refs to avoid unnecessary fetches
   const hasFetchedPatients = useRef(false);
   const hasFetchedAppointments = useRef(false);
@@ -315,6 +316,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // ================ Fetch all patients only once per session
   const fetchAllPatients = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -343,6 +345,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     if (hasFetchedPatients.current) return;
     fetchAllPatients();
     hasFetchedPatients.current = true;
@@ -351,6 +354,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //============ Add new patient
   const addNewPatient = useCallback(
     async (credentials: newPatientData) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -372,6 +376,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //=========== Socket listeners
   useEffect(() => {
     if (!socket) return;
+    if (!user) return;
 
     const handlePatientAdded = ({ patients, next_of_kin }: any) => {
       setPatientsData(patients);
@@ -401,6 +406,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //=============== New report
   const newReport = useCallback(
     async (credentials: report) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -421,6 +427,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //================= Admit patient
   const admitPatient = useCallback(
     async (credentials: admission) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -443,6 +450,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //================ Queue patient
   const quePatient = useCallback(
     async (credentials: admission) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -464,6 +472,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   //================= Fetch queue list only once per session
   const fetchQueList = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -479,6 +488,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     if (hasFetchedQueue.current) return;
     fetchQueList();
     hasFetchedQueue.current = true;
@@ -487,6 +497,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //================= Queue actions
   const QueActions = useCallback(
     async (credentials: QueActions) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -508,6 +519,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Fetch admitted patient report only once per session
   const fetch_Admitted_Patient_Report = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -523,6 +535,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     if (hasFetchedAdmittedReports.current) return;
     fetch_Admitted_Patient_Report();
     hasFetchedAdmittedReports.current = true;
@@ -531,6 +544,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Fetch patient report
   const fetchPatientReport = useCallback(
     async (credentials: discharge) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -551,6 +565,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //================== Discharge patient
   const dischargePatient = useCallback(
     async (credentials: discharge) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -572,6 +587,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //================ Add appointment
   const addAppointment = useCallback(
     async (credentials: appointment) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -590,6 +606,8 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   //============== Fetch appointments only once per session
   const fetchAppointment = useCallback(async () => {
+    if (!user) return;
+    if (hasFetchedAppointments.current) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -604,6 +622,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     if (hasFetchedAppointments.current) return;
     fetchAppointment();
     hasFetchedAppointments.current = true;
@@ -611,6 +630,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   //================ Fetch pharmacy data
   const fetchPharmacyData = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -638,6 +658,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   //=========== fetch lab data
   const fetchLaboratoryData = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -655,6 +676,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //=========== Update pharmacy order status
   const updatePharmacyOrderStatus = useCallback(
     async (credentials: pharmacyOrderStatus) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -677,6 +699,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //================ Update laboratory order status
   const updateLaboratoryOrderStatus = useCallback(
     async (credentials: labOrderderStatus) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -698,6 +721,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Fetch ultrasound data
   const fetchUltrasoundData = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -715,6 +739,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //================= Update ultrasound order status
   const updateUltrasoundOrderStatus = useCallback(
     async (credentials: labOrderderStatus) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -735,6 +760,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   //================fetch x-ray ==========
   const fetchXrayData = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -752,6 +778,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //===================== Submit external order
   const submitExternalOrder = useCallback(
     async (credentials: externalOrder) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -772,6 +799,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // ======================Fetch external orders
   const fetchExternalOrder = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -793,6 +821,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //================Order result
   const orderResult = useCallback(
     async (credentials: orderResult) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -812,6 +841,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // =============== add new billing
   const newBilling = useCallback(async (credentials: billingDetails) => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.post(
@@ -829,6 +859,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // ============ fetch transactions
   const fetchTransactions = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(
@@ -843,6 +874,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     if (transactions.length === 0) {
       fetchTransactions();
     }
@@ -851,6 +883,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // ========= fetch a particular patient's payment history
   const fetchPatientPaymentHistory = useCallback(
     async (patientId: string) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.get(
@@ -870,6 +903,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //======== external billing ===============
   const externalBilling = useCallback(
     async (credentials: externalBilling) => {
+      if (!user) return;
       try {
         setLoading(true);
         const response = await axios.post(
@@ -889,6 +923,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   //================= fetch external billing records =================
   const fetchExternalBilling = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const response = await axios.get(

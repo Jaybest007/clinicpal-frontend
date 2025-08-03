@@ -191,6 +191,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   //===========delete patient data ===============
   const deletePatient = useCallback(
     async (patient_id: string) => {
+      
       if (!hospitalData) {
         toast.error("Unauthorized. Please login again.");
         return;
