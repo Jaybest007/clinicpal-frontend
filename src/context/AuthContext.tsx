@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState,  useCallback, useMemo } from "react";
+import React, { createContext, useContext, useState,   useCallback, useMemo } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -66,37 +66,25 @@ const hydrateUser = useCallback(async () => {
   setLoading(true);
 
   try {
-    console.log("🔍 Making request to protected route...");
-
     const response = await axios.get<AuthUser>(
       "https://clinicpal.onrender.com/api/auth/protected",
       {
-        withCredentials: true, // Required for cookie-based auth
+        withCredentials: true,
       }
     );
-
-    console.log("✅ User data received:", response.data);
-
     setUser(response.data);
     setUserRole(response.data.role || "");
-  } catch (error: any) {
-    console.error("❌ Error fetching user:", error);
-
-    if (error.response) {
-      console.log("📡 Response data:", error.response.data);
-      console.log("📄 Response headers:", error.response.headers);
-      console.log("📊 Status code:", error.response.status);
-    } else if (error.request) {
-      console.log("🛰️ Request made but no response:", error.request);
-    } else {
-      console.log("⚙️ Other error:", error.message);
-    }
-
+  } catch {
     setUser(null);
     setUserRole("");
   } finally {
     setLoading(false);
   }
+}, []);
+
+React.useEffect(() => {
+  hydrateUser();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
 
 
