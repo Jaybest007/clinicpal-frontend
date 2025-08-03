@@ -67,7 +67,7 @@ const hydrateUser = useCallback(async () => {
 
   try {
     const response = await axios.get<AuthUser>(
-      "https://clinicpal.onrender.com/api/auth/protected",
+      "https://clinicpal.onrender.com/api/auth/protected", 
       {
         withCredentials: true,
       }
