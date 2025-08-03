@@ -72,7 +72,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Hydrate hospital data from backend (not localStorage)
   useEffect(() => {
-    axios.get<hospitalData>("https://clinicpal.onrender.com/api/protected", { withCredentials: true })
+    axios.get<hospitalData>("https://clinicpal.onrender.com/api/auth/protected", { withCredentials: true })
       .then((response) => {
         setHospitalData(response.data);
       })
@@ -112,6 +112,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const fetchStaffs = useCallback(async () => {
     if (fetchStaffsInProgress.current || !hospitalData || hospitalData.role !== "hospital") return;
     fetchStaffsInProgress.current = true;
+    if (!hospitalData) return;
     try {
       setLoading(true);
       const response = await axios.get("https://clinicpal.onrender.com/api/hospitals/fetchStaffs", { withCredentials: true });

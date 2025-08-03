@@ -342,14 +342,14 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   useEffect(() => {
     if (!user) return;
     if (hasFetchedPatients.current) return;
     fetchAllPatients();
     hasFetchedPatients.current = true;
-  }, [fetchAllPatients]);
+  }, [fetchAllPatients, user]); // <-- Add user as dependency
 
   //============ Add new patient
   const addNewPatient = useCallback(
@@ -444,7 +444,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchAllPatients]
+    [fetchAllPatients, user]
   );
 
   //================ Queue patient
@@ -467,7 +467,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchAllPatients]
+    [fetchAllPatients, user]
   );
 
   //================= Fetch queue list only once per session
@@ -485,14 +485,14 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   useEffect(() => {
     if (!user) return;
     if (hasFetchedQueue.current) return;
     fetchQueList();
     hasFetchedQueue.current = true;
-  }, [fetchQueList]);
+  }, [fetchQueList, user]); // <-- Add user as dependency
 
   //================= Queue actions
   const QueActions = useCallback(
@@ -532,14 +532,14 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   useEffect(() => {
     if (!user) return;
     if (hasFetchedAdmittedReports.current) return;
     fetch_Admitted_Patient_Report();
     hasFetchedAdmittedReports.current = true;
-  }, [fetch_Admitted_Patient_Report]);
+  }, [fetch_Admitted_Patient_Report, user]); // <-- Add user as dependency
 
   // Fetch patient report
   const fetchPatientReport = useCallback(
@@ -559,7 +559,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    []
+    [user]
   );
 
   //================== Discharge patient
@@ -581,7 +581,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchAllPatients]
+    [fetchAllPatients, user]
   );
 
   //================ Add appointment
@@ -601,7 +601,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    []
+    [user]
   );
 
   //============== Fetch appointments only once per session
@@ -619,14 +619,14 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   useEffect(() => {
     if (!user) return;
     if (hasFetchedAppointments.current) return;
     fetchAppointment();
     hasFetchedAppointments.current = true;
-  }, [fetchAppointment]);
+  }, [fetchAppointment, user]); // <-- Add user as dependency
 
   //================ Fetch pharmacy data
   const fetchPharmacyData = useCallback(async () => {
@@ -643,7 +643,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   // Fetch laboratory data
   const handleApiError = (err: any) => {
@@ -671,7 +671,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   //=========== Update pharmacy order status
   const updatePharmacyOrderStatus = useCallback(
@@ -693,7 +693,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchPharmacyData, fetchLaboratoryData]
+    [fetchPharmacyData, fetchLaboratoryData, user]
   );
 
   //================ Update laboratory order status
@@ -716,7 +716,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchLaboratoryData]
+    [fetchLaboratoryData, user]
   );
 
   // Fetch ultrasound data
@@ -734,7 +734,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   //================= Update ultrasound order status
   const updateUltrasoundOrderStatus = useCallback(
@@ -755,7 +755,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchUltrasoundData]
+    [fetchUltrasoundData, user]
   );
 
   //================fetch x-ray ==========
@@ -773,7 +773,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   //===================== Submit external order
   const submitExternalOrder = useCallback(
@@ -794,7 +794,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchUltrasoundData]
+    [fetchUltrasoundData, user]
   );
 
   // ======================Fetch external orders
@@ -816,7 +816,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   //================Order result
   const orderResult = useCallback(
@@ -836,7 +836,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    []
+    [user]
   );
 
   // =============== add new billing
@@ -855,7 +855,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   // ============ fetch transactions
   const fetchTransactions = useCallback(async () => {
@@ -871,14 +871,14 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   useEffect(() => {
     if (!user) return;
     if (transactions.length === 0) {
       fetchTransactions();
     }
-  }, [transactions, fetchTransactions]);
+  }, [transactions, fetchTransactions, user]); // <-- Add user as dependency
 
   // ========= fetch a particular patient's payment history
   const fetchPatientPaymentHistory = useCallback(
@@ -897,7 +897,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    []
+    [user]
   );
 
   //======== external billing ===============
@@ -918,7 +918,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    []
+    [user]
   );
 
   //================= fetch external billing records =================
@@ -935,7 +935,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); // <-- Add user as dependency
 
   // Memoize context value to avoid unnecessary rerenders
   const contextValue = useMemo(
