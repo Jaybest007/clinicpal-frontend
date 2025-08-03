@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -57,24 +57,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // ================= Provider =================
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true); // Start as loading
   const [userRole, setUserRole] = useState<string>("");
   const [tempInfo, setTempInfo] = useState<tempInfo[]>([]);
 
-  // ==== Hydrate user from backend (not localStorage) ====
-  useEffect(() => {
+  // Hydrate user from backend (on mount and after login/logout)
+  const hydrateUser = useCallback(async () => {
     setLoading(true);
-    axios.get<AuthUser>("https://clinicpal.onrender.com/api/auth/protected")
-      .then((response) => {
-        setUser(response.data);
-        setUserRole(response.data.role || "");
-      })
-      .catch(() => {
-        setUser(null);
-        setUserRole("");
-      })
-      .finally(() => setLoading(false));
+    try {
+      const response = await axios.get<AuthUser>("https://clinicpal.onrender.com/api/auth/protected");
+      setUser(response.data);
+      setUserRole(response.data.role || "");
+    } catch {
+      setUser(null);
+      setUserRole("");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    hydrateUser();
+    // Optionally, listen for cookie changes (not natively possible in JS, but you can trigger hydrateUser after login/logout)
+  }, [hydrateUser]);
 
   // ==== Login ====
   const login = useCallback(async (credentials: LoginData): Promise<AuthUser> => {
@@ -103,27 +108,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [hydrateUser]);
 
   // ==== Signup (User) ====
   const signup = useCallback(async (data: SignUpData): Promise<AuthUser> => {
     setLoading(true);
     try {
       await axios.post("https://clinicpal.onrender.com/api/auth/signup", data);
-
-      // Fetch user info after signup
-      const response = await axios.get<AuthUser>("https://clinicpal.onrender.com/api/auth/protected");
-      const newUser = response.data;
-
-      setUser(newUser);
-      setUserRole(newUser.role || "");
+      await hydrateUser();
       toast.success("Signup successful");
-
-      setTimeout(() => {
-        window.location.replace("/dashboard");
-      }, 100);
-
-      return newUser;
+      return user!;
     } catch (err: any) {
       const message =
         err?.response?.data?.error ||
@@ -134,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [hydrateUser, user]);
 
   // ==== Signup (Hospital) ====
   const hospital_Signup = useCallback(async (data: HospitalSignupData): Promise<void> => {
@@ -159,28 +153,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ==== Logout ====
   const logout = useCallback(async () => {
+    setLoading(true);
     try {
       await axios.post("https://clinicpal.onrender.com/api/auth/logout");
+      setUser(null);
+      setUserRole("");
+      toast.info("Logged out");
+      hydrateUser(); // Re-hydrate after logout
     } catch {}
-    setUser(null);
-    setUserRole("");
-    toast.info("Logged out");
-    window.location.replace("/login");
-  }, []);
+    finally {
+      setLoading(false);
+    }
+  }, [hydrateUser]);
+
+  // Memoize context value to avoid unnecessary rerenders
+  const contextValue = useMemo(() => ({
+    user,
+    loading,
+    userRole,
+    login,
+    signup,
+    logout,
+    hospital_Signup,
+    setTempInfo,
+    tempInfo
+  }), [user, loading, userRole, login, signup, logout, hospital_Signup, tempInfo]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        userRole,
-        login,
-        signup,
-        logout,
-        hospital_Signup,
-        setTempInfo, tempInfo
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

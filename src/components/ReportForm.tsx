@@ -3,6 +3,7 @@ import { FaTimes } from "react-icons/fa";
 import { useDashboard } from "../context/DashboardContext";
 import { useAuth } from "../context/AuthContext";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import { FiLoader } from "react-icons/fi";
 
 interface reportData {
   patient_id: string;
@@ -110,7 +111,7 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
     };
     const hasError = Object.values(newError).some((e) => e !== "");
     if (hasError) return setError((prev) => ({ ...prev, ...newError }));
-
+    
     try {
       await newReport({
         ...reportData,
@@ -297,7 +298,7 @@ const ReportForm = ({ isOpen, onClose, patient_id }: ReportFormProps) => {
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg shadow font-semibold transition"
               disabled={loading}
             >
-              {loading ? "Submitting..." : "Submit Report"}
+              {loading ? <FiLoader className="animate-spin" /> : "Submit Report"}
             </button>
           </div>
         </form>

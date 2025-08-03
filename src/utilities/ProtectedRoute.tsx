@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -9,24 +9,14 @@ type ProtectedRouteProps = {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Add a slight delay to prevent layout flicker on refresh
-    const timeout = setTimeout(() => {
-      setReady(true);
-    }, 200); // short enough not to be noticed, long enough to reduce jitter
-
-    return () => clearTimeout(timeout);
-  }, []);
-
-  useEffect(() => {
-    if (ready && !loading && !user) {
+    if (!loading && !user) {
       navigate("/login", { replace: true });
     }
-  }, [user, loading, ready, navigate]);
+  }, [user, loading, navigate]);
 
-  if (!ready || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-500 animate-pulse">
         Validating session...

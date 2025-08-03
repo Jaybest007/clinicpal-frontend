@@ -370,7 +370,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [socket]
+    [socket, user]
   );
 
   //=========== Socket listeners
@@ -401,7 +401,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       socket.off("quePatient", handleQuePatient);
       socket.off("queActions", handleQueActions);
     };
-  }, [socket]);
+  }, [socket, user]);
 
   //=============== New report
   const newReport = useCallback(
@@ -421,7 +421,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    []
+    [user]
   );
 
   //================= Admit patient
@@ -514,7 +514,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(false);
       }
     },
-    [fetchQueList]
+    [fetchQueList, user]
   );
 
   // Fetch admitted patient report only once per session
