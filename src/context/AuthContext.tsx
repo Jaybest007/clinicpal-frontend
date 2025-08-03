@@ -62,24 +62,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tempInfo, setTempInfo] = useState<tempInfo[]>([]);
 
   // Hydrate user from backend (on mount and after login/logout)
-  const hydrateUser = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get<AuthUser>("https://clinicpal.onrender.com/api/auth/protected");
-      setUser(response.data);
-      setUserRole(response.data.role || "");
-    } catch {
-      setUser(null);
-      setUserRole("");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+const hydrateUser = useCallback(async () => {
+  setLoading(true);
 
-  useEffect(() => {
-    hydrateUser();
-    // Optionally, listen for cookie changes (not natively possible in JS, but you can trigger hydrateUser after login/logout)
-  }, [hydrateUser]);
+  try {
+    console.log("🔍 Making request to protected route...");
+
+    const response = await axios.get<AuthUser>(
+      "https://clinicpal.onrender.com/api/auth/protected",
+      {
+        withCredentials: true, // Required for cookie-based auth
+      }
+    );
+
+    console.log("✅ User data received:", response.data);
+
+    setUser(response.data);
+    setUserRole(response.data.role || "");
+  } catch (error: any) {
+    console.error("❌ Error fetching user:", error);
+
+    if (error.response) {
+      console.log("📡 Response data:", error.response.data);
+      console.log("📄 Response headers:", error.response.headers);
+      console.log("📊 Status code:", error.response.status);
+    } else if (error.request) {
+      console.log("🛰️ Request made but no response:", error.request);
+    } else {
+      console.log("⚙️ Other error:", error.message);
+    }
+
+    setUser(null);
+    setUserRole("");
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
   // ==== Login ====
   const login = useCallback(async (credentials: LoginData): Promise<AuthUser> => {
