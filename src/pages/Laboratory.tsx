@@ -141,12 +141,14 @@ export const Laboratory = () => {
           <>
             {/* Stat cards */}
             {!orderHistory && viewType === "internal" && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                <StatCard icon={RiFileList3Fill} title="Total Orders" value={labData.length} />
-                <StatCard icon={MdOutlinePendingActions} title="Pending" value={labData.filter(order => order.status === "pending").length} />
-                <StatCard icon={AiOutlineFileDone} title="Processing" value={labData.filter(order => order.status === "processing").length} />
-                <StatCard icon={BiTask} title="Completed" value={labData.filter(order => order.status === "completed").length} />
-                <StatCard icon={BiTaskX} title="Cancelled" value={labData.filter(order => order.status === "cancelled").length} />
+              <div className="overflow-x-auto pb-2">
+                <div className="flex gap-3 min-w-max">
+                  <StatCard icon={RiFileList3Fill} title="Total Orders" value={labData.length} />
+                  <StatCard icon={MdOutlinePendingActions} title="Pending" value={labData.filter(order => order.status === "pending").length} />
+                  <StatCard icon={AiOutlineFileDone} title="Processing" value={labData.filter(order => order.status === "processing").length} />
+                  <StatCard icon={BiTask} title="Completed" value={labData.filter(order => order.status === "completed").length} />
+                  <StatCard icon={BiTaskX} title="Cancelled" value={labData.filter(order => order.status === "cancelled").length} />
+                </div>
               </div>
             )}
 

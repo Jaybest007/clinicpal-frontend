@@ -52,6 +52,11 @@ export function Xray() {
   const [orderResultModal, setOrderResultModal] = useState(false);
   const [orderResultsValue, setOrderResultsValue] = useState<string>("");
 
+  useEffect(() => {
+      fetchXrayData();
+      fetchExternalOrder();
+    }, [fetchXrayData, fetchExternalOrder]);
+
   const openModal = (order?: Order) => {
     if (order) setSelectedOrder(order);
     setModalOpen(true);
@@ -110,13 +115,16 @@ export function Xray() {
           <>
             {viewType === "internal" && (
               <>
-                <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-7">
-                  <StatCard icon={MdOutlineInventory} title="Total Orders" value={xrayData.length} />
-                  <StatCard icon={BiTask} title="Pending Orders" value={xrayData.filter(order => order.status === "pending").length} />
-                  <StatCard icon={BiTask} title="Processing Orders" value={xrayData.filter(order => order.status === "processing").length} />
-                  <StatCard icon={BiTask} title="Completed Orders" value={xrayData.filter(order => order.status === "completed").length} />
-                  <StatCard icon={FaTimes} title="Canceled Orders" value={xrayData.filter(order => order.status === "cancelled").length} />
+                <div className="overflow-x-auto pb-2">
+                  <div className="flex gap-3 min-w-max px-1">
+                    <StatCard icon={MdOutlineInventory} title="Total Orders" value={xrayData.length} />
+                    <StatCard icon={BiTask} title="Pending Orders" value={xrayData.filter(order => order.status === "pending").length} />
+                    <StatCard icon={BiTask} title="Processing Orders" value={xrayData.filter(order => order.status === "processing").length} />
+                    <StatCard icon={BiTask} title="Completed Orders" value={xrayData.filter(order => order.status === "completed").length} />
+                    <StatCard icon={FaTimes} title="Canceled Orders" value={xrayData.filter(order => order.status === "cancelled").length} />
+                  </div>
                 </div>
+
 
                 <InternalOrder
                   orders={xrayData}

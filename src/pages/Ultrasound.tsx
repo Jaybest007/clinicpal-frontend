@@ -122,13 +122,16 @@ export const Ultrasound = () => {
             {/* INTERNAL ORDER VIEW */}
             {viewType === "internal" && (
               <>
-              <div className="grid grid-cols-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-7">
-                <StatCard icon={MdOutlineInventory} title="Total Orders" value={ultrasoundData.length} />
-                <StatCard icon={BiTask} title="Pending Orders" value={ultrasoundData.filter(order => order.status === "pending").length} />
-                <StatCard icon={BiTask} title="Processing Orders" value={ultrasoundData.filter(order => order.status === "processing").length} />
-                <StatCard icon={BiTask} title="Completed Orders" value={ultrasoundData.filter(order => order.status === "completed").length} />
-                <StatCard icon={FaTimes} title="Canceled Orders" value={ultrasoundData.filter(order => order.status === "cancelled").length} />
+              <div className="overflow-x-auto pb-2">
+                <div className="flex gap-3 min-w-max">
+                  <StatCard icon={MdOutlineInventory} title="Total Orders" value={ultrasoundData.length} />
+                  <StatCard icon={BiTask} title="Pending Orders" value={ultrasoundData.filter(order => order.status === "pending").length} />
+                  <StatCard icon={BiTask} title="Processing Orders" value={ultrasoundData.filter(order => order.status === "processing").length} />
+                  <StatCard icon={BiTask} title="Completed Orders" value={ultrasoundData.filter(order => order.status === "completed").length} />
+                  <StatCard icon={FaTimes} title="Canceled Orders" value={ultrasoundData.filter(order => order.status === "cancelled").length} />
+                </div>
               </div>
+
 
               <InternalOrder
                 orders={ultrasoundData}
