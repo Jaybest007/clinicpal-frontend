@@ -4,6 +4,7 @@ import { DischargeBtn } from './DischargeBtn';
 import { ReportBtn } from './ReportBtn';
 import { useAuth } from '../context/AuthContext';
 import { MdWarning } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 
 const AdmittedPage = () => {
   const { patientsData } = useDashboard();
@@ -11,6 +12,7 @@ const AdmittedPage = () => {
   const admittedPatients = patientsData.filter(patient => patient.admission_status === true);
   const [confirmPage, setConfirmPage] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
+  const navigate = useNavigate();
 
   return (
     <section className="mt-6 mb-8 bg-white border border-gray-200 shadow-lg rounded-2xl overflow-hidden">
@@ -23,6 +25,7 @@ const AdmittedPage = () => {
         <table className="min-w-full divide-y divide-gray-100 text-sm text-left">
           <thead className="bg-gray-100 text-gray-700 font-medium uppercase tracking-wider sticky top-0 z-10">
             <tr>
+              <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">ID</th>
               <th className="px-4 py-3">Name</th>
               <th className="hidden md:table-cell px-4 py-3">Date Admitted</th>
@@ -41,7 +44,12 @@ const AdmittedPage = () => {
               </tr>
             ) : (
               admittedPatients.map((patient, index) => (
-                <tr key={patient.patient_id} className="hover:bg-blue-50 transition">
+                <tr
+                  key={patient.patient_id}
+                  className="hover:bg-blue-50 transition"
+                  onClick={() => navigate(`/reports/${patient.patient_id}`)}
+                >
+                  <td className="px-4 py-3 font-mono text-blue-700">{index + 1}</td>
                   <td className="px-4 py-3 font-mono text-blue-700 font-semibold">{patient.patient_id.toUpperCase()}</td>
                   <td className="px-4 py-3 font-bold text-gray-800">{patient.full_name.toUpperCase()}</td>
                   <td className="hidden md:table-cell px-4 py-3 font-mono text-blue-700">
@@ -59,7 +67,8 @@ const AdmittedPage = () => {
                       {user?.role === 'doctor' && (
                         <button
                           className="bg-green-600 hover:bg-green-500 px-4 py-2 text-xs rounded-md text-white font-medium transition"
-                          onClick={() => {
+                          onClick={e => {
+                            e.stopPropagation();
                             setConfirmPage(true);
                             setSelectedPatientId(patient.patient_id);
                           }}
@@ -67,7 +76,11 @@ const AdmittedPage = () => {
                           Discharge
                         </button>
                       )}
-                      <ReportBtn patient_id={patient.patient_id} />
+                      <span
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <ReportBtn patient_id={patient.patient_id} />
+                      </span>
                     </div>
                   </td>
                 </tr>

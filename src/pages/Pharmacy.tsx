@@ -123,7 +123,7 @@ export const Pharmacy = () => {
 
         {/* Order Table */}
         {orderData && (
-          <section className="bg-white rounded-xl shadow border border-slate-200 p-2 md:p-4 overflow-x-auto transition-all duration-300">
+          <section className="overflow-x-auto bg-white shadow-md rounded-xl border border-slate-200 p-2 md:p-4">
             {loading && (
               <div className="text-blue-600 animate-pulse text-sm mb-4 transition-opacity duration-300">Fetching latest orders from server...</div>
             )}
@@ -133,85 +133,101 @@ export const Pharmacy = () => {
             )}
 
             {!loading && pharmacyData.length > 0 && (
-              <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm transition-all duration-300">
-                <thead className="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
+              <table className="w-full text-xs md:text-sm text-left text-gray-700">
+                <thead className="bg-slate-50 border-b-2 border-slate-200">
                   <tr>
-                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">No</th>
-                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Date</th>
-                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Name</th>
-                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Order</th>
-                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Status</th>
-                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Sent by</th>
-                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Actions</th>
+                    <th className="px-4 py-3">No</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Name</th>
+                    <th className="px-4 py-3 max-w-[90px] md:max-w-[200px] truncate">Order</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Sent by</th>
+                    <th className="px-4 py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {!loading && pharmacyData.filter(order => order.status === "pending" || order.status === "processing").length === 0 && (
+                  {!loading && pharmacyData.filter(order => order.status === "pending" || order.status === "processing").length === 0 ? (
                     <tr>
                       <td colSpan={8} className="text-gray-500 py-6 text-center transition-opacity duration-300">No orders found.</td>
                     </tr>
+                  ) : (
+                    pharmacyData.filter(order => order.status === "pending").map((order, index) => (
+                      <tr className="odd:bg-white even:bg-slate-50 hover:bg-blue-50 transition-all duration-150"
+                        key={order.id}
+                        onClick={() => openModal(order)}
+                      >
+                        <td className="px-4 py-3 font-mono text-blue-700">{index + 1}</td>
+                        <td className="px-4 py-3 font-mono text-blue-700">{new Date(order.created_at).toLocaleString(undefined, {  timeStyle: 'short' })}</td>
+                        <td className="px-4 py-3 font-medium text-gray-900">{order.full_name?.toUpperCase()}</td>
+                        
+                        <td className="px-4 py-3 text-gray-700 truncate max-w-[90px] md:max-w-[200px]" title={order.order_data}>
+                          {order.order_data}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            order.status === "completed"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          } transition-colors duration-300`}>
+                            {order.status.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">{order.requested_by}</td>
+                        <td className="px-2 py-2 md:px-3 md:py-2 border-r">
+                          <div className="overflow-x-auto -mx-1">
+                            <div className="flex min-w-max gap-2 px-1">
+                              {/* 👁 View */}
+                              <button
+                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded-md whitespace-nowrap transition"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openModal(order);
+                                }}
+                                title="View Order"
+                              >
+                                View
+                              </button>
+
+                              {/* ❌ Cancel */}
+                              <button
+                                className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded-md whitespace-nowrap transition"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConfirmModal({
+                                    type: "cancelled",
+                                    patient_id: order.patient_id,
+                                    full_name: order.full_name,
+                                    id: order.id,
+                                  });
+                                }}
+                                title="Cancel Order"
+                              >
+                                Cancel
+                              </button>
+
+                              {/* ✅ Complete */}
+                              <button
+                                className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded-md whitespace-nowrap transition"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConfirmModal({
+                                    type: "complete",
+                                    patient_id: order.patient_id,
+                                    full_name: order.full_name,
+                                    id: order.id,
+                                  });
+                                }}
+                                title="Complete Order"
+                              >
+                                Complete
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+
+                      </tr>
+                    ))
                   )}
-                  {pharmacyData.filter(order => order.status === "pending").map((order, index) => (
-                    <tr className="hover:bg-blue-50 transition-colors duration-300 border-b border-gray-200"
-                      key={order.id}
-                      onClick={() => openModal(order)}
-                    >
-                      <td className="px-2 py-2 md:px-3 md:py-2 font-mono text-blue-700 border">{index + 1}</td>
-                      <td className="px-2 py-2 md:px-3 md:py-2 font-mono text-blue-700 border">{new Date(order.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</td>
-                      <td className="px-2 py-2 md:px-3 md:py-2 font-medium text-gray-900 border">{order.full_name?.toUpperCase()}</td>
-                      <td className="px-2 py-2 md:px-3 md:py-2 text-gray-700 border truncate max-w-[120px] md:max-w-[200px]" title={order.order_data}>
-                        {order.order_data}
-                      </td>
-                      <td className="px-2 py-2 md:px-3 md:py-2 border">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          order.status === "completed"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        } transition-colors duration-300`}>
-                          {order.status.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="px-2 py-2 md:px-3 md:py-2 text-gray-700 border">{order.requested_by}</td>
-                      <td className="px-2 py-2 md:px-3 md:py-2 border-r">
-                        <div className="flex flex-row flex-wrap gap-1 items-center">
-                          <button
-                            className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition"
-                            onClick={(e) => { e.stopPropagation(); openModal(order); }}
-                          >
-                            View
-                          </button>
-                          <button
-                            className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded transition"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setConfirmModal({
-                                type: "cancelled",
-                                patient_id: order.patient_id,
-                                full_name: order.full_name,
-                                id: order.id,
-                              });
-                            }}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded transition"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setConfirmModal({
-                                type: "complete",
-                                patient_id: order.patient_id,
-                                full_name: order.full_name,
-                                id: order.id
-                              });
-                            }}
-                          >
-                            Complete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
                 </tbody>
               </table>
             )}
