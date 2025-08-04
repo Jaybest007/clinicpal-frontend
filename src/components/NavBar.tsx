@@ -45,12 +45,12 @@ const NavBar = () => {
         {/* Logo */}
         <div className="flex items-center space-x-3">
           <Link to="/" className="flex items-center gap-2 text-xl font-bold tracking-wide text-white">
-            <img src={logo} alt="ClinicPal Logo" className="h-10 w-auto rounded-lg shadow-md" />
+            <img src={logo} alt="ClinicPal Logo" className="h-10 w-auto rounded-lg " />
           </Link>
         </div>
         {/* Hamburger for mobile */}
         <button
-          className="md:hidden flex items-center justify-center p-2 rounded-lg hover:bg-blue-800 transition"
+          className="md:hidden flex items-center justify-center p-2 rounded-lg hover:bg-blue-800 transition text-white"
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Close menu" : "Open menu"}
         >
@@ -106,10 +106,10 @@ const NavBar = () => {
         <div className="flex flex-col h-full py-6 px-4 space-y-2">
           <div className="flex items-center justify-between mb-6">
             <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white" onClick={() => setIsOpen(false)}>
-              <img src={logo} alt="ClinicPal Logo" className="h-8 w-auto rounded-lg shadow-md" />
+              <img src={logo} alt="ClinicPal Logo" className="h-8 w-auto rounded-lg" />
             </Link>
             <button
-              className="p-2 rounded-lg hover:bg-blue-900 transition"
+              className="p-2 rounded-lg hover:bg-blue-900 transition text-white"
               onClick={() => setIsOpen(false)}
               aria-label="Close menu"
             >
@@ -130,7 +130,7 @@ const NavBar = () => {
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all duration-200
                     ${isActive
                       ? 'bg-white text-blue-800 shadow'
-                      : 'bg-blue-700 text-white hover:bg-blue-900 hover:text-yellow-300'}
+                      : ' text-white hover:bg-blue-900 hover:text-yellow-300'}
                   `}
                   style={{ minWidth: 120, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                 >

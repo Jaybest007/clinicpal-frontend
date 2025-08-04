@@ -123,7 +123,7 @@ export const Pharmacy = () => {
 
         {/* Order Table */}
         {orderData && (
-          <section className="bg-white rounded-xl shadow border border-slate-200 p-3 md:p-4 overflow-x-auto transition-all duration-300">
+          <section className="bg-white rounded-xl shadow border border-slate-200 p-2 md:p-4 overflow-x-auto transition-all duration-300">
             {loading && (
               <div className="text-blue-600 animate-pulse text-sm mb-4 transition-opacity duration-300">Fetching latest orders from server...</div>
             )}
@@ -133,17 +133,16 @@ export const Pharmacy = () => {
             )}
 
             {!loading && pharmacyData.length > 0 && (
-              <table className="min-w-full divide-y divide-gray-200 text-sm transition-all duration-300">
+              <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm transition-all duration-300">
                 <thead className="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
                   <tr>
-                    <th className="px-3 py-2 text-left">No</th>
-                    <th className="px-3 py-2 text-left">Date</th>
-                    <th className="px-3 py-2 text-left">Name</th>
-                    <th className="px-3 py-2 text-left">Patient ID</th>
-                    <th className="px-3 py-2 text-left">Order</th>
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2 text-left">Sent by</th>
-                    <th className="px-3 py-2 text-left">Actions</th>
+                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">No</th>
+                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Date</th>
+                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Name</th>
+                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Order</th>
+                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Status</th>
+                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Sent by</th>
+                    <th className="px-2 py-2 md:px-3 md:py-2 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -157,14 +156,13 @@ export const Pharmacy = () => {
                       key={order.id}
                       onClick={() => openModal(order)}
                     >
-                      <td className="px-3 py-2 font-mono text-blue-700 border">{index + 1}</td>
-                      <td className="px-3 py-2 font-mono text-blue-700 border">{new Date(order.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</td>
-                      <td className="px-3 py-2 font-medium text-gray-900 border">{order.full_name?.toUpperCase()}</td>
-                      <td className="px-3 py-2 font-mono text-blue-700 border">{order.patient_id?.toUpperCase()}</td>
-                      <td className="px-3 py-2 text-gray-700 border truncate max-w-[200px]" title={order.order_data}>
+                      <td className="px-2 py-2 md:px-3 md:py-2 font-mono text-blue-700 border">{index + 1}</td>
+                      <td className="px-2 py-2 md:px-3 md:py-2 font-mono text-blue-700 border">{new Date(order.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</td>
+                      <td className="px-2 py-2 md:px-3 md:py-2 font-medium text-gray-900 border">{order.full_name?.toUpperCase()}</td>
+                      <td className="px-2 py-2 md:px-3 md:py-2 text-gray-700 border truncate max-w-[120px] md:max-w-[200px]" title={order.order_data}>
                         {order.order_data}
                       </td>
-                      <td className="px-3 py-2 border">
+                      <td className="px-2 py-2 md:px-3 md:py-2 border">
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           order.status === "completed"
                             ? "bg-green-100 text-green-700"
@@ -173,42 +171,44 @@ export const Pharmacy = () => {
                           {order.status.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-gray-700 border">{order.requested_by}</td>
-                      <td className="px-3 py-2 flex flex-col md:flex-row gap-2 border-r">
-                        <button
-                          className="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded text-white text-xs font-medium transition-colors duration-300"
-                          onClick={(e) => { e.stopPropagation(); openModal(order); }}
-                        >
-                          View
-                        </button>
-                        <button
-                          className="bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded text-sm transition-colors duration-300"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setConfirmModal({
-                              type: "cancelled",
-                              patient_id: order.patient_id,
-                              full_name: order.full_name,
-                              id: order.id,
-                            });
-                          }}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="bg-green-600 hover:bg-green-500 px-3 py-1.5 rounded text-white text-xs font-medium transition-colors duration-300"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setConfirmModal({
-                              type: "complete",
-                              patient_id: order.patient_id,
-                              full_name: order.full_name,
-                              id: order.id
-                            });
-                          }}
-                        >
-                          Complete
-                        </button>
+                      <td className="px-2 py-2 md:px-3 md:py-2 text-gray-700 border">{order.requested_by}</td>
+                      <td className="px-2 py-2 md:px-3 md:py-2 border-r">
+                        <div className="flex flex-row flex-wrap gap-1 items-center">
+                          <button
+                            className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition"
+                            onClick={(e) => { e.stopPropagation(); openModal(order); }}
+                          >
+                            View
+                          </button>
+                          <button
+                            className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmModal({
+                                type: "cancelled",
+                                patient_id: order.patient_id,
+                                full_name: order.full_name,
+                                id: order.id,
+                              });
+                            }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmModal({
+                                type: "complete",
+                                patient_id: order.patient_id,
+                                full_name: order.full_name,
+                                id: order.id
+                              });
+                            }}
+                          >
+                            Complete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
