@@ -15,7 +15,7 @@ const AdmittedPage = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="mt-6 mb-8 bg-white border border-gray-200 shadow-lg rounded-2xl overflow-hidden">
+    <section className="mb-8 bg-white border border-gray-200 shadow-lg rounded-2xl overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-white to-blue-50">
         <h2 className="text-2xl font-bold text-blue-900">Admitted Patients</h2>
         <p className="text-sm text-gray-500">Patients receiving in-patient care see records, update status, and export reports.</p>

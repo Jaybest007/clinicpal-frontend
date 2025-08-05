@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
-import { MdOutlinePendingActions } from "react-icons/md";
+import { MdOutlinePendingActions, MdOutlineInventory } from "react-icons/md";
 import NavBar from "../components/NavBar";
 import StatCard from "../components/StatCard";
 import { useDashboard } from "../context/DashboardContext";
-
+import { motion, AnimatePresence } from "framer-motion";
 import { BiTask, BiTaskX } from "react-icons/bi";
 import { AiOutlineFileDone } from "react-icons/ai";
-import { RiFileList3Fill } from "react-icons/ri";
+
 import OrderForm from "../components/OrderForm";
 import { useAuth } from "../context/AuthContext";
 import { DepartmentsReport } from "../components/DepartmentsReport";
 import { ExternalOrder } from "../components/ExternalOrder";
-
-import { InternalOrder } from "../components/InternalOrder";
+// Removed unused FiLoader, FiSearch, FiX, FiClipboard, FiFileText, FiCheck imports
+import { InternalOrder } from "../components/InternalOrder"; // Add this import
 import { OrderResult } from "../components/OrderResult";
-import { OrderHeaderControls } from "../components/OrderHeaderControls";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import { ViewOrderDetail } from "../components/ViewOrderDetail";
+import { OrderHeaderControls } from "../components/OrderHeaderControls";
 
 // Types for lab orders and confirmation modal
 interface LabOrder {
@@ -53,18 +53,18 @@ export const Laboratory = () => {
   const [orderResultsValue, setOrderResultsValue] = useState("");
   const [orderHistory, setOrderHistory] = useState(false);
   const [resultLoading, setResultLoading] = useState(false);
+  // Removed unused searchTerm and setSearchTerm state
   const { user } = useAuth();
 
-  // Add these two state hooks:
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
+    document.title = "Laboratory Management - ClinicPal";
     fetchLaboratoryData();
     fetchExternalOrder();
   }, [fetchLaboratoryData, fetchExternalOrder]);
 
- 
   // Close order details modal
   const closeModal = () => {
     setSelectedOrder(null);
@@ -88,6 +88,7 @@ export const Laboratory = () => {
       updated_at: new Date().toISOString(),
     });
     setConfirmModal(null);
+    fetchLaboratoryData();
   };
 
   // Sync orderResultsValue with selectedOrder.result when modal opens
@@ -115,13 +116,23 @@ export const Laboratory = () => {
     setResultLoading(false);
   };
 
+  // Calculate stats for trend indicators
+  const pendingOrders = labData.filter(order => order.status === "pending").length;
+  const processingOrders = labData.filter(order => order.status === "processing").length;
+  const completedOrders = labData.filter(order => order.status === "completed").length;
+  const cancelledOrders = labData.filter(order => order.status === "cancelled").length;
+  
+  const pendingTrend = pendingOrders > 0 ? Math.min(Math.round(pendingOrders / Math.max(labData.length, 1) * 100), 100) : 0;
+  const processingTrend = processingOrders > 0 ? Math.min(Math.round(processingOrders / Math.max(labData.length, 1) * 100), 100) : 0;
+  const completionRate = labData.length > 0 ? Math.round((completedOrders / labData.length) * 100) : 0;
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100">
       <NavBar />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
+      <main className="flex-1 w-full max-w-7xl mx-auto pt-20 px-4 sm:px-6 lg:px-8 pb-6 space-y-4">
         <OrderHeaderControls
-          department="Laboratory"
+          department="lab"
           viewType={viewType}
           setViewType={setViewType}
           loading={loading}
@@ -134,61 +145,112 @@ export const Laboratory = () => {
 
         {/* Show only DepartmentsReport if orderHistory is true */}
         {orderHistory ? (
-          <div className="transition-all duration-300">
-            <DepartmentsReport department={"lab"} />
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key="history"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="transition-all duration-300"
+            >
+              <DepartmentsReport department={"lab"} />
+            </motion.div>
+          </AnimatePresence>
         ) : (
-          <>
-            {/* Stat cards */}
-            {!orderHistory && viewType === "internal" && (
-              <div className="overflow-x-auto pb-2">
-                <div className="flex gap-3 min-w-max">
-                  <StatCard icon={RiFileList3Fill} title="Total Orders" value={labData.length} />
-                  <StatCard icon={MdOutlinePendingActions} title="Pending" value={labData.filter(order => order.status === "pending").length} />
-                  <StatCard icon={AiOutlineFileDone} title="Processing" value={labData.filter(order => order.status === "processing").length} />
-                  <StatCard icon={BiTask} title="Completed" value={labData.filter(order => order.status === "completed").length} />
-                  <StatCard icon={BiTaskX} title="Cancelled" value={labData.filter(order => order.status === "cancelled").length} />
-                </div>
-              </div>
-            )}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={viewType}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Internal Orders View */}
+              {viewType === "internal" && (
+                <>
+                  {/* Stat cards */}
+                  <div className="overflow-x-auto pb-2">
+                    <div className="flex gap-3 min-w-max">
+                      <StatCard 
+                        icon={MdOutlineInventory} 
+                        title="Total Orders" 
+                        value={labData.length}
+                        subtitle="All lab orders"
+                        variant="primary" 
+                        trend={{ value: 0, isUpGood: true }}
+                      />
+                      <StatCard 
+                        icon={MdOutlinePendingActions} 
+                        title="Pending" 
+                        value={pendingOrders}
+                        subtitle="Need attention"
+                        variant="warning" 
+                        trend={{ value: pendingTrend, isUpGood: false }}
+                      />
+                      <StatCard 
+                        icon={AiOutlineFileDone} 
+                        title="Processing" 
+                        value={processingOrders}
+                        subtitle="In progress"
+                        variant="info" 
+                        trend={{ value: processingTrend, isUpGood: false }}
+                      />
+                      <StatCard 
+                        icon={BiTask} 
+                        title="Completed" 
+                        value={completedOrders}
+                        subtitle="All time"
+                        variant="success" 
+                        trend={{ value: completionRate, isUpGood: true }}
+                      />
+                      <StatCard 
+                        icon={BiTaskX} 
+                        title="Cancelled" 
+                        value={cancelledOrders}
+                        subtitle="All time"
+                        variant="danger" 
+                        trend={{ value: 0, isUpGood: true }}
+                      />
+                    </div>
+                  </div>
 
-            {/* Internal Orders Table */}
-            {viewType === "internal" && (
-              <InternalOrder
-                loading={loading}
-                orders={labData}
-                openModal={openModal}
-                setSelectedOrder={setSelectedOrder}
-                setConfirmModal={setConfirmModal}
-                setOrderResultModal={setOrderResultModal}
-                setOrderResultsValue={setOrderResultsValue}
-              />
-            )}
-
-            {/* External Orders View */}
-            {viewType === "external" && (
-              <ExternalOrder loading={loading} orderType="lab" />
-            )}
-          </>
+                  {/* Internal Orders Table */}
+                  <InternalOrder
+                    orders={labData}  // Fixed: using labData instead of ultrasoundData
+                    openModal={openModal}
+                    setSelectedOrder={setSelectedOrder}
+                    setConfirmModal={setConfirmModal}
+                    setOrderResultModal={setOrderResultModal}
+                    setOrderResultsValue={setOrderResultsValue}
+                    loading={loading}
+                  />
+                </>
+              )}
+            
+              {/* External Orders View */}
+              {viewType === "external" && (
+                <ExternalOrder loading={loading} orderType="lab" />
+              )}
+            </motion.div>
+          </AnimatePresence>
         )}
-        
       </main>
 
       {/* Order Details Modal */}
       {showModal && selectedOrder && (
         <ViewOrderDetail open={showModal} order={selectedOrder} onClose={closeModal} />
-        
       )}
 
       {/* Confirmation Modal for actions */}
       {confirmModal && (
-              <ConfirmActionModal
-                open={!!confirmModal}
-                order={confirmModal.order}
-                type={confirmModal.type}
-                onCancel={() => setConfirmModal(null)}
-                onConfirm={handleActionConfirm}
-              />
+        <ConfirmActionModal
+          open={!!confirmModal}
+          order={confirmModal.order}
+          type={confirmModal.type}
+          onCancel={() => setConfirmModal(null)}
+          onConfirm={handleActionConfirm}
+        />
       )}
 
       {/* Result form modal */}
@@ -209,23 +271,25 @@ export const Laboratory = () => {
       {/* New Order Form Modal */}
       <OrderForm
         isOpen={modalOpen}
-              onClose={() => setModalOpen(false)}
-              onSubmit={async (data) => {
-              if (
-                data.order_type === "lab" ||
-                data.order_type === "xray" ||
-                data.order_type === "ultrasound" ||
-                data.order_type === "motuary"
-              ) {
-                await submitExternalOrder({
-                  full_name: data.full_name,
-                  age: data.age,
-                  order_type: data.order_type,
-                  order_data: data.description,
-                  sent_by: data.sent_by
-                });
-              }
-              }}
+        onClose={() => setModalOpen(false)}
+        onSubmit={async (data) => {
+          if (
+            data.order_type === "lab" ||
+            data.order_type === "xray" ||
+            data.order_type === "ultrasound" ||
+            data.order_type === "motuary"
+          ) {
+            await submitExternalOrder({
+              full_name: data.full_name,
+              age: data.age,
+              order_type: data.order_type,
+              order_data: data.description,
+              sent_by: data.sent_by
+            });
+            fetchExternalOrder();
+            setModalOpen(false);
+          }
+        }}
       />
     </div>
   );

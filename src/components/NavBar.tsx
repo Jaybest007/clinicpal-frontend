@@ -1,147 +1,237 @@
-import { useState, useEffect } from 'react';
-import {
-  FiMenu,
-  FiHome,
-  FiCalendar,
-  FiUser,
-  FiLogOut,
-  FiBook,
-  FiX,
-} from 'react-icons/fi';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FiMenu, FiX, FiChevronDown, FiHome, FiUser, FiBook, FiCalendar, FiLogOut } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import logo from "../assets/logo1.png";
 import { GiMedicines, GiMicroscope } from 'react-icons/gi';
 import { RiScan2Fill } from 'react-icons/ri';
 
+type NavItem = {
+  name: string;
+  icon: React.ReactElement;
+  path: string;
+  action?: () => void;
+};
+
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const location = useLocation();
   const { user, logout } = useAuth();
   const currentPath = location.pathname;
   const navigate = useNavigate();
 
-  const navItems = [
-    { name: 'Dashboard', icon: <FiHome />, path: '/dashboard' },
-    ...(user?.role === 'doctor' || user?.role === 'super admin' ? [{ name: 'Appointments', icon: <FiCalendar />, path: '/appointments' }] : []),
-    { name: 'Patients', icon: <FiUser />, path: '/patients' },
-    { name: 'Reports', icon: <FiBook />, path: '/reports' },
-    { name: 'Pharmacy', icon: <GiMedicines />, path: '/pharmacy' },
-    { name: 'Laboratory', icon: <GiMicroscope />, path: '/laboratory' },
-    { name: 'Ultrasound', icon: <RiScan2Fill />, path: '/ultrasound' },
-    ...(user?.role === 'xray' || user?.role === 'super admin' ? [{ name: 'X-Ray', icon: <RiScan2Fill />, path: '/xray' }] : []),
-    ...(user?.role === 'cashier' || user?.role === 'super admin' ? [{ name: 'Cashier', icon: <FiBook />, path: '/cashier' }] : []),
-    { name: 'Logout', icon: <FiLogOut />, path: '/login', action: () => { logout(); navigate("/login", { replace: true }); } },
-  ];
+  // Organize nav items by category
+  const getNavItems = () => {
+    const items: Record<string, NavItem[]> = {
+      main: [
+        { name: 'Dashboard', icon: <FiHome />, path: '/dashboard' },
+      ],
+      patient: [
+        { name: 'Patients', icon: <FiUser />, path: '/patients' },
+        { name: 'Reports', icon: <FiBook />, path: '/reports' },
+        ...(user?.role === 'doctor' || user?.role === 'super admin' 
+          ? [{ name: 'Appointments', icon: <FiCalendar />, path: '/appointments' }] 
+          : []
+        ),
+      ],
+      medical: [
+        { name: 'Pharmacy', icon: <GiMedicines />, path: '/pharmacy' },
+        { name: 'Laboratory', icon: <GiMicroscope />, path: '/laboratory' },
+        { name: 'Ultrasound', icon: <RiScan2Fill />, path: '/ultrasound' },
+        ...(user?.role === 'xray' || user?.role === 'super admin' 
+          ? [{ name: 'X-Ray', icon: <RiScan2Fill />, path: '/xray' }] 
+          : []
+        ),
+      ],
+      admin: [
+        ...(user?.role === 'cashier' || user?.role === 'super admin' 
+          ? [{ name: 'Cashier', icon: <FiBook />, path: '/cashier' }] 
+          : []
+        ),
+        { 
+          name: 'Logout', 
+          icon: <FiLogOut />, 
+          path: '/login', 
+          action: () => { 
+            logout(); 
+            navigate("/login", { replace: true }); 
+          } 
+        },
+      ],
+    };
 
-  // Auto-close mobile menu on route change
+    // Filter out empty categories
+    return Object.fromEntries(
+      Object.entries(items).filter(([_, items]) => items.length > 0)
+    );
+  };
+
+  const navGroups = getNavItems();
+
+  // Close mobile menu on route change
   useEffect(() => {
     setIsOpen(false);
-  }, [location.pathname]);
+    setActiveDropdown(null);
+  }, [currentPath]);
+
+  // Close menu on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false);
+        setActiveDropdown(null);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <nav className="relative w-full bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 shadow-lg z-50 border-b border-blue-900">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center space-x-3">
-          <Link to="/" className="flex items-center gap-2 text-xl font-bold tracking-wide text-white">
-            <img src={logo} alt="ClinicPal Logo" className="h-10 w-auto rounded-lg " />
-          </Link>
-        </div>
-        {/* Hamburger for mobile */}
-        <button
-          className="md:hidden flex items-center justify-center p-2 rounded-lg hover:bg-blue-800 transition text-white"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-        >
-          {isOpen ? <FiX size={28} /> : <FiMenu size={28} />}
-        </button>
+    <nav className="fixed top-0 left-0 right-0 z-50 ">
+      {/* Backdrop */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-        {/* Minimalist Desktop Navigation */}
-        <div className="hidden md:flex flex-1 justify-end items-center">
-          <div className="flex gap-2">
-            {navItems.map((item) => {
-              const isActive = currentPath === item.path;
-              return (
-                <div key={item.name} className="group relative">
+      {/* Main Navigation Bar */}
+      <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo Section */}
+            <div className="flex-shrink-0 flex items-center">
+              <img className="h-10 w-auto" src={logo} alt="ClinicPal" />
+              
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex lg:items-center lg:space-x-1">
+              {Object.entries(navGroups).map(([category, items]) => (
+                <div key={category} className="relative">
                   <button
-                    onClick={() => {
-                      if (item.action) item.action();
-                      else navigate(item.path);
-                    }}
-                    className={`flex items-center justify-center px-3 py-2 rounded-lg transition-all duration-200
-                      ${isActive
-                        ? 'bg-white text-blue-800 shadow-md'
-                        : 'bg-blue-600 text-white hover:bg-blue-800'}
-                    `}
-                    style={{ width: 48, height: 48 }}
+                    onClick={() => setActiveDropdown(activeDropdown === category ? null : category)}
+                    className={`flex items-center px-3 py-2 rounded-md text-white hover:bg-blue-600 transition-colors
+                      ${activeDropdown === category ? 'bg-blue-600' : ''}`}
                   >
-                    <span className="text-xl">{item.icon}</span>
+                    <span className="font-medium">
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </span>
+                    <FiChevronDown className={`ml-1 transform transition-transform duration-200 
+                      ${activeDropdown === category ? 'rotate-180' : ''}`} 
+                    />
                   </button>
-                  {/* Tooltip on hover */}
-                  <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-3 py-1 rounded bg-blue-900 text-white text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                    {item.name}
-                  </span>
+
+                  {/* Desktop Dropdown */}
+                  <AnimatePresence>
+                    {activeDropdown === category && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                      >
+                        <div className="py-1">
+                          {items.map((item) => (
+                            <button
+                              key={item.name}
+                              onClick={() => {
+                                if (item.action) item.action();
+                                else navigate(item.path);
+                                setActiveDropdown(null);
+                              }}
+                              className={`w-full flex items-center px-4 py-2 text-sm transition-colors
+                                ${currentPath === item.path
+                                  ? 'bg-blue-50 text-blue-700'
+                                  : 'text-gray-700 hover:bg-gray-100'
+                                }`}
+                            >
+                              <span className="mr-3 text-lg">{item.icon}</span>
+                              <span>{item.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+              ))}
+            </div>
 
-      {/* Mobile Navigation Overlay */}
-      <div
-        className={`fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setIsOpen(false)}
-        aria-hidden={!isOpen}
-      />
-
-      {/* Mobile Navigation Drawer */}
-      <div
-        className={`fixed top-0 right-0 h-full w-4/5 max-w-xs bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800 shadow-2xl z-50 transform transition-transform duration-300
-          ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        `}
-        style={{ borderLeft: '2px solid #1e3a8a' }}
-      >
-        <div className="flex flex-col h-full py-6 px-4 space-y-2">
-          <div className="flex items-center justify-between mb-6">
-            <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white" onClick={() => setIsOpen(false)}>
-              <img src={logo} alt="ClinicPal Logo" className="h-8 w-auto rounded-lg" />
-            </Link>
+            {/* Mobile Menu Button */}
             <button
-              className="p-2 rounded-lg hover:bg-blue-900 transition text-white"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close menu"
+              className="lg:hidden p-2 rounded-md text-white hover:bg-blue-600 transition-colors"
+              onClick={() => setIsOpen(true)}
+              aria-label="Open menu"
             >
-              <FiX size={24} />
+              <FiMenu size={24} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = currentPath === item.path;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => {
-                    if (item.action) item.action();
-                    else navigate(item.path);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all duration-200
-                    ${isActive
-                      ? 'bg-white text-blue-800 shadow'
-                      : ' text-white hover:bg-blue-900 hover:text-yellow-300'}
-                  `}
-                  style={{ minWidth: 120, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="truncate">{item.name}</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
       </div>
+
+      {/* Mobile Navigation */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.3 }}
+            className="fixed top-0 right-0 h-full w-[280px] bg-gradient-to-br from-blue-800 to-indigo-800 shadow-2xl z-50"
+          >
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between p-4 border-b border-blue-700">
+                <h2 className="text-xl font-bold text-white">Menu</h2>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 rounded-full hover:bg-blue-700 text-white transition-colors"
+                  aria-label="Close menu"
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto py-4">
+                {Object.entries(navGroups).map(([category, items]) => (
+                  <div key={category} className="px-4 mb-6">
+                    <div className="text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2 px-4">
+                      {category}
+                    </div>
+                    {items.map((item) => (
+                      <button
+                        key={item.name}
+                        onClick={() => {
+                          if (item.action) item.action();
+                          else navigate(item.path);
+                          setIsOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 mb-1
+                          ${currentPath === item.path
+                            ? 'bg-white text-blue-800 shadow-md'
+                            : 'text-white hover:bg-blue-700/50'
+                          }`}
+                      >
+                        <span className="text-lg">{item.icon}</span>
+                        <span className="truncate">{item.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

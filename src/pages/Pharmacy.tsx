@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { MdOutlineInventory } from "react-icons/md";
+import { MdOutlineInventory, MdMedication, MdHistory } from "react-icons/md";
 import NavBar from "../components/NavBar";
 import StatCard from "../components/StatCard";
 import { useDashboard } from "../context/DashboardContext";
-import { BiTask, BiTaskX } from "react-icons/bi";
+import { BiTask, BiTaskX, BiCheckCircle } from "react-icons/bi";
 import { DepartmentsReport } from "../components/DepartmentsReport";
-import { FiLoader, FiRefreshCw } from "react-icons/fi";
+import { FiLoader, FiRefreshCw,  FiCheck, FiX, FiSearch } from "react-icons/fi";
 import { ViewOrderDetail } from "../components/ViewOrderDetail";
+import { motion, AnimatePresence } from "framer-motion";
 
 type PharmacyOrder = {
   id: string;
@@ -18,12 +19,16 @@ type PharmacyOrder = {
   requested_by: string;
 };
 
+type OrderStatus = "all" | "pending" | "completed" | "cancelled";
+
 export const Pharmacy = () => {
   const { pharmacyData, fetchPharmacyData, loading, updatePharmacyOrderStatus } = useDashboard();
   const [selectedOrder, setSelectedOrder] = useState<PharmacyOrder | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [orderHistory, setOrderHistory] = useState(false);
   const [orderData, setOrderData] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<OrderStatus>("pending");
   const [confirmModal, setConfirmModal] = useState<null | {
     type: "complete" | "cancelled";
     patient_id: string;
@@ -32,6 +37,7 @@ export const Pharmacy = () => {
   }>(null);
 
   useEffect(() => {
+    document.title = "Pharmacy Management - ClinicPal";
     fetchPharmacyData();
   }, [fetchPharmacyData]);
 
@@ -58,210 +64,423 @@ export const Pharmacy = () => {
     fetchPharmacyData(); // Refresh after update
   };
 
-  // Stats calculation (fix: always use pharmacyData, not today's only)
+  // Stats calculation
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const isToday = (dateStr: string) => {
     const date = new Date(dateStr);
     return date >= today && date < new Date(today.getTime() + 24 * 60 * 60 * 1000);
   };
+  
   const todaysOrders = pharmacyData.filter(order => isToday(order.created_at));
   const totalOrders = todaysOrders.length;
   const pendingOrders = todaysOrders.filter(order => order.status === "pending").length;
   const completedOrders = todaysOrders.filter(order => order.status === "completed").length;
   const cancelledOrders = todaysOrders.filter(order => order.status === "cancelled").length;
+  
+  // Calculate trends based on 24-hour window (simplified example)
+  const pendingOrdersTrend = pendingOrders > 0 ? Math.min(Math.round(pendingOrders / Math.max(totalOrders, 1) * 100), 100) : 0;
+  const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+
+  // Filter function for orders
+  const filteredOrders = pharmacyData.filter(order => {
+    const matchesSearch = searchTerm === "" || 
+      order.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.patient_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.order_data.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  // Format date to be more readable
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return `Today, ${date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return `Yesterday, ${date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
+    } else {
+      return date.toLocaleDateString(undefined, { 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100">
       <NavBar />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-2 md:px-6 py-4 space-y-4">
-        {/* Header */}
-        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-3 rounded-t-xl shadow-sm">
-          <h1 className="text-lg md:text-xl font-semibold text-blue-900">Pharmacy Orders</h1>
-          <div className="mt-3 md:mt-0 flex w-full md:w-auto gap-2">
-            <button
-              onClick={fetchPharmacyData}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-md text-sm font-medium transition"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <FiLoader className="inline mr-1 mb-1 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <FiRefreshCw className="inline mr-2 mb-1" />
-                  Refresh
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => {
-                setOrderHistory(!orderHistory);
-                setOrderData(orderData ? false : true);
-              }}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition ${orderHistory ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-700"}`}
-            >
-              {orderHistory ? "Go Back" : "Order History"}
-            </button>
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 pt-20 md:px-6 pb-6 space-y-4">
+        {/* Header with Tabs */}
+        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-4 py-3">
+            <div className="flex items-center">
+              <MdMedication className="text-blue-600 w-6 h-6 mr-2" />
+              <h1 className="text-lg md:text-xl font-semibold text-blue-900">Pharmacy Management</h1>
+            </div>
+            <div className="mt-3 md:mt-0 flex flex-wrap w-full md:w-auto gap-2">
+              <button
+                onClick={fetchPharmacyData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm flex items-center"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <FiLoader className="mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <FiRefreshCw className="mr-2" />
+                    Refresh
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setOrderHistory(!orderHistory);
+                  setOrderData(!orderData);
+                }}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm flex items-center ${
+                  orderHistory 
+                    ? "bg-blue-600 text-white" 
+                    : "bg-white text-gray-700 border border-gray-300"
+                }`}
+              >
+                <MdHistory className="mr-2" />
+                {orderHistory ? "Current Orders" : "Order History"}
+              </button>
+            </div>
           </div>
+          
+          {!orderHistory && (
+            <div className="flex overflow-x-auto bg-gray-50 border-t border-gray-200">
+              <button 
+                className={`px-4 py-2 text-sm font-medium ${statusFilter === "pending" ? "text-blue-600 border-b-2 border-blue-500" : "text-gray-600 hover:text-blue-600"}`}
+                onClick={() => setStatusFilter("pending")}
+              >
+                Pending
+              </button>
+              <button 
+                className={`px-4 py-2 text-sm font-medium ${statusFilter === "completed" ? "text-blue-600 border-b-2 border-blue-500" : "text-gray-600 hover:text-blue-600"}`}
+                onClick={() => setStatusFilter("completed")}
+              >
+                Completed
+              </button>
+              <button 
+                className={`px-4 py-2 text-sm font-medium ${statusFilter === "cancelled" ? "text-blue-600 border-b-2 border-blue-500" : "text-gray-600 hover:text-blue-600"}`}
+                onClick={() => setStatusFilter("cancelled")}
+              >
+                Cancelled
+              </button>
+              <button 
+                className={`px-4 py-2 text-sm font-medium ${statusFilter === "all" ? "text-blue-600 border-b-2 border-blue-500" : "text-gray-600 hover:text-blue-600"}`}
+                onClick={() => setStatusFilter("all")}
+              >
+                All Orders
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Stats */}
+        {/* Stats Section */}
         {orderData && (
           <div className="overflow-x-auto pb-1">
             <div className="flex gap-2 min-w-max px-1">
-              <StatCard icon={MdOutlineInventory} title="Total Orders" value={totalOrders} />
-              <StatCard icon={BiTask} title="Pending Orders" value={pendingOrders} />
-              <StatCard icon={BiTask} title="Completed" value={completedOrders} />
-              <StatCard icon={BiTaskX} title="Cancelled" value={cancelledOrders} />
+              <StatCard 
+                icon={MdOutlineInventory} 
+                title="Total Orders" 
+                value={totalOrders}
+                subtitle="Today"
+                variant="primary" 
+                trend={{ value: 0, isUpGood: true }}
+              />
+              <StatCard 
+                icon={BiTask} 
+                title="Pending" 
+                value={pendingOrders}
+                subtitle="Need attention"
+                variant="warning" 
+                trend={{ value: pendingOrdersTrend, isUpGood: false }}
+              />
+              <StatCard 
+                icon={BiCheckCircle} 
+                title="Completed" 
+                value={completedOrders}
+                subtitle="Today"
+                variant="success" 
+                trend={{ value: completionRate, isUpGood: true }}
+              />
+              <StatCard 
+                icon={BiTaskX} 
+                title="Cancelled" 
+                value={cancelledOrders}
+                subtitle="Today"
+                variant="danger" 
+                trend={{ value: 0, isUpGood: true }}
+              />
             </div>
           </div>
         )}
 
-        {/* Order Table */}
-        {orderData && (
-          <section className="overflow-x-auto bg-white shadow-md rounded-xl border border-slate-200 p-2 md:p-4">
-            {loading && (
-              <div className="text-blue-600 animate-pulse text-sm mb-4 transition-opacity duration-300">Fetching latest orders from server...</div>
+        {/* Search bar - Only show when viewing orders */}
+        {orderData && !orderHistory && (
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by patient name, ID or medication..."
+              className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
             )}
+          </div>
+        )}
 
-            {!loading && pharmacyData.length === 0 && (
-              <div className="text-gray-500 py-6 text-center transition-opacity duration-300">No orders found.</div>
-            )}
+        {/* Order Table or Order History */}
+        <AnimatePresence mode="wait">
+          {orderData && !orderHistory && (
+            <motion.section 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white shadow-md rounded-xl border border-slate-200 overflow-hidden"
+            >
+              {/* Loading state */}
+              {loading && (
+                <div className="p-6 text-center">
+                  <div className="inline-block p-4 bg-blue-50 rounded-full mb-4">
+                    <FiLoader className="w-8 h-8 text-blue-600 animate-spin" />
+                  </div>
+                  <p className="text-blue-600 text-lg font-medium">Loading pharmacy orders...</p>
+                  <p className="text-gray-500 text-sm mt-1">Please wait while we fetch the latest data</p>
+                </div>
+              )}
 
-            {!loading && pharmacyData.length > 0 && (
-              <table className="w-full text-xs md:text-sm text-left text-gray-700">
-                <thead className="bg-slate-50 border-b-2 border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3">No</th>
-                    <th className="px-4 py-3">Date</th>
-                    <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3 max-w-[90px] md:max-w-[200px] truncate">Order</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Sent by</th>
-                    <th className="px-4 py-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {!loading && pharmacyData.filter(order => order.status === "pending" || order.status === "processing").length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="text-gray-500 py-6 text-center transition-opacity duration-300">No orders found.</td>
-                    </tr>
-                  ) : (
-                    pharmacyData.filter(order => order.status === "pending").map((order, index) => (
-                      <tr className="odd:bg-white even:bg-slate-50 hover:bg-blue-50 transition-all duration-150"
-                        key={order.id}
-                        onClick={() => openModal(order)}
-                      >
-                        <td className="px-4 py-3 font-mono text-blue-700">{index + 1}</td>
-                        <td className="px-4 py-3 font-mono text-blue-700">{new Date(order.created_at).toLocaleString(undefined, {  timeStyle: 'short' })}</td>
-                        <td className="px-4 py-3 font-medium text-gray-900">{order.full_name?.toUpperCase()}</td>
-                        
-                        <td className="px-4 py-3 text-gray-700 truncate max-w-[90px] md:max-w-[200px]" title={order.order_data}>
-                          {order.order_data}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            order.status === "completed"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-yellow-100 text-yellow-700"
-                          } transition-colors duration-300`}>
-                            {order.status.toUpperCase()}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-700">{order.requested_by}</td>
-                        <td className="px-2 py-2 md:px-3 md:py-2 border-r">
-                          <div className="overflow-x-auto -mx-1">
-                            <div className="flex min-w-max gap-2 px-1">
-                              {/* 👁 View */}
+              {/* Empty state */}
+              {!loading && filteredOrders.length === 0 && (
+                <div className="p-8 text-center">
+                  <div className="inline-block p-4 bg-gray-100 rounded-full mb-4">
+                    <MdMedication className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">No orders found</h3>
+                  <p className="text-gray-500 max-w-md mx-auto">
+                    {searchTerm 
+                      ? `No results found for "${searchTerm}". Try using different keywords or clear the search.`
+                      : statusFilter !== "all" 
+                        ? `There are no ${statusFilter} orders at the moment.` 
+                        : "There are no pharmacy orders at the moment."}
+                  </p>
+                </div>
+              )}
+
+              {/* Data table */}
+              {!loading && filteredOrders.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-700">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 py-3 w-12">#</th>
+                        <th className="px-4 py-3">Date</th>
+                        <th className="px-4 py-3">Patient</th>
+                        <th className="px-4 py-3">Medication</th>
+                        <th className="px-4 py-3 w-24">Status</th>
+                        <th className="px-4 py-3">Ordered By</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {filteredOrders.map((order, index) => (
+                        <tr 
+                          key={order.id}
+                          className="hover:bg-blue-50 transition-colors cursor-pointer"
+                          onClick={() => openModal(order)}
+                        >
+                          <td className="px-4 py-3.5 font-mono text-xs text-blue-700">{index + 1}</td>
+                          <td className="px-4 py-3.5 text-gray-700">
+                            {formatDate(order.created_at)}
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <div className="font-medium text-gray-900">{order.full_name}</div>
+                            <div className="text-xs text-gray-500">ID: {order.patient_id}</div>
+                          </td>
+                          <td className="px-4 py-3.5 text-gray-700">
+                            <div className="max-w-xs truncate" title={order.order_data}>
+                              {order.order_data}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <span className={`px-2.5 py-1 text-xs font-medium rounded-full inline-flex items-center ${
+                              order.status === "completed"
+                                ? "bg-green-100 text-green-800"
+                                : order.status === "cancelled" 
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                            }`}>
+                              {order.status === "completed" && <FiCheck className="mr-1 w-3 h-3" />}
+                              {order.status === "cancelled" && <FiX className="mr-1 w-3 h-3" />}
+                              {order.status === "pending" && <FiLoader className="mr-1 w-3 h-3" />}
+                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5 text-gray-700">{order.requested_by}</td>
+                          <td className="px-4 py-2.5 text-right">
+                            <div className="flex justify-end gap-2">
                               <button
-                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded-md whitespace-nowrap transition"
+                                className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center transition-colors"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   openModal(order);
                                 }}
-                                title="View Order"
                               >
+                                <FiSearch className="mr-1 w-3 h-3" />
                                 View
                               </button>
 
-                              {/* ❌ Cancel */}
-                              <button
-                                className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded-md whitespace-nowrap transition"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setConfirmModal({
-                                    type: "cancelled",
-                                    patient_id: order.patient_id,
-                                    full_name: order.full_name,
-                                    id: order.id,
-                                  });
-                                }}
-                                title="Cancel Order"
-                              >
-                                Cancel
-                              </button>
+                              {order.status === "pending" && (
+                                <>
+                                  <button
+                                    className="bg-red-100 text-red-700 hover:bg-red-200 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setConfirmModal({
+                                        type: "cancelled",
+                                        patient_id: order.patient_id,
+                                        full_name: order.full_name,
+                                        id: order.id,
+                                      });
+                                    }}
+                                  >
+                                    <FiX className="mr-1 w-3 h-3" />
+                                    Cancel
+                                  </button>
 
-                              {/* ✅ Complete */}
-                              <button
-                                className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded-md whitespace-nowrap transition"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setConfirmModal({
-                                    type: "complete",
-                                    patient_id: order.patient_id,
-                                    full_name: order.full_name,
-                                    id: order.id,
-                                  });
-                                }}
-                                title="Complete Order"
-                              >
-                                Complete
-                              </button>
+                                  <button
+                                    className="bg-green-100 text-green-700 hover:bg-green-200 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setConfirmModal({
+                                        type: "complete",
+                                        patient_id: order.patient_id,
+                                        full_name: order.full_name,
+                                        id: order.id,
+                                      });
+                                    }}
+                                  >
+                                    <FiCheck className="mr-1 w-3 h-3" />
+                                    Complete
+                                  </button>
+                                </>
+                              )}
                             </div>
-                          </div>
-                        </td>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </motion.section>
+          )}
 
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            )}
-          </section>
-        )}
-
-        {orderHistory && <div className="transition-all duration-300">
-          <DepartmentsReport department={"pharmacy"} />
-        </div>}
+          {orderHistory && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="transition-all duration-300"
+            >
+              <DepartmentsReport department="pharmacy" />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
-      {/* Modal */}
+      {/* Order Detail Modal */}
       {showModal && selectedOrder && (
         <ViewOrderDetail open={showModal} order={selectedOrder} onClose={closeModal} />
       )}
 
-      {/* 🔒 Confirmation Modal */}
+      {/* Confirmation Modal */}
       {confirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">Confirm Action</h2>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">
-              Are you sure you want to <strong>{confirmModal.type}</strong> <strong>{confirmModal.full_name}</strong>'s order?
-            </p>
-            <div className="flex justify-end gap-4">
-              <button className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded transition" onClick={() => setConfirmModal(null)}>No</button>
-              <button
-                className={`px-4 py-2 ${confirmModal.type === "complete" ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"} text-white rounded transition`}
-                onClick={handleActionConfirm}
-              >
-                Yes
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden"
+          >
+            <div className={`py-4 px-5 ${confirmModal.type === "complete" ? "bg-green-50" : "bg-red-50"}`}>
+              <h2 className={`text-lg font-semibold ${confirmModal.type === "complete" ? "text-green-800" : "text-red-800"}`}>
+                {confirmModal.type === "complete" ? "Complete Order" : "Cancel Order"}
+              </h2>
             </div>
-          </div>
+            
+            <div className="p-5">
+              <div className="mb-5">
+                <div className="text-sm text-gray-600 mb-1">Patient</div>
+                <div className="font-medium">{confirmModal.full_name}</div>
+                <div className="text-xs text-gray-500">ID: {confirmModal.patient_id}</div>
+              </div>
+              
+              <p className="text-gray-700 mb-6">
+                Are you sure you want to mark this order as <strong>{confirmModal.type}</strong>? 
+                {confirmModal.type === "complete" 
+                  ? " This will indicate that all medications have been dispensed."
+                  : " This will cancel the order and notify the requesting provider."}
+              </p>
+              
+              <div className="flex justify-end gap-3">
+                <button 
+                  onClick={() => setConfirmModal(null)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  className={`px-4 py-2 ${
+                    confirmModal.type === "complete" 
+                      ? "bg-green-600 hover:bg-green-700" 
+                      : "bg-red-600 hover:bg-red-700"
+                  } text-white rounded-lg transition-colors text-sm font-medium flex items-center`}
+                  onClick={handleActionConfirm}
+                >
+                  {confirmModal.type === "complete" ? (
+                    <>
+                      <FiCheck className="mr-1.5" />
+                      Complete Order
+                    </>
+                  ) : (
+                    <>
+                      <FiX className="mr-1.5" />
+                      Cancel Order
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

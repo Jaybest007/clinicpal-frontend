@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import StatCard from "../components/StatCard";
-import { FaUser, FaUserInjured, FaStethoscope, FaSearch } from "react-icons/fa";
+import { FaUser, FaUserInjured, FaStethoscope, FaSearch, FaClock } from "react-icons/fa";
 import NewPatient from "../components/NewPatient";
 import ReportForm from "../components/ReportForm";
 import { useAuth } from "../context/AuthContext";
@@ -35,6 +35,15 @@ const Dashboard = () => {
         return dischargedDate >= oneDayAgo && dischargedDate <= new Date();
       }).length
     : 0;
+    
+  const visitedPatientsCount = Array.isArray(patientsData)
+    ? patientsData.filter(patient => {
+        if (!patient.visit_on) return false;
+        const visitTime = new Date(patient.visit_on).getTime();
+        const now = Date.now();
+        return visitTime >= now - 24 * 60 * 60 * 1000;
+      }).length
+    : 0;
 
   const toggleNewPatient = () => {
     setShowNewPatient((prev) => !prev);
@@ -47,7 +56,7 @@ const Dashboard = () => {
     } else {
       toast.info("You are offline. Local changes will sync when back online.");
     }
-  }, [isOnline, addNewPatient, fetchAllPatients]);
+  }, [isOnline, addNewPatient]);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -99,77 +108,142 @@ const Dashboard = () => {
   ) : (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
       <NavBar />
-      {/* Status Indicator */}
-      <div className="flex justify-end px-4 pt-2">
-        <span
-          className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold
-            ${isOnline ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}
-          `}
-        >
-          <span className={`h-2 w-2 rounded-full ${isOnline ? "bg-green-500" : "bg-yellow-500"} inline-block`} />
-          {isOnline ? "Online - Live Data" : "Offline - Local Data"}
-        </span>
-      </div>
-      <main className="flex-1 pt-2 px-2 md:px-6">
+      {/* Enhanced Integrated Header */}
+      <main className="flex-1 px-2 sm:px-6 lg:px-8 pt-10">
         <div className="max-w-6xl mx-auto space-y-6">
           {/* Sticky Action Bar */}
-          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200 flex flex-col sm:flex-row items-center sm:justify-between px-4 md:px-6 py-2 rounded-t-xl shadow-sm mb-2 gap-2 sm:gap-3">
-            <h2 className="text-xl sm:text-2xl md:text-2xl font-semibold text-blue-900 text-center sm:text-left">
-              Welcome, <span className="font-bold">{user?.name || "Doctor"}</span>
-            </h2>
-            <div className="flex flex-wrap justify-center sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
-              <button
-                className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-md shadow transition"
-                onClick={toggleNewPatient}
-              >
-                {showNewPatient ? "Close Patient Form" : "Add New Patient"}
-              </button>
-              <Link
-                to="/patients"
-                className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none text-white px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base rounded-md shadow transition"
-              >
-                Find Patient <FaSearch />
-              </Link>
+          <div className="sticky top-0 z-20 pt-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-slate-200 overflow-hidden">
+          {/* Header gradient accent */}
+          <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+          
+          <div className="p-3 md:p-4">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              {/* Welcome and status section */}
+              <div className="flex-1 flex flex-col sm:flex-row items-center sm:items-start gap-2">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <FaStethoscope className="w-5 h-5 text-blue-600" />
+                </div>
+                
+                <div className="text-center sm:text-left">
+                  <h2 className="text-lg sm:text-xl font-semibold text-blue-900">
+                    Welcome, <span className="font-bold">{user?.name || "Doctor"}</span>
+                  </h2>
+                  <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-slate-500">
+                    <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
+                    <span>•</span>
+                    <span
+                      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium
+                        ${isOnline ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}
+                      `}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`} />
+                      {isOnline ? "Online" : "Offline"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Action buttons */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  onClick={toggleNewPatient}
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium text-sm shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-inner"
+                >
+                  {showNewPatient ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      <span className="hidden sm:inline">Close Form</span>
+                      <span className="sm:hidden">Close</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span className="hidden sm:inline">Add Patient</span>
+                      <span className="sm:hidden">Add</span>
+                    </>
+                  )}
+                </button>
+                
+                <Link
+                  to="/patients"
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-lg font-medium text-sm shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-inner"
+                >
+                  <FaSearch className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Find Patient</span>
+                  <span className="sm:hidden">Find</span>
+                </Link>
+                
+                <button
+                  className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                  aria-label="More options"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
+        </div>
 
           {/* Stat Cards */}
-          <div className="overflow-x-auto pb-1">
+          <div className="overflow-x-auto pb-1 mt-8 mb-6">
             <div className="inline-flex min-w-full gap-2 sm:gap-3 md:gap-4 px-1">
-              <StatCard title="All Patients" icon={FaUser} value={patientsList.length} />
-              <StatCard title="Admitted" icon={FaUserInjured} value={Total_admitted} />
-              <StatCard title="Discharged" icon={FaUserInjured} value={Total_Discharged} />
-              <StatCard title="Que List" icon={FaUser} value={queList.length} />
               <StatCard
-                title="Visited Patients"
+                title="All Patients"
                 icon={FaUser}
-                value={
-                  Array.isArray(patientsData)
-                    ? patientsData.filter(patient => {
-                        const visitTime = new Date(patient.visit_on).getTime();
-                        const now = Date.now();
-                        return visitTime >= now - 24 * 60 * 60 * 1000;
-                      }).length
-                    : 0
-                }
+                value={patientsList.length}
+                subtitle="Total registered"
+                variant="primary"
+                trend={{ value: 5, isUpGood: true }}
+                loading={false}
+              />
+              <StatCard
+                title="Admitted"
+                icon={FaUserInjured}
+                value={Total_admitted}
+                subtitle="Currently admitted"
+                variant="success"
+                trend={{ value: Total_admitted > 0 ? 10 : 0, isUpGood: false }}
+                loading={false}
+              />
+              <StatCard
+                title="Discharged"
+                icon={FaUserInjured}
+                value={Total_Discharged}
+                subtitle="Discharged in 24h"
+                variant="danger"
+                trend={{ value: Total_Discharged > 0 ? 15 : 0, isUpGood: true }}
+                loading={false}
+              />
+              <StatCard
+                title="Queue List"
+                icon={FaUser}
+                value={queList.length}
+                subtitle="Waiting"
+                variant="warning"
+                trend={{ value: queList.length > 0 ? 8 : 0, isUpGood: false }}
+                loading={false}
+              />
+              <StatCard
+                title="Recent Visits"
+                icon={FaClock}
+                value={visitedPatientsCount}
+                subtitle="Visited in 24h"
+                variant="info"
+                trend={{ value: visitedPatientsCount > 0 ? 12 : 0, isUpGood: true }}
+                loading={false}
               />
             </div>
           </div>
 
           {/* Summary Card - Clinical Detail */}
-          <div className="bg-white rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 border-t-4 border-blue-500 w-full">
-            <h3 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <FaStethoscope className="text-blue-500" />
-              Clinic Summary
-            </h3>
-            <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
-              You're managing a total of{" "}
-              <span className="font-bold text-blue-900">{patientsData.length}</span> patients today.
-              There are currently{" "}
-              <span className="text-green-600 font-bold">{Total_admitted} admitted</span> and
-              <span className="text-red-500 font-bold ml-1">{Total_Discharged} discharged</span>. Stay sharp!
-            </p>
-          </div>
+          
 
           {/* Dynamic Forms & Admitted Patients */}
           <div className="space-y-6">
@@ -183,11 +257,12 @@ const Dashboard = () => {
                 <ReportForm isOpen={showReportModal} onClose={() => setShowReportModal(false)} patient_id="" />
               </div>
             )}
-            
           </div>
           <div>
-              <QueList />
+            <QueList />
           </div>
+        </div>
+        {/* Closing tag added for max-w-6xl container */}
         </div>
       </main>
     </div>
