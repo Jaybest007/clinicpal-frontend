@@ -1,4 +1,4 @@
-import { use, useState } from 'react';
+import { useState } from 'react';
 import { useDashboard } from '../context/DashboardContext';
 import { DischargeBtn } from './DischargeBtn';
 import { ReportBtn } from './ReportBtn';
