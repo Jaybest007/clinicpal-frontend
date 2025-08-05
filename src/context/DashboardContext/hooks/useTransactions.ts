@@ -162,5 +162,6 @@ export const useTransactions = (token: string | null, role: string | null) => {
     externalBilling,
     fetchExternalBilling,
     updatePaymentStatus,
+    setPatientPaymentHistory
   };
 };

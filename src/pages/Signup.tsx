@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { FaEyeSlash, FaEye } from "react-icons/fa";
+import { FaEyeSlash, FaEye, FaUser, FaEnvelope, FaLock, FaPhone, FaBuilding } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import logo from "../assets/CP.png"; 
-
+import { motion, AnimatePresence } from "framer-motion";
+import { FiLoader } from "react-icons/fi";
 
 interface signUpData {
   firstName: string;
@@ -65,23 +66,23 @@ const SignUp = () => {
 
     if (name === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(value)) {
+      if (value && !emailRegex.test(value)) {
         setError(prev => ({ ...prev, [name]: "Please enter a valid email address" }));
       }
     }
 
     if (name === "password") {
       const PasswordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
-      if (!PasswordRegex.test(formData.password)) {
+      if (value && !PasswordRegex.test(value)) {
         setError(prev => ({
           ...prev,
-          [name]: "Password must be at least 6 characters, include uppercase or lowercase, and number.",
+          [name]: "Password must be at least 6 characters, include letters and numbers",
         }));
       }
     }
 
     if (name === "confirmPassword") {
-      if (value !== formData.password) {
+      if (value && value !== formData.password) {
         setError(prev => ({ ...prev, [name]: "Passwords do not match" }));
       } else {
         setError(prev => ({ ...prev, [name]: "" }));
@@ -105,7 +106,7 @@ const SignUp = () => {
     if (password !== confirmPassword) newError.confirmPassword = "Passwords do not match";
     if (!hospital_id.trim()) newError.hospital_id = "Hospital code is required";
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (email && !emailRegex.test(email)) {
       newError.email = "Please enter a valid email address";
     }
 
@@ -163,182 +164,252 @@ const SignUp = () => {
     }
   };
 
+  // Reusable input field component
+  const InputField = ({ 
+    label, 
+    name, 
+    type = "text", 
+    icon, 
+    placeholder, 
+    value, 
+    onChange,
+    errorMessage,
+    ...props 
+  }: { 
+    label: string;
+    name: string;
+    type?: string;
+    icon: React.ReactNode;
+    placeholder: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    errorMessage?: string;
+    [key: string]: any;
+  }) => (
+    <div className="w-full">
+      <label htmlFor={name} className="block mb-1 text-gray-700 font-medium text-sm">
+        {label}
+      </label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          {icon}
+        </div>
+        <input
+          id={name}
+          type={type}
+          name={name}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          className={`w-full rounded-lg p-2.5 pl-10 bg-blue-50/70 focus:bg-white border ${
+            errorMessage ? "border-red-300 focus:border-red-500" : "border-blue-200 focus:border-blue-400"
+          } outline-none transition-all duration-200 text-gray-800`}
+          {...props}
+        />
+        {name.includes("password") && (
+          <button
+            type="button"
+            onClick={() => setHidden(!hidden)}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-blue-500 hover:text-blue-700 focus:outline-none"
+            tabIndex={-1}
+            aria-label={hidden ? "Show password" : "Hide password"}
+          >
+            {hidden ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+          </button>
+        )}
+      </div>
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.p 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="text-xs text-red-600 mt-1 flex items-center gap-1 overflow-hidden"
+          >
+            <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>{errorMessage}</span>
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-100 px-4">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 sm:p-12 border border-blue-100 my-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-100 px-4 py-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 sm:p-10 border border-blue-100 my-4"
+      >
         {/* Logo & Title */}
-        <div className="flex flex-col items-center mb-8">
-          <img
+        <div className="flex flex-col items-center mb-6">
+          <motion.img
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
             src={logo}
             alt="ClinicPal Logo"
-            className="w-16 h-16 mb-2 rounded-full shadow-lg"
+            className="w-16 h-16 mb-3 rounded-full shadow-md object-cover"
           />
-          <h1 className="font-extrabold text-3xl sm:text-4xl text-blue-900 mb-2 tracking-tight">
+          <h1 className="font-bold text-2xl sm:text-3xl text-blue-900 mb-2 tracking-tight">
             Staff Onboarding
           </h1>
-          <p className="text-blue-700 text-base font-medium text-center">
-            Create your ClinicPal account to join your hospital team.
+          <p className="text-blue-600 text-sm font-medium text-center">
+            Create your ClinicPal account to join your hospital team
           </p>
         </div>
 
         {/* Error Message */}
-        {error.server && (
-          <p className="text-red-800 text-center bg-red-100 p-2 mb-2 rounded border border-red-300 font-semibold">
-            {error.server}
-          </p>
-        )}
+        <AnimatePresence>
+          {error.server && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4 overflow-hidden"
+            >
+              <div className="flex items-center gap-2 text-red-700 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>{error.server}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Signup Form */}
-        <form className="space-y-6 w-full" onSubmit={handleSubmit}>
-          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-            <div className="w-full">
-              <label htmlFor="firstName" className="block mb-1 text-gray-700 font-semibold">
-                First name
-              </label>
-              <input
-                type="text"
-                name="firstName"
-                className={`w-full rounded-lg p-3 bg-blue-50 focus:bg-white border border-blue-200 focus:border-blue-400 outline-none transition text-blue-900 font-medium ${
-                  error.firstName ? "border-red-400" : ""
-                }`}
-                placeholder="Enter your first name"
-                onChange={handleInputChange}
-                value={formData.firstName}
-              />
-              {error.firstName && <p className="text-sm text-red-600 mt-1">{error.firstName}</p>}
-            </div>
-            <div className="w-full">
-              <label htmlFor="lastName" className="block mb-1 text-gray-700 font-semibold">
-                Last name
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                className={`w-full rounded-lg p-3 bg-blue-50 focus:bg-white border border-blue-200 focus:border-blue-400 outline-none transition text-blue-900 font-medium ${
-                  error.lastName ? "border-red-400" : ""
-                }`}
-                placeholder="Enter your last name"
-                onChange={handleInputChange}
-                value={formData.lastName}
-              />
-              {error.lastName && <p className="text-sm text-red-600 mt-1">{error.lastName}</p>}
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-            <div className="w-full">
-              <label htmlFor="email" className="block mb-1 text-gray-700 font-semibold">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                className={`w-full rounded-lg p-3 bg-blue-50 focus:bg-white border border-blue-200 focus:border-blue-400 outline-none transition text-blue-900 font-medium ${
-                  error.email ? "border-red-400" : ""
-                }`}
-                placeholder="Enter your email"
-                onChange={handleInputChange}
-                value={formData.email}
-              />
-              {error.email && <p className="text-sm text-red-600 mt-1">{error.email}</p>}
-            </div>
-            <div className="w-full">
-              <label htmlFor="phone" className="block mb-1 text-gray-700 font-semibold">
-                Phone number
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                className={`w-full rounded-lg p-3 bg-blue-50 focus:bg-white border border-blue-200 focus:border-blue-400 outline-none transition text-blue-900 font-medium ${
-                  error.phone ? "border-red-400" : ""
-                }`}
-                placeholder="e.g. 080..."
-                onChange={handleInputChange}
-              />
-              {error.phone && <p className="text-sm text-red-600 mt-1">{error.phone}</p>}
-            </div>
-          </div>
-
-          <div className="w-full relative">
-            <label htmlFor="password" className="block mb-1 text-gray-700 font-semibold">
-              Password
-            </label>
-            <input
-              type={hidden ? "password" : "text"}
-              name="password"
-              placeholder="Enter password"
-              className={`w-full rounded-lg p-3 bg-blue-50 focus:bg-white border border-blue-200 focus:border-blue-400 outline-none transition text-blue-900 font-medium pr-20 ${
-                error.password ? "border-red-400" : ""
-              }`}
+        <form className="space-y-4 w-full" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField
+              label="First Name"
+              name="firstName"
+              icon={<FaUser className="h-4 w-4 text-blue-400" />}
+              placeholder="Enter your first name"
+              value={formData.firstName}
               onChange={handleInputChange}
-              value={formData.password}
+              errorMessage={error.firstName}
+              required
             />
-            <button
-              type="button"
-              onClick={() => setHidden(!hidden)}
-              className="absolute right-4 top-[42px] text-sm text-blue-500 hover:underline"
-            >
-              {hidden ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-            </button>
-            {error.password && <p className="text-sm text-red-600 mt-1">{error.password}</p>}
+            
+            <InputField
+              label="Last Name"
+              name="lastName"
+              icon={<FaUser className="h-4 w-4 text-blue-400" />}
+              placeholder="Enter your last name"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              errorMessage={error.lastName}
+              required
+            />
           </div>
 
-          <div className="w-full">
-            <label htmlFor="confirmPassword" className="block mb-1 text-gray-700 font-semibold">
-              Confirm Password
-            </label>
-            <input
-              type={hidden ? "password" : "text"}
-              placeholder="Confirm password"
-              name="confirmPassword"
-              className={`w-full rounded-lg p-3 bg-blue-50 focus:bg-white border border-blue-200 focus:border-blue-400 outline-none transition text-blue-900 font-medium ${
-                error.confirmPassword ? "border-red-400" : ""
-              }`}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField
+              label="Email Address"
+              name="email"
+              type="email"
+              icon={<FaEnvelope className="h-4 w-4 text-blue-400" />}
+              placeholder="Enter your email"
+              value={formData.email}
               onChange={handleInputChange}
-              value={formData.confirmPassword}
+              errorMessage={error.email}
+              required
+              autoComplete="email"
             />
-            {error.confirmPassword && <p className="text-sm text-red-600 mt-1">{error.confirmPassword}</p>}
+            
+            <InputField
+              label="Phone Number"
+              name="phone"
+              type="tel"
+              icon={<FaPhone className="h-4 w-4 text-blue-400" />}
+              placeholder="e.g. 080..."
+              value={formData.phone}
+              onChange={handleInputChange}
+              errorMessage={error.phone}
+              required
+              inputMode="numeric"
+            />
           </div>
 
-          <div className="w-full">
-            <label htmlFor="HospitalCode" className="block mb-1 text-gray-700 font-semibold">
-              Hospital Code
-            </label>
-            <input
-              type="text"
-              name="hospital_id"
-              className={`w-full rounded-lg p-3 bg-blue-50 focus:bg-white border border-blue-200 focus:border-blue-400 outline-none transition text-blue-900 font-medium ${
-                error.hospital_id ? "border-red-400" : ""
-              }`}
-              placeholder="Enter Hospital code"
-              onChange={handleInputChange}
-              value={formData.hospital_id}
-            />
-            {error.hospital_id && <p className="text-sm text-red-600 mt-1">{error.hospital_id}</p>}
-          </div>
+          <InputField
+            label="Hospital Code"
+            name="hospital_id"
+            icon={<FaBuilding className="h-4 w-4 text-blue-400" />}
+            placeholder="Enter your hospital code"
+            value={formData.hospital_id}
+            onChange={handleInputChange}
+            errorMessage={error.hospital_id}
+            required
+          />
+
+          <InputField
+            label="Password"
+            name="password"
+            type={hidden ? "password" : "text"}
+            icon={<FaLock className="h-4 w-4 text-blue-400" />}
+            placeholder="Create a strong password"
+            value={formData.password}
+            onChange={handleInputChange}
+            errorMessage={error.password}
+            required
+            autoComplete="new-password"
+          />
+          
+          <InputField
+            label="Confirm Password"
+            name="confirmPassword"
+            type={hidden ? "password" : "text"}
+            icon={<FaLock className="h-4 w-4 text-blue-400" />}
+            placeholder="Confirm your password"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            errorMessage={error.confirmPassword}
+            required
+            autoComplete="new-password"
+          />
+          
+          
 
           <button
             type="submit"
-            className="w-full p-3 mt-2 font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg shadow-md transition-colors hover:from-blue-400 hover:to-indigo-400"
+            disabled={loading}
+            className={`w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg py-2.5 mt-2 shadow transition-all duration-200 transform hover:translate-y-[-1px] active:translate-y-[1px] ${
+              loading ? "opacity-70 cursor-not-allowed" : "hover:shadow-md"
+            }`}
           >
-            {loading ? "Signing up..." : "Create account"}
+            {loading ? (
+              <span className="flex justify-center items-center gap-2">
+                <FiLoader className="animate-spin h-4 w-4" aria-hidden="true" />
+                <span>Creating Account...</span>
+              </span>
+            ) : (
+              "Create Account"
+            )}
           </button>
+        </form>
 
-          <div className="my-6 flex items-center">
-            <div className="flex-grow h-px bg-blue-100" />
-            <span className="mx-4 text-blue-400 font-semibold text-xs">OR</span>
-            <div className="flex-grow h-px bg-blue-100" />
-          </div>
+        {/* Divider */}
+        <div className="my-6 flex items-center">
+          <div className="flex-grow h-px bg-blue-100" />
+          <span className="mx-3 text-blue-400 text-xs font-medium">OR</span>
+          <div className="flex-grow h-px bg-blue-100" />
+        </div>
 
-          <div className="text-center text-sm text-blue-700 font-medium">
-            Already have an account?{" "}
-            <Link to="/login" className="text-indigo-600 underline font-bold">
-              Login
-            </Link>
-          </div>
-        </form>       
-      </div>
+        {/* Login Link */}
+        <div className="text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link 
+            to="/login" 
+            className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+          >
+            Sign in
+          </Link>
+        </div>
+      </motion.div>
     </div>
   );
 };

@@ -4,6 +4,93 @@ import { BsReceipt, BsCheckCircle, BsXCircle } from "react-icons/bs";
 import { useDashboard } from "../context/DashboardContext";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import TransactionDetails from ".././components/cashier/TransactionsDetails";
+
+const convertToCSV = (objArray: any[]) => {
+  // Define columns and headers
+  const columns = [
+    'id', 
+    'payers_name', 
+    'department', 
+    'description', 
+    'amount', 
+    'payment_status', 
+    'payment_method', 
+    'created_at'
+  ];
+  
+  const headers = [
+    'Transaction ID', 
+    'Payer', 
+    'Department', 
+    'Service', 
+    'Amount (₦)', 
+    'Payment Status', 
+    'Payment Method', 
+    'Date & Time'
+  ];
+  
+  // Create the header row
+  let csvContent = headers.join(',') + '\n';
+  
+  // Add data rows
+  objArray.forEach(obj => {
+    // Format data properly, escaping commas and quotes
+    const row = columns.map(col => {
+      let value = obj[col];
+      
+      // Format amount as number
+      if (col === 'amount') {
+        value = Number(value).toString();
+      }
+      
+      // Format date nicely
+      if (col === 'created_at') {
+        value = new Date(value).toLocaleString();
+      }
+      
+      // Format payment status
+      if (col === 'payment_status') {
+        value = value === 'paid' ? 'Paid' : 'Unpaid';
+      }
+      
+      // Escape quotes and commas for CSV format
+      if (value === null || value === undefined) {
+        return '';
+      }
+      
+      // Convert to string and handle special characters
+      const stringValue = String(value);
+      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      return stringValue;
+    });
+    
+    csvContent += row.join(',') + '\n';
+  });
+  
+  return csvContent;
+};
+
+const downloadCSV = (csvContent: string, filename: string) => {
+  // Create a blob with the CSV content
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  
+  // Create a temporary URL for the blob
+  const url = URL.createObjectURL(blob);
+  
+  // Create a link element to trigger the download
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.display = 'none';
+  
+  // Add the link to the document, click it, then remove it
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 type FilterType = "today" | "yesterday" | "search";
 
@@ -94,6 +181,9 @@ export function TodaysTransaction() {
     amount: number;
   }>(null);
 
+  // State for transaction details modal
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+
   // Handler to execute payment update after confirmation
   const handleConfirmedAction = async () => {
     if (!confirmModal) return;
@@ -157,6 +247,23 @@ export function TodaysTransaction() {
     return false;
   });
 
+  // Function to handle CSV export
+  const handleExportCSV = () => {
+    // Generate a filename with the current date
+    const date = new Date();
+    const formattedDate = date.toISOString().split('T')[0];
+    const filename = `transactions_${formattedDate}_${filter}.csv`;
+    
+    // Get data and sort it (same as in the table)
+    const dataToExport = [...filteredTransactions].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    
+    // Convert to CSV and download
+    const csvContent = convertToCSV(dataToExport);
+    downloadCSV(csvContent, filename);
+  };
+
   return (
     <div>
       {/* Section 2: Today's Transactions */}
@@ -172,7 +279,12 @@ export function TodaysTransaction() {
               {loading ? <FiRefreshCw className="animate-spin" /> : <FiRefreshCw />}{" "}
               <span className="hidden sm:inline">Refresh</span>
             </button>
-            <button className="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1 text-sm">
+            {/* Update the Export CSV button with the onClick handler */}
+            <button 
+              className="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1 text-sm"
+              onClick={handleExportCSV}
+              disabled={filteredTransactions.length === 0}
+            >
               <FiDownload /> <span className="hidden sm:inline">Export CSV</span>
             </button>
             <button
@@ -234,7 +346,11 @@ export function TodaysTransaction() {
               {filteredTransactions
                 .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                 .map((tx, index) => (
-                  <tr key={tx.id} className="even:bg-slate-50">
+                  <tr 
+                    key={tx.id} 
+                    className="even:bg-slate-50 cursor-pointer hover:bg-blue-50 transition-colors"
+                    onClick={() => setSelectedTransaction(tx)}
+                  >
                     <td className="px-4 py-2">{index + 1}</td>
                     <td className="px-4 py-2">{tx.payers_name}</td>
                     <td className="px-4 py-2">{tx.department}</td>
@@ -263,7 +379,10 @@ export function TodaysTransaction() {
                     <td className="px-4 py-2 flex flex-wrap gap-2">
                       <button
                         className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded flex items-center gap-1 text-xs"
-                        onClick={() => navigate("/bill-receipt", { state: tx })}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click
+                          navigate("/bill-receipt", { state: tx });
+                        }}
                       >
                         <FiPrinter /> <span className="hidden sm:inline">Print</span>
                       </button>
@@ -271,12 +390,15 @@ export function TodaysTransaction() {
                       {/* Updated Edit Button with Confirmation */}
                       {tx.payment_status !== "paid" && <button 
                         className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-2 py-1 rounded flex items-center gap-1 text-xs"
-                        onClick={() => setConfirmModal({
-                          type: "paid",
-                          transactionId: tx.id?.toString() || "",
-                          payersName: tx.payers_name || "Unknown",
-                          amount: Number(tx.amount) || 0
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click
+                          setConfirmModal({
+                            type: "paid",
+                            transactionId: tx.id?.toString() || "",
+                            payersName: tx.payers_name || "Unknown",
+                            amount: Number(tx.amount) || 0
+                          });
+                        }}
                         disabled={tx.payment_status === "paid" }
                       >
                         <FiEdit /> <span className="hidden sm:inline">Mark Paid</span>
@@ -285,12 +407,15 @@ export function TodaysTransaction() {
                       {/* Updated Cancel Button with Confirmation */}
                       <button 
                         className="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded flex items-center gap-1 text-xs"
-                        onClick={() => setConfirmModal({
-                          type: "cancel",
-                          transactionId: tx.id?.toString() || "",
-                          payersName: tx.payers_name || "Unknown",
-                          amount: Number(tx.amount) || 0
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click
+                          setConfirmModal({
+                            type: "cancel",
+                            transactionId: tx.id?.toString() || "",
+                            payersName: tx.payers_name || "Unknown",
+                            amount: Number(tx.amount) || 0
+                          });
+                        }}
                         disabled={tx.payment_status === "paid" }
                       >
                         <FiX /> <span className="hidden sm:inline">Cancel</span>
@@ -330,6 +455,16 @@ export function TodaysTransaction() {
             confirmText="Cancel Transaction"
             confirmColor="bg-red-600 hover:bg-red-700"
             icon={<FiX className="text-red-500 w-5 h-5" />}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Transaction Details Modal - Using the imported component */}
+      <AnimatePresence>
+        {selectedTransaction && (
+          <TransactionDetails 
+            transaction={selectedTransaction} 
+            onClose={() => setSelectedTransaction(null)} 
           />
         )}
       </AnimatePresence>

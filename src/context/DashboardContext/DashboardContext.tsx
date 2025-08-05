@@ -106,6 +106,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       newBilling: transactions.newBilling,
       fetchTransactions: transactions.fetchTransactions,
       fetchPatientPaymentHistory: transactions.fetchPatientPaymentHistory,
+      setPatientPaymentHistory: transactions.setPatientPaymentHistory,
       externalBilling: transactions.externalBilling,
       fetchExternalBilling: transactions.fetchExternalBilling,
       updatePaymentStatus: transactions.updatePaymentStatus,

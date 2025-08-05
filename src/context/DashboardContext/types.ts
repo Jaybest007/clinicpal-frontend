@@ -282,4 +282,5 @@ export interface DashboardContextType {
   externalBilling: (credentials: externalBilling) => Promise<void>;
   fetchExternalBilling: () => Promise<void>;
   updatePaymentStatus: (credentials: updatePaymentStatus) => Promise<void>;
+  setPatientPaymentHistory: Dispatch<SetStateAction<Transaction[]>>;
 }
