@@ -123,6 +123,7 @@ interface BillingFormProps {
     service?: string;
     amount?: string;
     payment_method?: string;
+    payment_status?: string;
     [key: string]: string | undefined;
   };
   handleInputChange: (
@@ -284,7 +285,8 @@ export const BillingForm = ({
             />
           </FormField>
           
-          <FormField id="payment_status" label="Payment Status">
+          {/* Payment Status - Updated to be required */}
+          <FormField id="payment_status" label="Payment Status" required error={errors.payment_status}>
             <SelectField
               id="payment_status"
               name="payment_status"
@@ -296,6 +298,7 @@ export const BillingForm = ({
                 { value: "unpaid", label: "Unpaid" },
                 { value: "partially_paid", label: "Partially Paid" }
               ]}
+              error={errors.payment_status}
               icon={<FiArchive className="w-4 h-4 text-gray-500" />}
             />
           </FormField>

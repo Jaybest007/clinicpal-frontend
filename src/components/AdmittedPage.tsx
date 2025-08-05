@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { useDashboard } from '../context/DashboardContext';
 import { DischargeBtn } from './DischargeBtn';
 import { ReportBtn } from './ReportBtn';
@@ -64,7 +64,7 @@ const AdmittedPage = () => {
                   <td className="hidden sm:table-cell px-4 py-3 text-gray-600">{patient.admission_reason || 'N/A'}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2 flex-wrap">
-                      {user?.role === 'doctor' && (
+                      {user?.role === 'doctor' || user?.role === 'super admin' && (
                         <button
                           className="bg-green-600 hover:bg-green-500 px-4 py-2 text-xs rounded-md text-white font-medium transition"
                           onClick={e => {

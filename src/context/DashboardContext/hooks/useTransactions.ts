@@ -139,7 +139,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
       setLoading(true);
       const response = await axios.post(
         `${API_BASE_URL}${API_ENDPOINTS.PAYMENT_ACTIONS}`,
-        { credentials },
+        credentials,
         createApiRequest(token)
       );
       toast.success(response.data.success);

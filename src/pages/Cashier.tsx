@@ -113,6 +113,7 @@ export const Cashier = () => {
       service: billingData.service.trim() ? "" : "Service is required.",
       amount: billingData.amount > 0 ? "" : "Amount must be greater than 0.",
       payment_method: billingData.payment_method.trim() ? "" : "Payment method is required.",
+      payment_status: billingData.payment_status ? "" : "Payment status is required.",
     };
     setErrors(newErrors);
 

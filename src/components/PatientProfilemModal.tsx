@@ -226,7 +226,7 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
               </div>
             </div>
 
-            {/* Tab Navigation */}
+            {/* Tab Navigation - FIXED PERMISSION CHECK */}
             <div className="border-b border-gray-200">
               <nav className="flex -mb-px">
                 <button
@@ -255,7 +255,8 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
                   Add to Queue
                 </button>
                 
-                {user?.role === "doctor" && (
+                {/* Updated condition to include super admin */}
+                {(user?.role === "doctor" || user?.role === "super admin") && (
                   <button
                     onClick={() => setActiveTab('admit')}
                     className={`py-3 px-4 flex items-center text-sm font-medium ${
@@ -263,11 +264,11 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
                         ? 'border-b-2 border-blue-500 text-blue-600'
                         : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`
-                }
-                >
-                  <FaHospital className={`mr-2 h-4 w-4 ${activeTab === 'admit' ? 'text-blue-500' : 'text-gray-400'}`} />
-                  Admit Patient
-                </button>
+                  }
+                  >
+                    <FaHospital className={`mr-2 h-4 w-4 ${activeTab === 'admit' ? 'text-blue-500' : 'text-gray-400'}`} />
+                    Admit Patient
+                  </button>
                 )}
               </nav>
             </div>
@@ -496,7 +497,7 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
               )}
 
               {/* Admit Tab */}
-              {activeTab === 'admit' && user?.role === "doctor" && (
+              {activeTab === 'admit' && (user?.role === "doctor" || user?.role === "super admin") && (
                 <section className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                   <div className="flex items-center mb-4">
                     <div className="bg-yellow-100 p-2 rounded-full mr-3">
