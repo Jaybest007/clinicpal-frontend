@@ -252,6 +252,7 @@ const Patients = () => {
                           onClick={() => {
                             setSelectedPatient({
                               ...patient,
+                              gender: (patient as any).gender ?? "",
                               discharged_on: patient.discharged_on ?? "",
                               admitted_on: patient.admitted_on ?? ""
                             });

@@ -12,6 +12,7 @@ export interface patientInfo {
   patient_id: string;
   address: string;
   phone: string;
+  gender: string;
   age: number;
   admission_status: boolean;
   admission_reason: string;
@@ -291,6 +292,10 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
                         <div className="flex">
                           <span className="text-gray-500 w-24">Age:</span> 
                           <span className="font-medium">{patient.age} years</span>
+                        </div>
+                        <div className="flex">
+                          <span className="text-gray-500 w-24">Gender:</span> 
+                          <span className="font-medium text-gray-800">{patient.gender}</span>
                         </div>
                         <div className="flex items-start">
                           <span className="text-gray-500 w-24">Phone:</span> 
