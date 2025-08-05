@@ -7,7 +7,8 @@ import type {
   Transaction, 
   billingDetails, 
   externalBilling, 
-  externalBillingData 
+  externalBillingData,
+  updatePaymentStatus
 } from "../types";
 
 /**
@@ -130,6 +131,26 @@ export const useTransactions = (token: string | null, role: string | null) => {
     }
   }, [token]);
 
+  // Update payment status
+  const updatePaymentStatus = useCallback( async (credentials: updatePaymentStatus) => {
+    if (!token) return;
+
+    try{
+      setLoading(true);
+      const response = await axios.post(
+        `${API_BASE_URL}${API_ENDPOINTS.PAYMENT_ACTIONS}`,
+        { credentials },
+        createApiRequest(token)
+      );
+      toast.success(response.data.success);
+    } catch (err: any) {
+      handleApiError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
   return {
     loading,
     transactions,
@@ -140,5 +161,6 @@ export const useTransactions = (token: string | null, role: string | null) => {
     fetchPatientPaymentHistory,
     externalBilling,
     fetchExternalBilling,
+    updatePaymentStatus,
   };
 };

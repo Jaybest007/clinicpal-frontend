@@ -51,4 +51,5 @@ export const API_ENDPOINTS = {
   FETCH_PATIENT_PAYMENT_HISTORY: "/cashier/fetchPatientPaymentHistory",
   EXTERNAL_BILLING: "/cashier/externalBilling",
   FETCH_EXTERNAL_BILLING: "/cashier/fetchExternalBilling",
+  PAYMENT_ACTIONS: "/cashier/paymentActions",
 } as const;

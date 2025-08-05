@@ -98,10 +98,10 @@ const ConfirmationPage: React.FC = () => {
                 >
                   <QRCodeSVG 
                     value={`CLINICPAL
-ID: ${String(newPatient.patient_id).toUpperCase()}
-Name: ${String(newPatient.full_name)}
-Phone: ${String(newPatient.phone)}
-Date: ${new Date().toLocaleDateString()}`} 
+                    ID: ${String(newPatient.patient_id).toUpperCase()}
+                    Name: ${String(newPatient.full_name)}
+                    Phone: ${String(newPatient.phone)}
+                    Date: ${new Date().toLocaleDateString()}`} 
                     size={120} // Increased size for better scanning
                     level="H" // High error correction
                     includeMargin={true}
@@ -193,18 +193,18 @@ Date: ${new Date().toLocaleDateString()}`}
         </div>
       </motion.div>
       
-      {/* Print-optimized version - FIXED QR CODE */}
-      <div className="hidden print:block print:p-8">
-        <div className="text-center mb-8">
+      {/* Print-optimized version - with improved mobile support */}
+      <div className="hidden print:block print:p-8 my-8 sm:my-12">
+        <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-blue-900">ClinicPal Patient Registration</h1>
           <p className="text-gray-600">Registration Date: {new Date().toLocaleDateString()}</p>
         </div>
         
-        <div className="border-2 border-gray-300 rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-2 gap-6">
+        <div className="border-2 border-gray-300 rounded-lg p-4 sm:p-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Patient Information</h2>
-              <div className="space-y-4">
+              <h2 className="text-lg font-bold text-gray-900 mb-3">Patient Information</h2>
+              <div className="space-y-3">
                 <div>
                   <p className="text-sm text-gray-500">Full Name</p>
                   <p className="font-bold">{String(newPatient.full_name).toUpperCase()}</p>
@@ -220,10 +220,10 @@ Date: ${new Date().toLocaleDateString()}`}
               </div>
             </div>
             
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center mt-4 sm:mt-0">
               <p className="text-sm text-gray-500 mb-2">Patient ID</p>
-              <div className="bg-gray-100 border-2 border-gray-300 rounded-lg p-4 text-center">
-                <p className="font-mono text-xl font-bold">{String(newPatient.patient_id).toUpperCase()}</p>
+              <div className="bg-gray-100 border-2 border-gray-300 rounded-lg p-3 text-center">
+                <p className="font-mono text-lg sm:text-xl font-bold">{String(newPatient.patient_id).toUpperCase()}</p>
               </div>
               <div className="mt-4">
                 <QRCodeSVG 
@@ -232,8 +232,8 @@ Date: ${new Date().toLocaleDateString()}`}
                   Name: ${String(newPatient.full_name)}
                   Phone: ${String(newPatient.phone)}
                   Date: ${new Date().toLocaleDateString()}`}
-                  size={120} // Increased size for better scanning
-                  level="H" // High error correction
+                  size={120}
+                  level="H"
                   includeMargin={true}
                 />
               </div>
@@ -241,9 +241,9 @@ Date: ${new Date().toLocaleDateString()}`}
           </div>
         </div>
         
-        <div className="text-center text-sm text-gray-500 mt-8">
+        <div className="text-center text-sm text-gray-500 mt-6">
           <p>This document serves as proof of registration at ClinicPal system.</p>
-          <p>Please keep this information for future reference.</p>
+          <p className="mt-1">Please keep this information for future reference.</p>
         </div>
       </div>
     </div>

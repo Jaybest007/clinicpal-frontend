@@ -1,21 +1,35 @@
-import { BsCheckCircle, BsXCircle } from "react-icons/bs";
+import { useEffect } from "react";
+import { BsCheckCircle, BsXCircle, BsPrinter, BsArrowLeft } from "react-icons/bs";
 import { useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { QRCodeSVG } from "qrcode.react";
 
 export function BillReceipt() {
   const location = useLocation();
   const navigate = useNavigate();
   const tx = location.state;
+  
+  useEffect(() => {
+    document.title = `Receipt - ${tx?.payers_name || "Patient"} - ClinicPal`;
+  }, [tx]);
 
   if (!tx) {
     return (
-      <div className="p-8 text-center">
-        <p className="text-red-500 font-semibold mb-4">No bill data to print.</p>
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-          onClick={() => navigate(-1)}
+      <div className="min-h-screen flex items-center justify-center p-2">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow-md p-4 max-w-sm w-full text-center"
         >
-          Go Back
-        </button>
+          <h2 className="text-lg font-bold text-gray-800 mb-2">No Receipt Data</h2>
+          <p className="text-gray-600 mb-4">No billing information available.</p>
+          <button
+            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 mx-auto text-sm"
+            onClick={() => navigate(-1)}
+          >
+            <BsArrowLeft /> Back
+          </button>
+        </motion.div>
       </div>
     );
   }
@@ -32,95 +46,178 @@ export function BillReceipt() {
   const amount = tx.amount || 0;
   const createdAt = tx.created_at ? new Date(tx.created_at).toLocaleString() : "N/A";
   const referenceId = tx.id || tx.reference_id || "N/A";
+  const notes = tx.notes || "";
+
+  // Format date for better display
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+  
+  const qrData = `CLINICPAL RECEIPT
+    Ref: ${referenceId}
+    Amount: ₦${Number(amount).toLocaleString()}
+    Payer: ${payersName}
+    Patient: ${patientId}
+    Date: ${createdAt}
+    Status: ${paymentStatus.toUpperCase()}`;
+
+
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg border border-gray-300 print:shadow-none print:border-0 print:rounded-none print:max-w-full print:mt-0 print:p-0">
-      {/* Header Branding */}
-      <div className="flex flex-col items-center mb-6">
-        <span className="text-2xl font-bold tracking-wide text-gray-900">
-          ClinicPal Health Services
-        </span>
-        <span className="text-xs text-gray-500 italic">{hospitalId}</span>
+    <div className="bg-white py-4 px-2 print:p-0 print:m-0">
+      {/* Screen-only controls */}
+      <div className="max-w-sm mx-auto mb-3 flex justify-between items-center print:hidden">
+        <button
+          onClick={() => navigate(-1)}
+          className="bg-white text-gray-700 px-3 py-1.5 rounded text-sm flex items-center gap-1"
+        >
+          <BsArrowLeft size={14} /> Back
+        </button>
+        <button
+          onClick={() => window.print()}
+          className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm flex items-center gap-1"
+        >
+          <BsPrinter size={14} /> Print
+        </button>
       </div>
-
-      {/* Meta Info */}
-      <div className="mb-4 text-sm text-gray-600 space-y-1">
-        <div className="flex justify-between">
-          <span>Date</span>
-          <span>{createdAt}</span>
+      
+      {/* Receipt Document */}
+      <div className="max-w-sm mx-auto bg-white border border-gray-200 print:border-0 print:shadow-none print:m-0">
+        {/* Header */}
+        <div className="border-b border-gray-200 p-3 print:p-2">
+          <div className="text-center">
+            <h1 className="text-lg font-bold text-gray-900">
+              ClinicPal Health Services
+            </h1>
+            <p className="text-xs text-gray-500">{hospitalId}</p>
+            <div className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium inline-block mt-1 print:bg-transparent print:border print:border-blue-300">
+              RECEIPT
+            </div>
+          </div>
         </div>
-        <div className="flex justify-between">
-          <span>Receipt By</span>
-          <span>{createdBy}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Reference ID</span>
-          <span className="text-xs text-gray-400 italic">{referenceId}</span>
+        
+        {/* Body */}
+        <div className="p-3 print:p-2">
+          {/* Meta Information */}
+          <div className="flex justify-between text-xs mb-3">
+            <div>
+              <p className="text-gray-500 uppercase">Date</p>
+              <p className="font-medium">{formatDate(createdAt)}</p>
+              
+              <p className="text-gray-500 uppercase mt-1">Receipt By</p>
+              <p className="font-medium">{createdBy}</p>
+            </div>
+            
+            <div className="text-right">
+              <p className="text-gray-500 uppercase">Reference ID</p>
+              <p className="font-mono">{referenceId}</p>
+              
+              <div className="mt-1 hidden sm:block print:block">
+                <QRCodeSVG 
+                  value={qrData}
+                  size={48}
+                  level="L"
+                  className="ml-auto"
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Customer Information */}
+          <div className="border border-gray-200 rounded p-2 mb-3 bg-gray-50 print:bg-white">
+            <p className="text-xs font-medium mb-1 text-gray-700">Customer Information</p>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+              <div>
+                <p className="text-gray-500">Payer's Name</p>
+                <p className="font-medium">{payersName}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Patient ID</p>
+                <p className="font-mono">{patientId}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-gray-500">Department</p>
+                <p className="capitalize">{department}</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Service Details */}
+          <div className="mb-3">
+            <p className="text-xs font-medium mb-1 text-gray-700">Service Details</p>
+            <table className="w-full text-xs border-t border-b border-gray-200">
+              <thead>
+                <tr className="bg-gray-50 print:bg-white">
+                  <th className="text-left py-1 px-2 text-gray-500">Description</th>
+                  <th className="text-right py-1 px-2 text-gray-500 w-20">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t border-gray-100">
+                  <td className="py-1 px-2">
+                    <p>{description}</p>
+                    {notes && <p className="text-gray-500 text-xs mt-0.5">{notes}</p>}
+                  </td>
+                  <td className="py-1 px-2 text-right">₦{Number(amount).toLocaleString()}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-gray-200 bg-gray-50 print:bg-white">
+                  <td className="py-1 px-2 font-medium">Total</td>
+                  <td className="py-1 px-2 text-right font-bold">₦{Number(amount).toLocaleString()}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          
+          {/* Payment Information */}
+          <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+            <div className="border border-gray-200 rounded p-2">
+              <p className="font-medium text-gray-700 mb-1">Payment Method</p>
+              <p className="capitalize">{paymentMethod}</p>
+            </div>
+            
+            <div className="border border-gray-200 rounded p-2">
+              <p className="font-medium text-gray-700 mb-1">Payment Status</p>
+              <div className="flex items-center gap-1">
+                {paymentStatus === "paid" ? (
+                  <>
+                    <BsCheckCircle className="text-green-600" size={12} />
+                    <span className="font-medium text-green-700">PAID</span>
+                  </>
+                ) : (
+                  <>
+                    <BsXCircle className="text-red-600" size={12} />
+                    <span className="font-medium text-red-700">UNPAID</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* Footer */}
+          <div className="text-center border-t border-dashed border-gray-200 pt-2 text-xs">
+            <p className="text-gray-600">Thank you for your patronage.</p>
+            <p className="text-gray-500 mt-0.5">For questions, contact our accounts department.</p>
+            <p className="mt-1 text-xs text-blue-700">Powered by ClinicPal</p>
+          </div>
         </div>
       </div>
-
-      <hr className="my-2 border-dashed border-gray-300" />
-
-      {/* Payee Info */}
-      <div className="mb-4 space-y-1">
-        <div className="flex justify-between text-base font-semibold text-gray-700">
-          <span>Payers's Name</span>
-          <span>{payersName}</span>
-        </div>
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Patient ID</span>
-          <span>{patientId}</span>
-        </div>
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Department</span>
-          <span>{department}</span>
-        </div>
-      </div>
-
-      <hr className="my-2 border-dashed border-gray-300" />
-
-      {/* Billing Details */}
-      <div className="mb-4 space-y-1 text-sm text-gray-600">
-        <div className="flex justify-between">
-          <span>Description</span>
-          <span>{description}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Payment Method</span>
-          <span className="capitalize">{paymentMethod}</span>
-        </div>
-        <div className="flex justify-between font-semibold">
-          <span>Status</span>
-          <span className="text-gray-600">
-            <span className="flex items-center gap-1">
-              {paymentStatus === "paid" ? (
-                <>
-                  <BsCheckCircle className="text-green-600 text-lg" />
-                  <span>PAID</span>
-                </>
-              ) : (
-                <>
-                  <BsXCircle className="text-red-500 text-lg" />
-                  <span>UNPAID</span>
-                </>
-              )}
-            </span>
-          </span>
-        </div>
-      </div>
-
-      <hr className="my-2 border-dashed border-gray-300" />
-
-      {/* Total */}
-      <div className="flex justify-between items-center mt-4 font-bold text-lg text-gray-800">
-        <span>Total</span>
-        <span>₦{Number(amount).toLocaleString()}</span>
-      </div>
-
-      {/* Footer Branding */}
-      <div className="mt-8 text-center text-xs text-gray-500 border-t border-dashed pt-2">
-        Thank you for your patronage. <br />
-        <span className="font-semibold text-gray-600 italic">Powered by ClinicPal</span>
+      
+      {/* Print timestamp */}
+      <div className="hidden print:block text-center text-xs text-gray-400 mt-1">
+        {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
       </div>
     </div>
   );

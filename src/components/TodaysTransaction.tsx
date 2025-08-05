@@ -1,16 +1,111 @@
 import { useMemo, useState } from "react";
-import { FiRefreshCw, FiDownload, FiPrinter, FiEdit, FiX } from "react-icons/fi";
+import { FiRefreshCw, FiDownload, FiPrinter, FiEdit, FiX, FiAlertCircle } from "react-icons/fi";
 import { BsReceipt, BsCheckCircle, BsXCircle } from "react-icons/bs";
 import { useDashboard } from "../context/DashboardContext";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 type FilterType = "today" | "yesterday" | "search";
 
+// Confirmation modal component
+interface ConfirmModalProps {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => Promise<void>;
+  onCancel: () => void;
+  isLoading: boolean;
+  confirmText?: string;
+  confirmColor?: string;
+  icon?: React.ReactNode;
+}
+
+const ConfirmModal: React.FC<ConfirmModalProps> = ({ 
+  isOpen, 
+  title, 
+  message, 
+  onConfirm, 
+  onCancel, 
+  isLoading,
+  confirmText = "Confirm",
+  confirmColor = "bg-blue-600 hover:bg-blue-700",
+  icon = <FiAlertCircle className="text-amber-500 w-5 h-5" />
+}) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white rounded-lg shadow-lg max-w-md w-full"
+      >
+        <div className="p-5 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            {icon}
+            <h3 className="font-semibold text-lg text-gray-800">{title}</h3>
+          </div>
+        </div>
+        
+        <div className="p-5">
+          <p className="text-gray-600">{message}</p>
+        </div>
+        
+        <div className="p-4 bg-gray-50 rounded-b-lg flex justify-end gap-3">
+          <button 
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors text-sm font-medium"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancel
+          </button>
+          <button 
+            className={`px-4 py-2 rounded-lg text-white transition-colors text-sm font-medium flex items-center gap-2 ${confirmColor}`}
+            onClick={onConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                Processing...
+              </>
+            ) : (
+              confirmText
+            )}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 export function TodaysTransaction() {
-  const { transactions, loading, fetchTransactions, externalBillingData } = useDashboard();
+  const { transactions, loading, fetchTransactions, externalBillingData, updatePaymentStatus } = useDashboard();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<FilterType>("today");
   const [search, setSearch] = useState("");
+  
+  // State for confirmation modals
+  const [confirmModal, setConfirmModal] = useState<null | {
+    type: "paid" | "cancel";
+    transactionId: string;
+    payersName: string;
+    amount: number;
+  }>(null);
+
+  // Handler to execute payment update after confirmation
+  const handleConfirmedAction = async () => {
+    if (!confirmModal) return;
+    
+    await updatePaymentStatus({
+      transaction_id: confirmModal.transactionId,
+      action: confirmModal.type
+    });
+    
+    setConfirmModal(null);
+    fetchTransactions();
+  };
 
   // 1. Map externalBillingData to match transactions structure
   const mappedExternal = useMemo(() => externalBillingData.map((ext, idx) => ({
@@ -172,10 +267,32 @@ export function TodaysTransaction() {
                       >
                         <FiPrinter /> <span className="hidden sm:inline">Print</span>
                       </button>
-                      <button className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-2 py-1 rounded flex items-center gap-1 text-xs">
-                        <FiEdit /> <span className="hidden sm:inline">Edit</span>
-                      </button>
-                      <button className="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded flex items-center gap-1 text-xs">
+                      
+                      {/* Updated Edit Button with Confirmation */}
+                      {tx.payment_status !== "paid" && <button 
+                        className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-2 py-1 rounded flex items-center gap-1 text-xs"
+                        onClick={() => setConfirmModal({
+                          type: "paid",
+                          transactionId: tx.id?.toString() || "",
+                          payersName: tx.payers_name || "Unknown",
+                          amount: Number(tx.amount) || 0
+                        })}
+                        disabled={tx.payment_status === "paid" }
+                      >
+                        <FiEdit /> <span className="hidden sm:inline">Mark Paid</span>
+                      </button>}
+                      
+                      {/* Updated Cancel Button with Confirmation */}
+                      <button 
+                        className="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded flex items-center gap-1 text-xs"
+                        onClick={() => setConfirmModal({
+                          type: "cancel",
+                          transactionId: tx.id?.toString() || "",
+                          payersName: tx.payers_name || "Unknown",
+                          amount: Number(tx.amount) || 0
+                        })}
+                        disabled={tx.payment_status === "paid" }
+                      >
                         <FiX /> <span className="hidden sm:inline">Cancel</span>
                       </button>
                     </td>
@@ -185,6 +302,37 @@ export function TodaysTransaction() {
           </table>
         </div>
       </section>
+
+      {/* Confirmation Modals */}
+      <AnimatePresence>
+        {confirmModal && confirmModal.type === "paid" && (
+          <ConfirmModal
+            isOpen={true}
+            title="Mark as Paid"
+            message={`Are you sure you want to mark the payment of ₦${confirmModal.amount.toLocaleString()} for ${confirmModal.payersName} as paid?`}
+            onConfirm={handleConfirmedAction}
+            onCancel={() => setConfirmModal(null)}
+            isLoading={loading}
+            confirmText="Mark as Paid"
+            confirmColor="bg-green-600 hover:bg-green-700"
+            icon={<BsCheckCircle className="text-green-500 w-5 h-5" />}
+          />
+        )}
+        
+        {confirmModal && confirmModal.type === "cancel" && (
+          <ConfirmModal
+            isOpen={true}
+            title="Cancel Transaction"
+            message={`Are you sure you want to cancel the payment of ₦${confirmModal.amount.toLocaleString()} for ${confirmModal.payersName}? This action cannot be undone.`}
+            onConfirm={handleConfirmedAction}
+            onCancel={() => setConfirmModal(null)}
+            isLoading={loading}
+            confirmText="Cancel Transaction"
+            confirmColor="bg-red-600 hover:bg-red-700"
+            icon={<FiX className="text-red-500 w-5 h-5" />}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

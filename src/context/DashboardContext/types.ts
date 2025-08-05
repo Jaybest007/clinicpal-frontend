@@ -214,6 +214,11 @@ export interface externalBillingData {
   created_by: string;
 }
 
+export interface updatePaymentStatus {
+  transaction_id: string;
+  action: string;
+}
+
 // ==================== CONTEXT TYPE ====================
 export interface DashboardContextType {
   // Auth
@@ -276,4 +281,5 @@ export interface DashboardContextType {
   fetchPatientPaymentHistory: (patient_id: string) => Promise<void>;
   externalBilling: (credentials: externalBilling) => Promise<void>;
   fetchExternalBilling: () => Promise<void>;
+  updatePaymentStatus: (credentials: updatePaymentStatus) => Promise<void>;
 }
