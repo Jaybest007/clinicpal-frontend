@@ -1,6 +1,5 @@
 import axios from "axios";
-import React from "react";
-import { useCallback, useContext, createContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "react-toastify";
 
 //========== interfaces ==========
@@ -32,6 +31,7 @@ interface staffsData {
   created_at: Date;
 }
 
+
 //=======================
 interface HospitalContextType {
   loading: boolean;
@@ -43,6 +43,7 @@ interface HospitalContextType {
   staffs: staffsData[] | null;
   deletePatient: (patient_id: string) => Promise<void>;
   fetchStaffs: () => Promise<void>;
+  refreshAllData: () => Promise<void>;
 }
 
 //============ context setup =============
@@ -53,10 +54,11 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [loading, setLoading] = useState<boolean>(false);
   const [hospitalData, setHospitalData] = useState<hospitalData | null>(null);
   const [staffs, setStaffs] = useState<staffsData[] | null>(null);
+  
 
   // Prevent duplicate fetches
   const fetchStaffsInProgress = useRef(false);
-
+ 
   // Utility: handle API errors with 403 auto-logout and no toast
   const handleApiError = (err: any) => {
     const code = err?.response?.status;
@@ -115,8 +117,10 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setStaffs(response.data);
       } else {
         setStaffs([]);
+        console.log("Hospital Context - No staffs found");
       }
     } catch (err: any) {
+      console.error("Hospital Context - Error fetching staffs:", err);
       handleApiError(err);
       throw err;
     } finally {
@@ -125,13 +129,15 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [hospitalData]);
 
-  // Only fetch staffs if not already loaded and token is present
+  // Auto-fetch data when hospital data is available
   useEffect(() => {
-    if (hospitalData?.token && !staffs) {
-      fetchStaffs();
+    if (hospitalData?.token && hospitalData.role === "hospital") {
+      if (!staffs) {
+        fetchStaffs();
+      }
+      
     }
-    // eslint-disable-next-line
-  }, [hospitalData?.token]);
+  }, [hospitalData, staffs,  fetchStaffs,]);
 
   //=========== Give staff role =============
   const updateStaffRole = useCallback(
@@ -211,6 +217,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         );
         toast.success(response.data.success);
+        // Refresh patients data after deletion
       } catch (err: any) {
         handleApiError(err);
         throw err;
@@ -218,8 +225,25 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setLoading(false);
       }
     },
-    [hospitalData, fetchStaffs]
+    [hospitalData, ]
   );
+
+  // Refresh all data function
+  const refreshAllData = useCallback(async () => {
+    console.log("Hospital Context - Refreshing all data...");
+    setLoading(true);
+    try {
+      await fetchStaffs();
+      
+      toast.success('Data refreshed successfully');
+    } catch (error) {
+      console.error("Hospital Context - Error refreshing data:", error);
+      toast.error('Failed to refresh data');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchStaffs,]);
+
 
   return (
     <HospitalContext.Provider
@@ -231,8 +255,11 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         hospitalData,
         logout,
         staffs,
+        
         deletePatient,
-        fetchStaffs
+        fetchStaffs,
+        
+        refreshAllData
       }}
     >
       {children}
@@ -242,8 +269,8 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const useHospital = (): HospitalContextType => {
   const context = useContext(HospitalContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useHospital must be used within a HospitalProvider");
   }
   return context;
-};
+}

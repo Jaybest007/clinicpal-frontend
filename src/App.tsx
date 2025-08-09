@@ -30,6 +30,7 @@ import { BillReceipt } from "./components/print/BillReceipt";
 import { Xray } from "./pages/Xray";
 import { HqTransactions } from "./pages/HqPages/HqTransactions";
 import { SalesReportPrint } from "./components/print/SalesReportPrint";
+import PharmacyInventoryPage from "./pages/PharmacyInventoryPage";
 
 function App() {
   // Get token from AuthContext
@@ -57,7 +58,9 @@ function App() {
             <Route path="/ultrasound" element={<ProtectedRoute> <Ultrasound /> </ProtectedRoute>} />
             <Route path="/confirmation" element={<ProtectedRoute><ConfirmationPage /></ProtectedRoute>} />
             <Route path="/docs" element={<DocumentationPage />} />
-
+            <Route path="/pharmacy/inventory" element={<ProtectedRoute><PharmacyInventoryPage /></ProtectedRoute>} />
+            
+            {/* Print Routes */}
             <Route path="/sales-report" element={<ProtectedRoute><SalesReportPrint /></ProtectedRoute>} />
             
             {/* Hospital Routes */}
