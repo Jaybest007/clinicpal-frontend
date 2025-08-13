@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./hooks/useAuth";
 import { usePatients } from "./hooks/usePatients";
 import { useQueue } from "./hooks/useQueue";
@@ -7,6 +7,7 @@ import { useAppointments } from "./hooks/useAppointments";
 import { useOrders } from "./hooks/useOrders";
 import { useTransactions } from "./hooks/useTransactions";
 import { useSocketEvents } from "./services/socketService";
+import { useInventory } from "./hooks/useInventory";
 import type { DashboardContextType } from "./types";
 
 /**
@@ -21,6 +22,7 @@ import type { DashboardContextType } from "./types";
  * - Patient queue management
  * - Billing and transaction processing
  * - Real-time updates via WebSocket
+ * - Inventory management
  */
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -34,6 +36,24 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const appointments = useAppointments(auth.token);
   const orders = useOrders(auth.token);
   const transactions = useTransactions(auth.token, auth.role);
+  
+  // Get user data and token from your auth context or storage
+  const [userRole, setUserRole] = useState<string>("");
+  const [token, setToken] = useState<string>("");
+  
+  // Initialize user data
+  useEffect(() => {
+    // Get user data from localStorage or another source
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    const userToken = userData.token || '';
+    const role = userData.role || '';
+    
+    setToken(userToken);
+    setUserRole(role);
+  }, []);
+  
+  // Pass role directly to useInventory instead of relying on context
+  const inventoryData = useInventory(token, userRole);
 
   // Set up real-time socket events
   useSocketEvents(
@@ -47,11 +67,11 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     (): DashboardContextType => ({
       // Authentication
       token: auth.token,
-      role: auth.role,
+      role: userRole,
       
       // Global loading state (combine loading states if needed)
       loading: patients.loading || queue.loading || reports.loading || 
-               appointments.loading || orders.loading || transactions.loading,
+               appointments.loading || orders.loading || transactions.loading || inventoryData.loading,
 
       // Patient Management
       patientsData: patients.patientsData,
@@ -110,8 +130,24 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       externalBilling: transactions.externalBilling,
       fetchExternalBilling: transactions.fetchExternalBilling,
       updatePaymentStatus: transactions.updatePaymentStatus,
+
+      // Inventory Management
+      inventory: inventoryData.inventory,
+      inventoryLoading: inventoryData.loading,
+      inventoryError: inventoryData.error,
+      transactionHistory: inventoryData.transactionHistory,
+      transactionLoading: inventoryData.transactionLoading,
+      transactionError: inventoryData.transactionError,
+      fetchInventory: inventoryData.fetchInventory,
+      fetchTransactionHistory: inventoryData.fetchTransactionHistory,
+      addInventoryItem: inventoryData.addInventoryItem,
+      updateInventoryItem: inventoryData.updateInventoryItem,
+      deleteInventoryItem: inventoryData.deleteInventoryItem,
+      processSale: inventoryData.processSale,
+      processRestock: inventoryData.processRestock,
+      getStockStatus: inventoryData.getStockStatus,
     }),
-    [auth, patients, queue, reports, appointments, orders, transactions]
+    [auth, patients, queue, reports, appointments, orders, transactions, inventoryData, userRole]
   );
 
   return (

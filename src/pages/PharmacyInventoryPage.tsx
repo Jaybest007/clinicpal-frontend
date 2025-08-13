@@ -7,139 +7,44 @@ import SaleTransactionModal from "../components/pharmacy/SaleTransactionModal";
 import RestockModal from "../components/pharmacy/RestockModal";
 import TransactionDetailModal from "../components/pharmacy/TransactionDetailModal";
 import EditItemModal from "../components/pharmacy/EditItemModal";
-
-// Sample hardcoded data - replace with Context data later
-const SAMPLE_INVENTORY = [
-  {
-    id: "MED-001",
-    name: "Paracetamol 500mg",
-    category: "Analgesics",
-    unit: "tablets",
-    quantity: 250,
-    minThreshold: 50,
-    expiryDate: "2025-08-15"
-  },
-  {
-    id: "MED-002", 
-    name: "Amoxicillin 250mg",
-    category: "Antibiotics",
-    unit: "capsules",
-    quantity: 45,
-    minThreshold: 60,
-    expiryDate: "2024-12-20"
-  },
-  {
-    id: "SUP-001",
-    name: "Disposable Syringes 5ml",
-    category: "Medical Supplies", 
-    unit: "pieces",
-    quantity: 0,
-    minThreshold: 100,
-    expiryDate: "2026-01-10"
-  },
-  {
-    id: "MED-003",
-    name: "Ibuprofen 400mg", 
-    category: "Analgesics",
-    unit: "tablets",
-    quantity: 180,
-    minThreshold: 40,
-    expiryDate: "2025-03-22"
-  },
-  {
-    id: "SUP-002",
-    name: "Medical Face Masks",
-    category: "Medical Supplies",
-    unit: "pieces", 
-    quantity: 850,
-    minThreshold: 200,
-    expiryDate: "2027-06-30"
-  },
-  {
-    id: "MED-004",
-    name: "Cough Syrup 100ml",
-    category: "Cough & Cold",
-    unit: "bottles",
-    quantity: 25,
-    minThreshold: 30,
-    expiryDate: "2024-11-15"
-  }
-];
-
-// Helper function to determine stock status
-const getStockStatus = (quantity: number, minThreshold: number): string => {
-  if (quantity === 0) return "Out of Stock";
-  if (quantity <= minThreshold) return "Low Stock";
-  return "In Stock";
-};
-
-type InventoryItem = {
-  id: string;
-  name: string;
-  category: string;
-  unit: string;
-  quantity: number;
-  minThreshold: number;
-  expiryDate: string;
-};
-
-type NewInventoryItem = {
-  id?: string;
-  name: string;
-  category: string;
-  unit: string;
-  quantity: number | string;
-  minThreshold: number | string;
-  expiryDate: string;
-};
-
-type TransactionItem = {
-  id: string;
-  name: string;
-  unit: string;
-  availableQuantity: number;
-  quantityToSell: number;
-  unitPrice?: number;
-};
-
-type RestockItem = {
-  id: string;
-  name: string;
-  unit: string;
-  currentQuantity: number;
-  quantityToAdd: number;
-};
-
-type SaleTransaction = {
-  id: string;
-  date: string;
-  time: string;
-  staff: string;
-  staffId: string;
-  items: {
-    id: string;
-    name: string;
-    quantity: number;
-    unit: string;
-    unitPrice?: number;
-  }[];
-  totalItems: number;
-  totalAmount?: number;
-  type: "sale" | "restock" | "adjustment" | "expired_removal";
-  notes?: string;
-};
+import { useDashboard } from "../context/DashboardContext";
+import type { 
+  InventoryItem, 
+  InventoryTransaction, 
+  InventoryTransactionItem, 
+  RestockItem, 
+  TransactionFilters 
+} from "../context/DashboardContext/types";
 
 export default function PharmacyInventoryPage() {
-  const [inventory, setInventory] = useState<InventoryItem[]>(SAMPLE_INVENTORY);
+  // Use the dashboard context for inventory operations
+  const { 
+    inventory, 
+    inventoryLoading, 
+    inventoryError,
+    transactionHistory, 
+    transactionLoading,
+    transactionError,
+    getStockStatus,
+    addInventoryItem,
+    updateInventoryItem,
+    deleteInventoryItem,
+    processSale,
+    processRestock,
+    fetchTransactionHistory,
+    fetchInventory
+  } = useDashboard();
+
+  // UI state
   const [filters, setFilters] = useState({
     search: "",
     category: "All",
     status: "All"
   });
+  
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
-  const [transactionHistory, setTransactionHistory] = useState<SaleTransaction[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
   
@@ -151,20 +56,23 @@ export default function PharmacyInventoryPage() {
     dateFrom: "",
     dateTo: ""
   });
-  const [selectedTransaction, setSelectedTransaction] = useState<SaleTransaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<InventoryTransaction | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Get unique categories from inventory
   const categories = useMemo(() => {
+    if (!inventory.length) return ["All"];
     const uniqueCategories = [...new Set(inventory.map(item => item.category))];
     return ["All", ...uniqueCategories.sort()];
   }, [inventory]);
 
   // Filter inventory based on current filters
   const filteredInventory = useMemo(() => {
+    if (inventoryLoading) return [];
+    
     return inventory.filter(item => {
       const matchesSearch = item.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-                           item.id.toLowerCase().includes(filters.search.toLowerCase());
+                           (item.id && item.id.toLowerCase().includes(filters.search.toLowerCase()));
       
       const matchesCategory = filters.category === "All" || item.category === filters.category;
       
@@ -173,39 +81,53 @@ export default function PharmacyInventoryPage() {
 
       return matchesSearch && matchesCategory && matchesStatus;
     });
-  }, [inventory, filters]);
+  }, [inventory, filters, getStockStatus, inventoryLoading]);
 
   // Calculate summary statistics
   const stats = useMemo(() => {
+    if (inventoryLoading) return { total: 0, inStock: 0, lowStock: 0, outOfStock: 0 };
+    
     const total = inventory.length;
     const inStock = inventory.filter(item => getStockStatus(item.quantity, item.minThreshold) === "In Stock").length;
     const lowStock = inventory.filter(item => getStockStatus(item.quantity, item.minThreshold) === "Low Stock").length;
     const outOfStock = inventory.filter(item => getStockStatus(item.quantity, item.minThreshold) === "Out of Stock").length;
     
     return { total, inStock, lowStock, outOfStock };
-  }, [inventory]);
+  }, [inventory, getStockStatus, inventoryLoading]);
 
   // Filter transaction history
   const filteredHistory = useMemo(() => {
+    if (transactionLoading) return [];
+    
     return transactionHistory.filter(transaction => {
-      const matchesSearch = transaction.id.toLowerCase().includes(historyFilters.search.toLowerCase()) ||
-                           transaction.staff.toLowerCase().includes(historyFilters.search.toLowerCase()) ||
-                           transaction.items.some(item => 
-                             item.name.toLowerCase().includes(historyFilters.search.toLowerCase())
-                           );
+      const matchesSearch = 
+        (transaction.id && transaction.id.toLowerCase().includes(historyFilters.search.toLowerCase())) ||
+        (transaction.staff && transaction.staff.toLowerCase().includes(historyFilters.search.toLowerCase())) ||
+        transaction.items.some(item => 
+          item.name.toLowerCase().includes(historyFilters.search.toLowerCase())
+        );
 
       const matchesType = historyFilters.type === "all" || transaction.type === historyFilters.type;
 
-      const transactionDate = new Date(transaction.date);
-      const matchesDateFrom = !historyFilters.dateFrom || transactionDate >= new Date(historyFilters.dateFrom);
-      const matchesDateTo = !historyFilters.dateTo || transactionDate <= new Date(historyFilters.dateTo);
+      const transactionDate = transaction.date ? new Date(transaction.date) : null;
+      const matchesDateFrom = !historyFilters.dateFrom || 
+        (transactionDate && transactionDate >= new Date(historyFilters.dateFrom));
+      const matchesDateTo = !historyFilters.dateTo || 
+        (transactionDate && transactionDate <= new Date(historyFilters.dateTo));
 
       return matchesSearch && matchesType && matchesDateFrom && matchesDateTo;
     });
-  }, [transactionHistory, historyFilters]);
+  }, [transactionHistory, historyFilters, transactionLoading]);
 
   // Calculate history stats
   const historyStats = useMemo(() => {
+    if (transactionLoading) return { 
+      totalTransactions: 0, 
+      totalSales: 0, 
+      totalRestocks: 0, 
+      totalRevenue: 0 
+    };
+    
     const totalTransactions = filteredHistory.length;
     const totalSales = filteredHistory.filter(t => t.type === "sale").length;
     const totalRestocks = filteredHistory.filter(t => t.type === "restock").length;
@@ -214,7 +136,7 @@ export default function PharmacyInventoryPage() {
       .reduce((sum, t) => sum + (t.totalAmount || 0), 0);
 
     return { totalTransactions, totalSales, totalRestocks, totalRevenue };
-  }, [filteredHistory]);
+  }, [filteredHistory, transactionLoading]);
 
   // Handle filter changes
   const handleFilterChange = (filterType: "search" | "category" | "status", value: string) => {
@@ -235,152 +157,68 @@ export default function PharmacyInventoryPage() {
       dateFrom: "",
       dateTo: ""
     });
+    
+    // Refetch with cleared filters
+    fetchTransactionHistory();
   };
 
-  const viewTransactionDetails = (transaction: SaleTransaction) => {
+  const viewTransactionDetails = (transaction: InventoryTransaction) => {
     setSelectedTransaction(transaction);
     setIsDetailModalOpen(true);
   };
 
   // Handle adding new item
-  const handleAddItem = (newItem: NewInventoryItem) => {
-    const item: InventoryItem = {
-      ...newItem,
-      id: newItem.id || `ITEM-${Date.now()}`,
-      quantity: parseInt(newItem.quantity as string) || 0,
-      minThreshold: parseInt(newItem.minThreshold as string) || 0
-    };
-    
-    setInventory(prev => [item, ...prev]);
-    setIsAddModalOpen(false);
-
-    // Add to transaction history for new item
-    const now = new Date();
-    const newTransaction: SaleTransaction = {
-      id: `TXN-${Date.now()}`,
-      date: now.toISOString().split('T')[0],
-      time: now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-      staff: "System",
-      staffId: "SYSTEM",
-      items: [{
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit
-      }],
-      totalItems: item.quantity,
-      type: "restock",
-      notes: "New item added to inventory"
-    };
-
-    setTransactionHistory(prev => [newTransaction, ...prev]);
+  const handleAddItem = async (newItem: any) => {
+    try {
+      await addInventoryItem(newItem);
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error("Error adding item:", error);
+      alert("Failed to add item. Please try again.");
+    }
   };
 
   // Handle deleting item
-  const handleDeleteItem = (id: string) => {
+  const handleDeleteItem = async (id: string) => {
     const itemToDelete = inventory.find(item => item.id === id);
     
     if (itemToDelete && window.confirm(`Are you sure you want to delete ${itemToDelete.name}?`)) {
-      setInventory(prev => prev.filter(item => item.id !== id));
-
-      // Add to transaction history for deletion
-      const now = new Date();
-      const newTransaction: SaleTransaction = {
-        id: `TXN-${Date.now()}`,
-        date: now.toISOString().split('T')[0],
-        time: now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-        staff: "System",
-        staffId: "SYSTEM",
-        items: [{
-          id: itemToDelete.id,
-          name: itemToDelete.name,
-          quantity: itemToDelete.quantity,
-          unit: itemToDelete.unit
-        }],
-        totalItems: itemToDelete.quantity,
-        type: "expired_removal",
-        notes: "Item removed from inventory"
-      };
-
-      setTransactionHistory(prev => [newTransaction, ...prev]);
+      try {
+        await deleteInventoryItem(id);
+      } catch (error) {
+        console.error("Error deleting item:", error);
+        alert("Failed to delete item. Please try again.");
+      }
     }
   };
 
   // Handle processing sale transaction
-  const handleProcessSale = (transactionItems: TransactionItem[], saleData: {
-    staff: string;
-    notes: string;
-    totalAmount: number;
-  }) => {
-    // Update inventory
-    setInventory(prev => prev.map(item => {
-      const transactionItem = transactionItems.find(ti => ti.id === item.id);
-      if (transactionItem) {
-        return {
-          ...item,
-          quantity: Math.max(0, item.quantity - transactionItem.quantityToSell)
-        };
-      }
-      return item;
-    }));
-
-    // Add to transaction history
-    const now = new Date();
-    const newTransaction: SaleTransaction = {
-      id: `TXN-${Date.now()}`,
-      date: now.toISOString().split('T')[0],
-      time: now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-      staff: saleData.staff,
-      staffId: `STAFF-${Date.now().toString().slice(-6)}`,
-      items: transactionItems.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantityToSell,
-        unit: item.unit,
-        unitPrice: item.unitPrice
-      })),
-      totalItems: transactionItems.reduce((sum, item) => sum + item.quantityToSell, 0),
-      totalAmount: saleData.totalAmount,
-      type: "sale",
-      notes: saleData.notes
-    };
-
-    setTransactionHistory(prev => [newTransaction, ...prev]);
+  const handleProcessSale = async (
+    transactionItems: InventoryTransactionItem[], 
+    saleData: {
+      staff: string;
+      notes: string;
+      totalAmount: number;
+    }
+  ) => {
+    try {
+      await processSale(transactionItems, saleData);
+      setIsSaleModalOpen(false);
+    } catch (error) {
+      console.error("Error processing sale:", error);
+      alert("Failed to process sale. Please try again.");
+    }
   };
 
   // Handle processing restock
-  const handleProcessRestock = (restockItems: RestockItem[]) => {
-    setInventory(prev => prev.map(item => {
-      const restockItem = restockItems.find(ri => ri.id === item.id);
-      if (restockItem) {
-        return {
-          ...item,
-          quantity: item.quantity + restockItem.quantityToAdd
-        };
-      }
-      return item;
-    }));
-
-    // Add to transaction history
-    const now = new Date();
-    const newTransaction: SaleTransaction = {
-      id: `TXN-${Date.now()}`,
-      date: now.toISOString().split('T')[0],
-      time: now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-      staff: "System",
-      staffId: "SYSTEM",
-      items: restockItems.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantityToAdd,
-        unit: item.unit
-      })),
-      totalItems: restockItems.reduce((sum, item) => sum + item.quantityToAdd, 0),
-      type: "restock",
-      notes: "Inventory restocked"
-    };
-
-    setTransactionHistory(prev => [newTransaction, ...prev]);
+  const handleProcessRestock = async (restockItems: RestockItem[]) => {
+    try {
+      await processRestock(restockItems);
+      setIsRestockModalOpen(false);
+    } catch (error) {
+      console.error("Error processing restock:", error);
+      alert("Failed to process restock. Please try again.");
+    }
   };
 
   // Handle editing item
@@ -390,33 +228,15 @@ export default function PharmacyInventoryPage() {
   };
 
   // Handle saving edited item
-  const handleSaveEditedItem = (updatedItem: InventoryItem) => {
-    setInventory(prev => prev.map(item => 
-      item.id === updatedItem.id ? updatedItem : item
-    ));
-    setIsEditModalOpen(false);
-    setItemToEdit(null);
-
-    // Add to transaction history for edit
-    const now = new Date();
-    const newTransaction: SaleTransaction = {
-      id: `TXN-${Date.now()}`,
-      date: now.toISOString().split('T')[0],
-      time: now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-      staff: "System",
-      staffId: "SYSTEM",
-      items: [{
-        id: updatedItem.id,
-        name: updatedItem.name,
-        quantity: updatedItem.quantity,
-        unit: updatedItem.unit
-      }],
-      totalItems: updatedItem.quantity,
-      type: "adjustment",
-      notes: `Item updated: ${updatedItem.name}`
-    };
-
-    setTransactionHistory(prev => [newTransaction, ...prev]);
+  const handleSaveEditedItem = async (updatedItem: InventoryItem) => {
+    try {
+      await updateInventoryItem(updatedItem);
+      setIsEditModalOpen(false);
+      setItemToEdit(null);
+    } catch (error) {
+      console.error("Error updating item:", error);
+      alert("Failed to update item. Please try again.");
+    }
   };
 
   // Handle clearing filters
@@ -426,6 +246,26 @@ export default function PharmacyInventoryPage() {
       category: "All", 
       status: "All"
     });
+  };
+
+  // Update history filters and fetch data
+  const applyHistoryFilters = () => {
+    const filters: TransactionFilters = {
+      search: historyFilters.search,
+      type: historyFilters.type !== 'all' ? historyFilters.type : undefined,
+      dateFrom: historyFilters.dateFrom,
+      dateTo: historyFilters.dateTo
+    };
+    
+    fetchTransactionHistory(filters);
+  };
+
+  // Refresh data
+  const handleRefreshData = () => {
+    fetchInventory();
+    if (activeTab === "history") {
+      fetchTransactionHistory();
+    }
   };
 
   return (
@@ -447,6 +287,7 @@ export default function PharmacyInventoryPage() {
               <button
                 onClick={() => setIsSaleModalOpen(true)}
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                disabled={inventoryLoading}
               >
                 <FiShoppingCart className="h-4 w-4 mr-2" />
                 Process Sale
@@ -455,6 +296,7 @@ export default function PharmacyInventoryPage() {
               <button
                 onClick={() => setIsRestockModalOpen(true)}
                 className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+                disabled={inventoryLoading}
               >
                 <FiTrendingUp className="h-4 w-4 mr-2" />
                 Restock Items
@@ -501,6 +343,25 @@ export default function PharmacyInventoryPage() {
           </div>
         </div>
 
+        {/* Error state display */}
+        {(activeTab === "inventory" && inventoryError) || (activeTab === "history" && transactionError) ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <h3 className="text-red-800 font-medium">Error loading data</h3>
+            <p className="text-red-600 text-sm mt-1">
+              {activeTab === "inventory" ? 
+                (inventoryError?.message || "Failed to load inventory data") :
+                (transactionError?.message || "Failed to load transaction data")
+              }
+            </p>
+            <button 
+              onClick={handleRefreshData}
+              className="mt-2 text-sm text-red-700 hover:text-red-900 font-medium"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : null}
+
         {/* Tab Content */}
         {activeTab === "inventory" ? (
           <InventorySection
@@ -511,8 +372,9 @@ export default function PharmacyInventoryPage() {
             onFilterChange={handleFilterChange}
             onClearFilters={handleClearFilters}
             onDeleteItem={handleDeleteItem}
-            onEditItem={handleEditItem} // Add this prop
+            onEditItem={handleEditItem}
             getStockStatus={getStockStatus}
+            isLoading={inventoryLoading}
           />
         ) : (
           <HistorySection
@@ -522,6 +384,8 @@ export default function PharmacyInventoryPage() {
             onFilterChange={handleHistoryFilterChange}
             onClearFilters={clearHistoryFilters}
             onViewDetails={viewTransactionDetails}
+            onApplyFilters={applyHistoryFilters}
+            isLoading={transactionLoading}
           />
         )}
 
@@ -535,7 +399,7 @@ export default function PharmacyInventoryPage() {
 
         <EditItemModal
           isOpen={isEditModalOpen}
-          item={itemToEdit}
+          item={itemToEdit ? { ...itemToEdit, expiryDate: itemToEdit.expiryDate ?? "" } : null}
           categories={categories.filter(cat => cat !== "All")}
           onClose={() => {
             setIsEditModalOpen(false);
@@ -546,14 +410,14 @@ export default function PharmacyInventoryPage() {
 
         <SaleTransactionModal
           isOpen={isSaleModalOpen}
-          inventory={inventory}
+          inventory={inventory.map(item => ({ ...item, expiryDate: item.expiryDate ?? "" }))}
           onClose={() => setIsSaleModalOpen(false)}
           onProcessSale={handleProcessSale}
         />
 
         <RestockModal
           isOpen={isRestockModalOpen}
-          inventory={inventory}
+          inventory={inventory.map(item => ({ ...item, expiryDate: item.expiryDate ?? "" }))}
           onClose={() => setIsRestockModalOpen(false)}
           onProcessRestock={handleProcessRestock}
         />
@@ -561,7 +425,10 @@ export default function PharmacyInventoryPage() {
         {/* Transaction Detail Modal */}
         {isDetailModalOpen && selectedTransaction && (
           <TransactionDetailModal
-            transaction={selectedTransaction}
+            transaction={{
+              ...selectedTransaction,
+              staffId: selectedTransaction.staffId ?? ""
+            }}
             onClose={() => {
               setIsDetailModalOpen(false);
               setSelectedTransaction(null);

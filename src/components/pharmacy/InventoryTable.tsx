@@ -1,29 +1,19 @@
-
 import { FiEdit2, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
-
-type InventoryItem = {
-  id: string;
-  name: string;
-  category: string;
-  unit: string;
-  quantity: number;
-  minThreshold: number;
-  expiryDate: string;
-};
+import type { InventoryItem } from '../../context/DashboardContext/types';
 
 interface InventoryTableProps {
   items: InventoryItem[];
   getStockStatus: (quantity: number, minThreshold: number) => string;
   onDeleteItem: (id: string) => void;
   onUpdateItem: (item: InventoryItem) => void;
-  onEditItem?: (item: InventoryItem) => void; // Add this prop
+  onEditItem?: (item: InventoryItem) => void;
 }
 
 export default function InventoryTable({ 
   items, 
   getStockStatus, 
-  onDeleteItem, 
-  
+  onDeleteItem,
+  onUpdateItem, // Add this even if unused, to satisfy the interface
   onEditItem 
 }: InventoryTableProps) {
   const getStatusColor = (status: string) => {
@@ -39,14 +29,16 @@ export default function InventoryTable({
     }
   };
 
-  const isExpiringSoon = (expiryDate: string) => {
+  const isExpiringSoon = (expiryDate?: string) => {
+    if (!expiryDate) return false;
     const today = new Date();
     const expiry = new Date(expiryDate);
     const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
   };
 
-  const isExpired = (expiryDate: string) => {
+  const isExpired = (expiryDate?: string) => {
+    if (!expiryDate) return false;
     const today = new Date();
     const expiry = new Date(expiryDate);
     return expiry < today;
@@ -121,14 +113,20 @@ export default function InventoryTable({
                   </td>
                   
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className={`text-sm ${expired ? 'text-red-600 font-medium' : expiringSoon ? 'text-yellow-600 font-medium' : 'text-gray-900'}`}>
-                      {item.expiryDate}
-                    </div>
-                    {(expired || expiringSoon) && (
-                      <div className="flex items-center text-xs text-yellow-600">
-                        <FiAlertTriangle className="h-3 w-3 mr-1" />
-                        {expired ? 'Expired' : 'Expires soon'}
-                      </div>
+                    {item.expiryDate ? (
+                      <>
+                        <div className={`text-sm ${expired ? 'text-red-600 font-medium' : expiringSoon ? 'text-yellow-600 font-medium' : 'text-gray-900'}`}>
+                          {item.expiryDate}
+                        </div>
+                        {(expired || expiringSoon) && (
+                          <div className="flex items-center text-xs text-yellow-600">
+                            <FiAlertTriangle className="h-3 w-3 mr-1" />
+                            {expired ? 'Expired' : 'Expires soon'}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-sm text-gray-500">Not specified</div>
                     )}
                   </td>
                   

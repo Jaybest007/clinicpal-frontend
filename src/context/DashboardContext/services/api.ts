@@ -52,4 +52,13 @@ export const API_ENDPOINTS = {
   EXTERNAL_BILLING: "/cashier/externalBilling",
   FETCH_EXTERNAL_BILLING: "/cashier/fetchExternalBilling",
   PAYMENT_ACTIONS: "/cashier/paymentActions",
+
+  //Inventory
+  ADD_INVENTORY_ITEM: "/inventory/addInventoryItem",
+  FETCH_INVENTORY: "/inventory/fetchInventory",
+  UPDATE_INVENTORY_ITEM: "/inventory/updateInventoryItem",
+  DELETE_INVENTORY_ITEM: "/inventory/deleteInventoryItem",
+  FETCH_INVENTORY_CATEGORIES: "/inventory/fetchInventoryCategories",
+  FETCH_INVENTORY_ITEM: "/inventory/fetchInventoryItem",
+  UPDATE_INVENTORY_ITEM_STATUS: "/inventory/updateInventoryItemStatus",
 } as const; 

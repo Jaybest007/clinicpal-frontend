@@ -219,6 +219,88 @@ export interface updatePaymentStatus {
   action: string;
 }
 
+// ==================== INVENTORY INTERFACES ====================
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  unit: string;
+  quantity: number;
+  minThreshold: number;
+  expiryDate?: string;
+  price?: number;
+  batchNumber?: string;
+  supplier?: string;
+  location?: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface NewInventoryItem {
+  name: string;
+  category: string;
+  unit: string;
+  quantity: number | string;
+  minThreshold: number | string;
+  expiryDate?: string;
+  price?: number | string;
+  batchNumber?: string;
+  supplier?: string;
+  location?: string;
+  description?: string;
+}
+
+export interface InventoryTransactionItem {
+  id: string;
+  name: string;
+  unit: string;
+  availableQuantity: number;
+  quantityToSell: number;
+  unitPrice?: number;
+}
+
+export interface RestockItem {
+  id: string;
+  name: string;
+  unit: string;
+  currentQuantity: number;
+  quantityToAdd: number;
+}
+
+export interface SaleData {
+  staff: string;
+  notes: string;
+  totalAmount: number;
+}
+
+export interface InventoryTransaction {
+  id: string;
+  date: string;
+  time: string;
+  staff: string;
+  staffId?: string;
+  items: {
+    id: string;
+    name: string;
+    quantity: number;
+    unit: string;
+    unitPrice?: number;
+  }[];
+  totalItems: number;
+  totalAmount?: number;
+  type: "sale" | "restock" | "adjustment" | "expired_removal";
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface TransactionFilters {
+  search?: string;
+  type?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 // ==================== CONTEXT TYPE ====================
 export interface DashboardContextType {
   // Auth
@@ -283,4 +365,20 @@ export interface DashboardContextType {
   fetchExternalBilling: () => Promise<void>;
   updatePaymentStatus: (credentials: updatePaymentStatus) => Promise<void>;
   setPatientPaymentHistory: Dispatch<SetStateAction<Transaction[]>>;
+
+  // Inventory Management
+  inventory: InventoryItem[];
+  inventoryLoading: boolean;
+  inventoryError: Error | null;
+  transactionHistory: InventoryTransaction[];
+  transactionLoading: boolean;
+  transactionError: Error | null;
+  fetchInventory: () => Promise<void>;
+  fetchTransactionHistory: (filters?: TransactionFilters) => Promise<void>;
+  addInventoryItem: (item: NewInventoryItem) => Promise<InventoryItem>;
+  updateInventoryItem: (item: InventoryItem) => Promise<InventoryItem>;
+  deleteInventoryItem: (id: string) => Promise<void>;
+  processSale: (items: InventoryTransactionItem[], saleData: SaleData) => Promise<InventoryTransaction>;
+  processRestock: (items: RestockItem[]) => Promise<InventoryTransaction>;
+  getStockStatus: (quantity: number, minThreshold: number) => string;
 }

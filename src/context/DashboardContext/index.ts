@@ -33,6 +33,14 @@ export type {
   fetchedExterOrder,
   orderResult,
   newPatient,
+  // Inventory types
+  InventoryItem,
+  NewInventoryItem,
+  InventoryTransaction,
+  InventoryTransactionItem,
+  RestockItem,
+  SaleData,
+  TransactionFilters
 } from "./types";
 
 // Utility exports

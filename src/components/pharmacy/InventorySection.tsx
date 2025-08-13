@@ -1,17 +1,8 @@
-
-import { FiPackage } from 'react-icons/fi';
+import React from 'react';
+import { FiFilter, FiSearch, FiAlertTriangle, FiPackage, FiCheck, FiAlertCircle, FiXCircle } from 'react-icons/fi';
 import InventoryTable from './InventoryTable';
-import InventoryFilters from './InventoryFilters';
-
-type InventoryItem = {
-  id: string;
-  name: string;
-  category: string;
-  unit: string;
-  quantity: number;
-  minThreshold: number;
-  expiryDate: string;
-};
+import StatCard from '../StatCard';
+import type { InventoryItem } from '../../context/DashboardContext/types';
 
 interface InventorySectionProps {
   filteredInventory: InventoryItem[];
@@ -30,11 +21,12 @@ interface InventorySectionProps {
   onFilterChange: (filterType: "search" | "category" | "status", value: string) => void;
   onClearFilters: () => void;
   onDeleteItem: (id: string) => void;
-  onEditItem: (item: InventoryItem) => void; // Add this prop
+  onEditItem: (item: InventoryItem) => void;
   getStockStatus: (quantity: number, minThreshold: number) => string;
+  isLoading?: boolean;
 }
 
-export default function InventorySection({
+const InventorySection: React.FC<InventorySectionProps> = ({
   filteredInventory,
   stats,
   filters,
@@ -42,92 +34,120 @@ export default function InventorySection({
   onFilterChange,
   onClearFilters,
   onDeleteItem,
-  onEditItem, // Add this prop
-  getStockStatus
-}: InventorySectionProps) {
+  onEditItem,
+  getStockStatus,
+  isLoading = false
+}) => {
   return (
-    <>
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Total Items</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
-            </div>
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <FiPackage className="h-4 w-4 text-blue-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">In Stock</p>
-              <p className="text-2xl font-semibold text-green-600">{stats.inStock}</p>
-            </div>
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <div className="w-3 h-3 bg-green-600 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Low Stock</p>
-              <p className="text-2xl font-semibold text-amber-600">{stats.lowStock}</p>
-            </div>
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                <div className="w-3 h-3 bg-amber-600 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-              <p className="text-2xl font-semibold text-red-600">{stats.outOfStock}</p>
-            </div>
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <div className="w-3 h-3 bg-red-600 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-6">
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Items"
+          icon={FiPackage}
+          value={stats.total}
+          variant="primary"
+          loading={isLoading}
+        />
+        <StatCard
+          title="In Stock"
+          icon={FiCheck}
+          value={stats.inStock}
+          variant="success"
+          loading={isLoading}
+        />
+        <StatCard
+          title="Low Stock"
+          icon={FiAlertCircle}
+          value={stats.lowStock}
+          variant="warning"
+          loading={isLoading}
+        />
+        <StatCard
+          title="Out of Stock"
+          icon={FiXCircle}
+          value={stats.outOfStock}
+          variant="danger"
+          loading={isLoading}
+        />
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow mb-8">
-        <div className="p-6">
-          <InventoryFilters
-            filters={filters}
-            categories={categories}
-            onFilterChange={onFilterChange}
-            onClearFilters={onClearFilters}
-          />
+      <div className="bg-white p-6 rounded-xl shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2 md:mb-0">Inventory Items</h2>
+          
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search items..."
+                className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full"
+                value={filters.search}
+                onChange={(e) => onFilterChange("search", e.target.value)}
+              />
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+            
+            <select
+              className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              value={filters.category}
+              onChange={(e) => onFilterChange("category", e.target.value)}
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>
+                  {category === "All" ? "All Categories" : category}
+                </option>
+              ))}
+            </select>
+            
+            <select
+              className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              value={filters.status}
+              onChange={(e) => onFilterChange("status", e.target.value)}
+            >
+              <option value="All">All Status</option>
+              <option value="In Stock">In Stock</option>
+              <option value="Low Stock">Low Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select>
+            
+            <button
+              onClick={onClearFilters}
+              className="flex items-center gap-1 px-3 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <FiFilter className="h-4 w-4" />
+              Clear Filters
+            </button>
+          </div>
         </div>
+        
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : filteredInventory.length > 0 ? (
+          <InventoryTable
+            items={filteredInventory}
+            getStockStatus={getStockStatus}
+            onDeleteItem={onDeleteItem}
+            onUpdateItem={() => {}}
+            onEditItem={onEditItem}
+          />
+        ) : (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+            <FiAlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+            <h3 className="text-lg font-medium text-gray-900 mb-1">No items found</h3>
+            <p className="text-gray-500">
+              {filters.search || filters.category !== "All" || filters.status !== "All"
+                ? "Try adjusting your filters or add a new item."
+                : "Add your first inventory item to get started."}
+            </p>
+          </div>
+        )}
       </div>
-
-      {/* Inventory Table */}
-      <div className="bg-white rounded-lg shadow">
-        <InventoryTable
-          items={filteredInventory}
-          getStockStatus={getStockStatus}
-          onDeleteItem={onDeleteItem}
-          onUpdateItem={() => {}}
-          onEditItem={onEditItem} // Pass the edit handler
-        />
-      </div>
-    </>
+    </div>
   );
-}
+};
+
+export default InventorySection;

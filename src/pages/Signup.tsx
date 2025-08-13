@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, memo } from "react";
 import { FaEyeSlash, FaEye, FaUser, FaEnvelope, FaLock, FaPhone, FaBuilding } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import logo from "../assets/CP.png"; 
-import { motion, AnimatePresence } from "framer-motion";
 import { FiLoader } from "react-icons/fi";
 
 interface signUpData {
@@ -17,6 +15,75 @@ interface signUpData {
   confirmPassword: string;
   hospital_id: string;
 }
+
+// Memoized input field component to prevent unnecessary re-renders
+const InputField = memo(({ 
+  label, 
+  name, 
+  type = "text", 
+  icon, 
+  placeholder, 
+  value, 
+  onChange,
+  errorMessage,
+  ...props 
+}: { 
+  label: string;
+  name: string;
+  type?: string;
+  icon: React.ReactNode;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  errorMessage?: string;
+  [key: string]: any;
+}) => (
+  <div className="w-full">
+    <label htmlFor={name} className="block mb-1 text-gray-700 font-medium text-sm">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        {icon}
+      </div>
+      <input
+        id={name}
+        type={type}
+        name={name}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className={`w-full rounded-lg p-2.5 pl-10 bg-blue-50/70 focus:bg-white border ${
+          errorMessage ? "border-red-300" : "border-blue-200"
+        } outline-none text-gray-800`}
+        autoComplete="off"
+        data-lpignore="true"
+        {...props}
+      />
+      {name.includes("password") && props.showPasswordToggle && (
+        <button
+          type="button"
+          onClick={props.onTogglePassword}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-blue-500 focus:outline-none"
+          tabIndex={-1}
+        >
+          {props.isPasswordHidden ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+        </button>
+      )}
+    </div>
+    {errorMessage && (
+      <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+        <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>{errorMessage}</span>
+      </p>
+    )}
+  </div>
+));
+
+// Prevent unnecessary re-renders
+InputField.displayName = 'InputField';
 
 const SignUp = () => {
   useEffect(() => {
@@ -54,41 +121,55 @@ const SignUp = () => {
     hospital_id: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Memoize input handler to prevent recreation on each render
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     let updatedValue = value;
     if (name === "phone") {
       updatedValue = value.replace(/[^\d]/g, "").slice(0, 11);
     }
+    
     setFormData(prev => ({ ...prev, [name]: updatedValue }));
-    setError(prev => ({ ...prev, [name]: "" }));
-
-    if (name === "email") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (value && !emailRegex.test(value)) {
-        setError(prev => ({ ...prev, [name]: "Please enter a valid email address" }));
+    
+    // Don't validate on every keystroke for better performance
+    if (value.length > 3) {
+      let errorMsg = "";
+      
+      if (name === "email" && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          errorMsg = "Please enter a valid email address";
+        }
       }
-    }
 
-    if (name === "password") {
-      const PasswordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
-      if (value && !PasswordRegex.test(value)) {
-        setError(prev => ({
-          ...prev,
-          [name]: "Password must be at least 6 characters, include letters and numbers",
-        }));
+      if (name === "password" && value) {
+        const PasswordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+        if (!PasswordRegex.test(value)) {
+          errorMsg = "Password must be at least 6 characters, include letters and numbers";
+        }
       }
-    }
 
-    if (name === "confirmPassword") {
-      if (value && value !== formData.password) {
-        setError(prev => ({ ...prev, [name]: "Passwords do not match" }));
+      if (name === "confirmPassword" && value) {
+        if (value !== formData.password) {
+          errorMsg = "Passwords do not match";
+        }
+      }
+
+      if (errorMsg) {
+        setError(prev => ({ ...prev, [name]: errorMsg }));
       } else {
         setError(prev => ({ ...prev, [name]: "" }));
       }
+    } else {
+      setError(prev => ({ ...prev, [name]: "" }));
     }
-  };
+  }, [formData.password]);
+
+  // Memoize toggle password handler
+  const togglePasswordVisibility = useCallback(() => {
+    setHidden(prev => !prev);
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -164,125 +245,55 @@ const SignUp = () => {
     }
   };
 
-  // Reusable input field component
-  const InputField = ({ 
-    label, 
-    name, 
-    type = "text", 
-    icon, 
-    placeholder, 
-    value, 
-    onChange,
-    errorMessage,
-    ...props 
-  }: { 
-    label: string;
-    name: string;
-    type?: string;
-    icon: React.ReactNode;
-    placeholder: string;
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    errorMessage?: string;
-    [key: string]: any;
-  }) => (
-    <div className="w-full">
-      <label htmlFor={name} className="block mb-1 text-gray-700 font-medium text-sm">
-        {label}
-      </label>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          {icon}
-        </div>
-        <input
-          id={name}
-          type={type}
-          name={name}
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          className={`w-full rounded-lg p-2.5 pl-10 bg-blue-50/70 focus:bg-white border ${
-            errorMessage ? "border-red-300 focus:border-red-500" : "border-blue-200 focus:border-blue-400"
-          } outline-none transition-all duration-200 text-gray-800`}
-          {...props}
-        />
-        {name.includes("password") && (
-          <button
-            type="button"
-            onClick={() => setHidden(!hidden)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-blue-500 hover:text-blue-700 focus:outline-none"
-            tabIndex={-1}
-            aria-label={hidden ? "Show password" : "Hide password"}
-          >
-            {hidden ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
-          </button>
-        )}
-      </div>
-      <AnimatePresence>
-        {errorMessage && (
-          <motion.p 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="text-xs text-red-600 mt-1 flex items-center gap-1 overflow-hidden"
-          >
-            <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span>{errorMessage}</span>
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+  // Common props for password fields
+  const passwordProps = {
+    showPasswordToggle: true,
+    isPasswordHidden: hidden,
+    onTogglePassword: togglePasswordVisibility
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-100 px-4 py-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 sm:p-10 border border-blue-100 my-4"
-      >
-        {/* Logo & Title */}
-        <div className="flex flex-col items-center mb-6">
-          <motion.img
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-            src={logo}
-            alt="ClinicPal Logo"
-            className="w-16 h-16 mb-3 rounded-full shadow-md object-cover"
-          />
-          <h1 className="font-bold text-2xl sm:text-3xl text-blue-900 mb-2 tracking-tight">
+      <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-blue-100 my-4">
+        {/* Title */}
+        <div className="text-center mb-6">
+          <h1 className="font-bold text-2xl text-blue-900 mb-2">
             Staff Onboarding
           </h1>
-          <p className="text-blue-600 text-sm font-medium text-center">
-            Create your ClinicPal account to join your hospital team
+          <p className="text-blue-600 text-sm">
+            Create your account to join your hospital team
           </p>
         </div>
 
         {/* Error Message */}
-        <AnimatePresence>
-          {error.server && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-4 overflow-hidden"
-            >
-              <div className="flex items-center gap-2 text-red-700 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>{error.server}</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {error.server && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 text-red-700 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{error.server}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 text-sm text-blue-800">
+          <div className="font-medium mb-1">Important Information:</div>
+          <ul className="list-disc pl-4 space-y-1">
+            <li>You'll need your hospital code to register</li>
+            <li>Your account will need approval before you can access the system</li>
+            <li>Use a secure password with letters and numbers</li>
+          </ul>
+        </div>
 
         {/* Signup Form */}
-        <form className="space-y-4 w-full" onSubmit={handleSubmit}>
+        <form 
+          className="space-y-4 w-full" 
+          onSubmit={handleSubmit}
+          autoComplete="off"
+          noValidate
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField
               label="First Name"
@@ -318,7 +329,6 @@ const SignUp = () => {
               onChange={handleInputChange}
               errorMessage={error.email}
               required
-              autoComplete="email"
             />
             
             <InputField
@@ -356,7 +366,7 @@ const SignUp = () => {
             onChange={handleInputChange}
             errorMessage={error.password}
             required
-            autoComplete="new-password"
+            {...passwordProps}
           />
           
           <InputField
@@ -369,16 +379,14 @@ const SignUp = () => {
             onChange={handleInputChange}
             errorMessage={error.confirmPassword}
             required
-            autoComplete="new-password"
+            {...passwordProps}
           />
           
-          
-
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg py-2.5 mt-2 shadow transition-all duration-200 transform hover:translate-y-[-1px] active:translate-y-[1px] ${
-              loading ? "opacity-70 cursor-not-allowed" : "hover:shadow-md"
+            className={`w-full bg-blue-600 text-white font-semibold rounded-lg py-2.5 mt-2 ${
+              loading ? "opacity-70 cursor-not-allowed" : "hover:bg-blue-700"
             }`}
           >
             {loading ? (
@@ -393,7 +401,7 @@ const SignUp = () => {
         </form>
 
         {/* Divider */}
-        <div className="my-6 flex items-center">
+        <div className="my-5 flex items-center">
           <div className="flex-grow h-px bg-blue-100" />
           <span className="mx-3 text-blue-400 text-xs font-medium">OR</span>
           <div className="flex-grow h-px bg-blue-100" />
@@ -404,12 +412,12 @@ const SignUp = () => {
           Already have an account?{" "}
           <Link 
             to="/login" 
-            className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+            className="text-blue-600 hover:text-blue-800 font-semibold"
           >
             Sign in
           </Link>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
