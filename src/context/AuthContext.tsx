@@ -89,8 +89,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserRole(loggedInUser.role || "");
       localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedInUser));
 
-      toast.success("Login successful");
-
       // Hard refresh to clear stale context
       setTimeout(() => {
         window.location.replace("/dashboard");
@@ -98,11 +96,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return loggedInUser;
     } catch (err: any) {
-      const message =
-        err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Login failed. Please try again.";
-      toast.error(message);
+      // const message =
+      //   err?.response?.data?.error ||
+      //   err?.response?.data?.message ||
+      //   "Login failed. Please try again.";
+      // toast.error(message);
       throw err;
     } finally {
       setLoading(false);
