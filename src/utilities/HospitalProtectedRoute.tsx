@@ -39,11 +39,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         <style>{logoAnimationStyles}</style>
         <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50">
           <div className="relative flex items-center justify-center">
-        <img
-          src={logo}
-          alt="ClinicPal Logo"
-          className="w-24 h-24 object-contain logo-breathe"
-        />
+            <img
+              src={logo}
+              alt="ClinicPal Logo"
+              className="w-24 h-24 object-contain logo-breathe"
+            />
           </div>
           <p className="mt-4 text-blue-600 font-medium animate-pulse">Loading ClinicPal...</p>
         </div>

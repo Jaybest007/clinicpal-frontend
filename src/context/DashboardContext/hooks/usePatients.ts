@@ -33,14 +33,23 @@ export const usePatients = (token: string | null) => {
 
       // Save to Dexie for offline use
       if (response.data.patients?.length) {
-        clinipalDB.patientsData.clear().then(() => {
-          clinipalDB.patientsData.bulkAdd(response.data.patients);
-        });
+        try {
+          await clinipalDB.patientsData.clear();
+          await clinipalDB.patientsData.bulkAdd(response.data.patients);
+        } catch (dbError) {
+          console.warn("Failed to cache patients data:", dbError);
+          // Non-critical error, continue execution
+        }
       }
+      
       if (response.data.next_of_kin?.length) {
-        clinipalDB.nextOfKin.clear().then(() => {
-          clinipalDB.nextOfKin.bulkAdd(response.data.next_of_kin);
-        });
+        try {
+          await clinipalDB.nextOfKin.clear();
+          await clinipalDB.nextOfKin.bulkAdd(response.data.next_of_kin);
+        } catch (dbError) {
+          console.warn("Failed to cache next of kin data:", dbError);
+          // Non-critical error, continue execution
+        }
       }
     } catch (err: any) {
       handleApiError(err);

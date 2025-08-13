@@ -53,6 +53,13 @@ export const handleApiError = (error: unknown): Error => {
   
   // Handle non-axios errors
   if (error instanceof Error) {
+    // Special handling for Dexie/IndexedDB errors
+    if (error.name === 'BulkError' || error.name === 'ConstraintError') {
+      console.warn('Database operation failed:', error);
+      // For UI purposes, don't show IndexedDB errors to users since offline storage is non-critical
+      return new Error('A non-critical storage operation failed. Your data is still safe.');
+    }
+    
     return error;
   }
   

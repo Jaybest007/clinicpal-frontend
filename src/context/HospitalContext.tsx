@@ -58,6 +58,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Prevent duplicate fetches
   const fetchStaffsInProgress = useRef(false);
+  const initialFetchCompleted = useRef(false);
  
   // Utility: handle API errors with 403 auto-logout and no toast
   const handleApiError = (err: any) => {
@@ -82,7 +83,10 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const hospitalLogin = useCallback(async (credentials: hospitalLogin) => {
     try {
       setLoading(true);
-      const response = await axios.post("https://clinicpal.onrender.com/api/auth/hospital_login", credentials);
+      const response = await axios.post(
+        "https://clinicpal.onrender.com/api/auth/hospital_login", 
+        credentials
+      );
       localStorage.setItem("hospital_data", JSON.stringify(response.data));
       setHospitalData(response.data);
       toast.success(response.data.success);
@@ -131,13 +135,11 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Auto-fetch data when hospital data is available
   useEffect(() => {
-    if (hospitalData?.token && hospitalData.role === "hospital") {
-      if (!staffs) {
-        fetchStaffs();
-      }
-      
+    if (hospitalData?.token && hospitalData.role === "hospital" && !initialFetchCompleted.current) {
+      fetchStaffs();
+      initialFetchCompleted.current = true;
     }
-  }, [hospitalData, staffs,  fetchStaffs,]);
+  }, [hospitalData, fetchStaffs]);
 
   //=========== Give staff role =============
   const updateStaffRole = useCallback(
@@ -230,19 +232,18 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Refresh all data function
   const refreshAllData = useCallback(async () => {
-    console.log("Hospital Context - Refreshing all data...");
+    
     setLoading(true);
     try {
       await fetchStaffs();
-      
       toast.success('Data refreshed successfully');
     } catch (error) {
-      console.error("Hospital Context - Error refreshing data:", error);
+     
       toast.error('Failed to refresh data');
     } finally {
       setLoading(false);
     }
-  }, [fetchStaffs,]);
+  }, [fetchStaffs]);
 
 
   return (
@@ -255,10 +256,8 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         hospitalData,
         logout,
         staffs,
-        
         deletePatient,
         fetchStaffs,
-        
         refreshAllData
       }}
     >
