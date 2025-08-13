@@ -62,11 +62,11 @@ export const HospitalDashboard = () => {
         </div>
 
         {/* Stat Cards */}
-  <DashboardAnalytics
-    staffs={staffs ?? []}
-    patientsData={patientsData}
-    loading={loading}
-  />
+        <DashboardAnalytics
+          staffs={staffs ?? []}
+          patientsData={patientsData}
+          loading={loading}
+        />
 
         {/* Staff Table */}
         <Staffs

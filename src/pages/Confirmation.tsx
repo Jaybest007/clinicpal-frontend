@@ -41,12 +41,12 @@ const ConfirmationPage: React.FC = () => {
     return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 backdrop-blur-sm p-4 print:bg-white print:p-0">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 backdrop-blur-sm p-4 print:bg-white print:p-0 py-10 overflow-auto">
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-xl relative border border-blue-100 overflow-hidden print:shadow-none print:border-0"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-xl relative border border-blue-100 overflow-hidden print:shadow-none print:border-0 my-auto"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 print:bg-blue-600">
@@ -90,10 +90,10 @@ const ConfirmationPage: React.FC = () => {
           
           <div className="p-5">
             <div className="flex flex-col md:flex-row md:items-start gap-6">
-              {/* QR Code Section - FIXED */}
-              <div className="flex flex-col items-center">
+              {/* QR Code Section - IMPROVED */}
+              <div className="flex flex-col items-center mx-auto mb-4 md:mb-0">
                 <div 
-                  className="bg-white p-2 rounded-lg shadow-sm border border-blue-200 mb-2"
+                  className="bg-white p-3 rounded-lg shadow-sm border border-blue-200 mb-2"
                   onClick={() => setShowQR(!showQR)}
                 >
                   <QRCodeSVG 
@@ -102,7 +102,7 @@ const ConfirmationPage: React.FC = () => {
                     Name: ${String(newPatient.full_name)}
                     Phone: ${String(newPatient.phone)}
                     Date: ${new Date().toLocaleDateString()}`} 
-                    size={120} // Increased size for better scanning
+                    size={160} // Increased size for better scanning
                     level="H" // High error correction
                     includeMargin={true}
                     className="cursor-pointer"
@@ -232,7 +232,7 @@ const ConfirmationPage: React.FC = () => {
                   Name: ${String(newPatient.full_name)}
                   Phone: ${String(newPatient.phone)}
                   Date: ${new Date().toLocaleDateString()}`}
-                  size={120}
+                  size={180}
                   level="H"
                   includeMargin={true}
                 />

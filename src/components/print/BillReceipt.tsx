@@ -65,12 +65,12 @@ export function BillReceipt() {
   };
   
   const qrData = `CLINICPAL RECEIPT
-    Ref: ${referenceId}
-    Amount: ₦${Number(amount).toLocaleString()}
-    Payer: ${payersName}
-    Patient: ${patientId}
-    Date: ${createdAt}
-    Status: ${paymentStatus.toUpperCase()}`;
+    REF: ${referenceId}
+    AMOUNT: ₦${Number(amount).toLocaleString()}
+    PAYER: ${payersName}
+    PATIENT: ${patientId}
+    DATE: ${formatDate(createdAt)}
+    STATUS: ${paymentStatus.toUpperCase()}`;
 
 
 
@@ -126,8 +126,8 @@ export function BillReceipt() {
               <div className="mt-1 hidden sm:block print:block">
                 <QRCodeSVG 
                   value={qrData}
-                  size={48}
-                  level="L"
+                  size={80}
+                  level="M"
                   className="ml-auto"
                 />
               </div>
@@ -210,6 +210,19 @@ export function BillReceipt() {
           <div className="text-center border-t border-dashed border-gray-200 pt-2 text-xs">
             <p className="text-gray-600">Thank you for your patronage.</p>
             <p className="text-gray-500 mt-0.5">For questions, contact our accounts department.</p>
+            
+            {/* Larger QR Code for easy scanning */}
+            <div className="flex justify-center my-4">
+              <div className="bg-white p-2 border border-gray-200 rounded-md shadow-sm">
+                <QRCodeSVG 
+                  value={qrData}
+                  size={140}
+                  level="M"
+                  includeMargin={true}
+                />
+              </div>
+            </div>
+            
             <p className="mt-1 text-xs text-blue-700">Powered by ClinicPal</p>
           </div>
         </div>
