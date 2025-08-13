@@ -5,7 +5,7 @@ interface InventoryTableProps {
   items: InventoryItem[];
   getStockStatus: (quantity: number, minThreshold: number) => string;
   onDeleteItem: (id: string) => void;
-  onUpdateItem: (item: InventoryItem) => void;
+  
   onEditItem?: (item: InventoryItem) => void;
 }
 
@@ -13,7 +13,7 @@ export default function InventoryTable({
   items, 
   getStockStatus, 
   onDeleteItem,
-  onUpdateItem, // Add this even if unused, to satisfy the interface
+ 
   onEditItem 
 }: InventoryTableProps) {
   const getStatusColor = (status: string) => {

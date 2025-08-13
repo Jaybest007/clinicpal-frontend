@@ -131,7 +131,7 @@ const InventorySection: React.FC<InventorySectionProps> = ({
             items={filteredInventory}
             getStockStatus={getStockStatus}
             onDeleteItem={onDeleteItem}
-            onUpdateItem={() => {}}
+           
             onEditItem={onEditItem}
           />
         ) : (
