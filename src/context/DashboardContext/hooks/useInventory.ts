@@ -24,12 +24,6 @@ export const useInventory = (token?: string, userRole?: string) => {
   const [transactionLoading, setTransactionLoading] = useState(true);
   const [transactionError, setTransactionError] = useState<Error | null>(null);
 
-  // Use the role passed as parameter instead of from context
-  const role = userRole || "";
-
-  // Simple check for inventory access
-  const hasAccess = role === "super admin" || role === "pharmacist";
-
   // Common headers for authenticated requests
   const getHeaders = useCallback(() => {
     return {
@@ -46,12 +40,6 @@ export const useInventory = (token?: string, userRole?: string) => {
 
   // Fetch inventory items
   const fetchInventory = useCallback(async () => {
-    // Skip if no access
-    if (!hasAccess) {
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     setError(null);
     
@@ -67,16 +55,10 @@ export const useInventory = (token?: string, userRole?: string) => {
     } finally {
       setLoading(false);
     }
-  }, [getHeaders, hasAccess]);
+  }, [getHeaders]);
 
   // Fetch transaction history
   const fetchTransactionHistory = useCallback(async (filters?: TransactionFilters) => {
-    // Skip if no access
-    if (!hasAccess) {
-      setTransactionLoading(false);
-      return;
-    }
-
     setTransactionLoading(true);
     setTransactionError(null);
     
@@ -105,15 +87,10 @@ export const useInventory = (token?: string, userRole?: string) => {
     } finally {
       setTransactionLoading(false);
     }
-  }, [getHeaders, hasAccess]);
+  }, [getHeaders]);
 
   // Add new inventory item
   const addInventoryItem = useCallback(async (newItem: NewInventoryItem): Promise<InventoryItem> => {
-    // Skip if no access
-    if (!hasAccess) {
-      return {} as InventoryItem;
-    }
-
     try {
       const response = await axios.post(
         `${API_BASE_URL}${API_ENDPOINTS.ADD_INVENTORY_ITEM}`, 
@@ -130,15 +107,10 @@ export const useInventory = (token?: string, userRole?: string) => {
      
       throw handledError;
     }
-  }, [getHeaders, hasAccess]);
+  }, [getHeaders]);
 
   // Update inventory item
   const updateInventoryItem = useCallback(async (updatedItem: InventoryItem): Promise<InventoryItem> => {
-    // Skip if no access
-    if (!hasAccess) {
-      return updatedItem;
-    }
-
     try {
       const response = await axios.put(
         `${API_BASE_URL}${API_ENDPOINTS.UPDATE_INVENTORY_ITEM}/${updatedItem.id}`, 
@@ -156,15 +128,10 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders, hasAccess]);
+  }, [getHeaders]);
 
   // Delete inventory item
   const deleteInventoryItem = useCallback(async (id: string): Promise<void> => {
-    // Skip if no access
-    if (!hasAccess) {
-      return;
-    }
-
     try {
       await axios.delete(
         `${API_BASE_URL}${API_ENDPOINTS.DELETE_INVENTORY_ITEM}/${id}`, 
@@ -177,18 +144,13 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders, hasAccess]);
+  }, [getHeaders]);
 
   // Process sale transaction
   const processSale = useCallback(async (
     items: InventoryTransactionItem[], 
     saleData: SaleData
   ): Promise<InventoryTransaction> => {
-    // Skip if no access
-    if (!hasAccess) {
-      return {} as InventoryTransaction;
-    }
-
     try {
       const payload = {
         items,
@@ -224,15 +186,10 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders, hasAccess]);
+  }, [getHeaders]);
 
   // Process restock transaction
   const processRestock = useCallback(async (items: RestockItem[]): Promise<InventoryTransaction> => {
-    // Skip if no access
-    if (!hasAccess) {
-      return {} as InventoryTransaction;
-    }
-
     try {
       const payload = {
         items,
@@ -266,19 +223,27 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders, hasAccess]);
+  }, [getHeaders]);
 
-  // Initial data load
+  // Initial data load - only check role here
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      setTransactionLoading(false);
+      return;
+    }
+    
+    // Only check the role once here
+    const hasAccess = userRole === "super admin" || userRole === "pharmacist";
     if (!hasAccess) {
       setLoading(false);
       setTransactionLoading(false);
       return;
     }
+    
     fetchInventory();
     fetchTransactionHistory();
-  }, [token, fetchInventory, fetchTransactionHistory, hasAccess]);
+  }, [token, fetchInventory, fetchTransactionHistory, userRole]);
 
   return {
     // Inventory data and operations

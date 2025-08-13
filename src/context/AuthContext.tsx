@@ -125,11 +125,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return newUser;
     } catch (err: any) {
-      const message =
-        err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Signup failed. Please try again.";
-      toast.error(message);
+      // const message =
+      //   err?.response?.data?.error ||
+      //   err?.response?.data?.message ||
+      //   "Signup failed. Please try again.";
+      // toast.error(message);
       throw err;
     } finally {
       setLoading(false);

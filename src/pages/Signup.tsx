@@ -350,7 +350,7 @@ const SignUp = () => {
             name="hospital_id"
             icon={<FaBuilding className="h-4 w-4 text-blue-400" />}
             placeholder="Enter your hospital code"
-            value={formData.hospital_id}
+            value={formData.hospital_id.toUpperCase()}
             onChange={handleInputChange}
             errorMessage={error.hospital_id}
             required
