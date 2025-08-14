@@ -1,21 +1,33 @@
 import pic1 from "../assets/pic.png";
 import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import problem from "../assets/cards.webp";
 import { FiFileText, FiUsers, FiPieChart, FiClipboard, FiServer, FiShield, FiMessageCircle, FiCheckCircle } from "react-icons/fi";
 import { MdOutlineHealthAndSafety, MdOutlineReceiptLong } from "react-icons/md";
 import { RiHospitalLine } from "react-icons/ri";
+import { LandingPageNav } from "../components/landing_page/LandingpageNav";
 
 // Feature card component for better reusability
 type FeatureCardProps = {
   title: string;
   description: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  delay?: number;
 };
 
-const FeatureCard = ({ title, description, icon: Icon }: FeatureCardProps) => (
-  <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4 border-blue-500">
+const FeatureCard = ({ title, description, icon: Icon, delay = 0 }: FeatureCardProps) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ 
+      duration: 0.5, 
+      delay: delay,
+      ease: "easeOut"
+    }}
+    className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4 border-blue-500"
+  >
     <div className="flex items-start gap-4">
       <div className="bg-blue-50 p-3 rounded-lg">
         <Icon className="w-6 h-6 text-blue-600" />
@@ -25,7 +37,7 @@ const FeatureCard = ({ title, description, icon: Icon }: FeatureCardProps) => (
         <p className="text-slate-600">{description}</p>
       </div>
     </div>
-  </div>
+  </motion.div>
 );
 
 // Stat component for impact section
@@ -33,82 +45,38 @@ type StatCardProps = {
   value: string;
   label: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  delay?: number;
 };
 
-const StatCard = ({ value, label, icon: Icon }: StatCardProps) => (
-  <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center">
+const StatCard = ({ value, label, icon: Icon, delay = 0 }: StatCardProps) => (
+  <motion.div 
+    initial={{ opacity: 0, scale: 0.9 }}
+    whileInView={{ opacity: 1, scale: 1 }}
+    viewport={{ once: true }}
+    transition={{ 
+      duration: 0.5, 
+      delay: delay,
+      ease: "easeOut"
+    }}
+    className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center"
+  >
     <div className="p-3 rounded-full bg-blue-50 mb-3">
       <Icon className="w-8 h-8 text-blue-600" />
     </div>
     <p className="text-3xl font-bold text-blue-700 mb-1">{value}</p>
     <p className="text-gray-600 text-center">{label}</p>
-  </div>
+  </motion.div>
 );
 
 const LandingPage = () => {
-  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  
 
-  // Add scroll detection for enhanced header
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-slate-800">
       {/* Enhanced Navbar */}
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white shadow-md py-3" : "bg-white/90 backdrop-blur-md py-4"
-      }`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12">
-          <div className="flex items-center space-x-3">
-            <img src={logo} alt="ClinicPal Logo" className="h-10 w-auto" />
-          </div>
-          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium">
-            <a href="#features" className="text-slate-600 hover:text-blue-700 transition-colors">Features</a>
-            <a href="#benefits" className="text-slate-600 hover:text-blue-700 transition-colors">Benefits</a>
-            <a href="#testimonials" className="text-slate-600 hover:text-blue-700 transition-colors">Testimonials</a>
-            <a href="#faq" className="text-slate-600 hover:text-blue-700 transition-colors">FAQ</a>
-            <Link
-              to="/login"
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow"
-            >
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              className="bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow"
-            >
-              Get Started
-            </Link>
-          </nav>
-          <button
-            className="md:hidden text-slate-700 p-2 rounded-lg hover:bg-gray-100"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle Menu"
-          >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d={mobileOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-            </svg>
-          </button>
-        </div>
-        {mobileOpen && (
-          <div className="md:hidden px-6 pb-6 pt-4 space-y-4 bg-white border-t border-slate-200">
-            <a href="#features" className="block py-2 text-slate-600 hover:text-blue-700">Features</a>
-            <a href="#benefits" className="block py-2 text-slate-600 hover:text-blue-700">Benefits</a>
-            <a href="#testimonials" className="block py-2 text-slate-600 hover:text-blue-700">Testimonials</a>
-            <a href="#faq" className="block py-2 text-slate-600 hover:text-blue-700">FAQ</a>
-            <div className="pt-2 space-y-3">
-              <Link to="/login" className="block w-full text-center bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700">Login</Link>
-              <Link to="/signup" className="block w-full text-center bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700">Get Started</Link>
-            </div>
-          </div>
-        )}
-      </header>
+      <LandingPageNav />
 
       <main className="flex-grow">
         {/* Enhanced Hero Section */}
@@ -116,19 +84,44 @@ const LandingPage = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-green-50 z-0"></div>
           <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="space-y-8">
+              <motion.div 
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="space-y-8"
+              >
                 <div>
-                  <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
+                  <motion.span 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="inline-block px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4"
+                  >
                     Healthcare Management Platform
-                  </span>
-                  <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-slate-800">
+                  </motion.span>
+                  <motion.h1 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    className="text-4xl sm:text-5xl font-bold leading-tight text-slate-800"
+                  >
                     Digital <span className="text-blue-600">Healthcare Records</span> for Modern Clinics
-                  </h1>
+                  </motion.h1>
                 </div>
-                <p className="text-slate-600 text-lg leading-relaxed">
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                  className="text-slate-600 text-lg leading-relaxed"
+                >
                   Transform your hospital's workflow with ClinicPal an enterprise-grade management solution built specifically for Nigerian healthcare facilities, replacing paper records with a secure digital system.
-                </p>
-                <div className="flex flex-row flex-wrap gap-2 w-full">
+                </motion.p>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                  className="flex flex-row flex-wrap gap-2 w-full"
+                >
                   <Link
                     to="/signup"
                     className="flex-1 min-w-[120px] px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow flex items-center justify-center gap-2 text-sm"
@@ -141,23 +134,36 @@ const LandingPage = () => {
                   >
                     Request Demo
                   </a>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-500">
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                  className="flex items-center gap-2 text-sm text-slate-500"
+                >
                   <FiCheckCircle className="text-green-500" />
                   <span>No credit card required</span>
                   <span className="mx-2">•</span>
                   <FiCheckCircle className="text-green-500" />
                   <span>14-day free trial</span>
-                </div>
-              </div>
-              <div className="relative">
+                </motion.div>
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="relative"
+              >
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-green-500/10 rounded-3xl transform rotate-3"></div>
-                <img 
+                <motion.img 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
                   src={pic1} 
                   alt="ClinicPal Dashboard" 
                   className="relative rounded-2xl shadow-lg w-full max-w-lg mx-auto" 
                 />
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
@@ -165,41 +171,95 @@ const LandingPage = () => {
         {/* Problem Statement Section */}
         <section id="benefits" className="py-20 bg-white px-6 md:px-12">
           <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-            <img src={problem} alt="Healthcare challenges" className="rounded-xl shadow-md" />
-            <div className="space-y-6">
-              <span className="text-blue-600 font-medium">The Challenge</span>
-              <h2 className="text-3xl font-bold text-gray-900">Why Nigerian Healthcare Needs Digital Transformation</h2>
-              <p className="text-gray-600 text-lg leading-relaxed">
+            <motion.img 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              src={problem} 
+              alt="Healthcare challenges" 
+              className="rounded-xl shadow-md" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="space-y-6"
+            >
+              <motion.span 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="text-blue-600 font-medium"
+              >
+                The Challenge
+              </motion.span>
+              <motion.h2 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="text-3xl font-bold text-gray-900"
+              >
+                Why Nigerian Healthcare Needs Digital Transformation
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="text-gray-600 text-lg leading-relaxed"
+              >
                 Healthcare facilities across Nigeria face critical challenges with paper-based systems: 
                 lost records, prescription errors, lengthy patient wait times, and administrative inefficiencies.
-              </p>
+              </motion.p>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  className="flex items-start gap-3"
+                >
                   <div className="mt-1 p-1 rounded-full bg-red-100">
                     <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
                   <p className="text-gray-700">Paper records get damaged, lost, or become illegible over time</p>
-                </div>
-                <div className="flex items-start gap-3">
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                  className="flex items-start gap-3"
+                >
                   <div className="mt-1 p-1 rounded-full bg-red-100">
                     <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
                   <p className="text-gray-700">Manual billing creates room for financial discrepancies</p>
-                </div>
-                <div className="flex items-start gap-3">
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.7, duration: 0.5 }}
+                  className="flex items-start gap-3"
+                >
                   <div className="mt-1 p-1 rounded-full bg-red-100">
                     <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
                   <p className="text-gray-700">Departments struggle to communicate effectively, delaying care</p>
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -353,16 +413,28 @@ const LandingPage = () => {
         {/* Enhanced Testimonial Section */}
         <section id="testimonials" className="py-20 bg-white px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="text-center mb-16"
+            >
               <span className="text-blue-600 font-medium">Success Stories</span>
               <h2 className="text-3xl font-bold mt-2 text-gray-900">Trusted by Healthcare Leaders</h2>
               <p className="text-gray-600 text-lg mt-4 max-w-3xl mx-auto">
                 Healthcare professionals across Nigeria are experiencing the benefits of ClinicPal.
               </p>
-            </div>
+            </motion.div>
             
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-slate-50 p-8 rounded-xl relative">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="bg-slate-50 p-8 rounded-xl relative"
+              >
                 <svg className="absolute top-4 left-4 w-10 h-10 text-blue-300 opacity-40" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                 </svg>
@@ -380,9 +452,15 @@ const LandingPage = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
               
-              <div className="bg-slate-50 p-8 rounded-xl relative">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-slate-50 p-8 rounded-xl relative"
+              >
                 <svg className="absolute top-4 left-4 w-10 h-10 text-blue-300 opacity-40" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                 </svg>
@@ -400,28 +478,48 @@ const LandingPage = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
 
         {/* Enhanced CTA Section */}
         <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6">
-          <div className="max-w-5xl mx-auto text-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="max-w-5xl mx-auto text-center"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Transform Your Healthcare Facility Today</h2>
             <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
               Join the digital healthcare revolution and provide better patient care with ClinicPal.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+            >
               <Link to="/signup" className="px-8 py-4 bg-white text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-all duration-200 shadow-md hover:shadow-lg">
                 Start Your Free Trial
               </Link>
               <a href="#demo" className="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg">
                 Schedule a Demo
               </a>
-            </div>
-            <p className="mt-6 text-blue-200">No credit card required. 14-day free trial. Cancel anytime.</p>
-          </div>
+            </motion.div>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="mt-6 text-blue-200"
+            >
+              No credit card required. 14-day free trial. Cancel anytime.
+            </motion.p>
+          </motion.div>
         </section>
 
         {/* Enhanced Footer */}
@@ -471,7 +569,7 @@ const LandingPage = () => {
                   <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
                   <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
                   <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                  <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
                 </ul>
               </div>
               
