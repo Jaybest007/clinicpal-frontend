@@ -14,7 +14,7 @@ export const usePatients = (token: string | null) => {
   const [patientsData, setPatientsData] = useState<PatientsData[]>([]);
   const [nextOfKinData, setNextOfKinData] = useState<nextOfKinData[]>([]);
   const [newPatient, setNewPatient] = useState<newPatient[]>([]);
-  
+
   const hasFetchedPatients = useRef(false);
 
   // Fetch all patients

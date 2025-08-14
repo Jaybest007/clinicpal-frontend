@@ -1,21 +1,34 @@
 import { useState, useEffect } from "react";
 import { useHospital } from "../context/HospitalContext";
-import { useDashboard } from "../context/DashboardContext";
+
 import { HqNavBar } from "../components/hq_components/HqNavBar";
 import { Staffs } from "../components/hq_components/Staffs";
 import { DashboardAnalytics } from "../components/hq_components/DashboardAnalytics";
+import { usePatients } from "../context/DashboardContext/hooks/usePatients";
 
 export const HospitalDashboard = () => {
+  const hospitalDetail = localStorage.getItem("hospital_data");
+  const token = JSON.parse(hospitalDetail || "{}").token;
+
   const { hospitalData, staffs, deleteUser, updateStaffRole, loading } = useHospital();
-  const { patientsData = [] } = useDashboard();
+  const { patientsData = [], fetchAllPatients } = usePatients(token);
 
   const [editingStaffId, setEditingStaffId] = useState<string>("");
   const [newRole, setNewRole] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [hasFetched, setHasFetched] = useState<boolean>(false);
 
+  // Make sure hospital token is used by passing it to localStorage before fetching
   useEffect(() => {
-  }, []);
+    if (!hasFetched && hospitalData) {
+      // Ensure the hospital token is available in localStorage
+      fetchAllPatients();
+      setHasFetched(true);
+    }
+  }, [fetchAllPatients, hasFetched, hospitalData]);
 
+
+  
   // Filter staff by search term
   const filteredStaffs = Array.isArray(staffs)
     ? staffs.filter(

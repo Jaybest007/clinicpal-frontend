@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { HqNavBar } from "../../components/hq_components/HqNavBar";
-import { useDashboard } from "../../context/DashboardContext";
+
 import PatientProfileModal from "../../components/PatientProfilemModal";
 import type { patientInfo } from "../../components/PatientProfilemModal";
 import { useHospital } from "../../context/HospitalContext";
 import ConfirmActionModal from "../../components/ConfirmActionModal";
 import { FaSearch, FaUserPlus, FaFileExport, FaSortAmountDown, FaSortAmountUp, FaEye, FaTrash } from "react-icons/fa";
 import { FiRefreshCw } from "react-icons/fi";
+import { usePatients } from "../../context/DashboardContext/hooks/usePatients";
 
-// Status badge component
-const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+// StatusBadge component
+const StatusBadge: React.FC<{ status: string }> = React.memo(({ status }) => {
   let color = "bg-gray-100 text-gray-600";
   
   if (status === "admitted") {
@@ -27,22 +28,24 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
       {status?.charAt(0).toUpperCase() + status?.slice(1) || "Unknown"}
     </span>
   );
-};
+});
 
 // PatientAnalytics component
-const PatientAnalytics: React.FC<{ patients: patientInfo[] }> = ({ patients }) => {
-  // Calculate analytics
-  const totalPatients = patients?.length || 0;
-  const admittedPatients = patients?.filter((p: patientInfo) => p.admission_status === true)?.length || 0;
-  const malePatients = patients?.filter((p: patientInfo) => p.gender?.toLowerCase() === "male")?.length || 0;
-  const femalePatients = patients?.filter((p: patientInfo) => p.gender?.toLowerCase() === "female")?.length || 0;
-  
-  const analytics = [
-    { label: "Total Patients", value: totalPatients, color: "bg-blue-100 text-blue-800" },
-    { label: "Currently Admitted", value: admittedPatients, color: "bg-purple-100 text-purple-800" },
-    { label: "Male", value: malePatients, color: "bg-indigo-100 text-indigo-800" },
-    { label: "Female", value: femalePatients, color: "bg-pink-100 text-pink-800" },
-  ];
+const PatientAnalytics: React.FC<{ patients: patientInfo[] }> = React.memo(({ patients }) => {
+  // Calculate analytics using useMemo
+  const analytics = useMemo(() => {
+    const totalPatients = patients?.length || 0;
+    const admittedPatients = patients?.filter((p: patientInfo) => p.admission_status === true)?.length || 0;
+    const malePatients = patients?.filter((p: patientInfo) => p.gender?.toLowerCase() === "male")?.length || 0;
+    const femalePatients = patients?.filter((p: patientInfo) => p.gender?.toLowerCase() === "female")?.length || 0;
+    
+    return [
+      { label: "Total Patients", value: totalPatients, color: "bg-blue-100 text-blue-800" },
+      { label: "Currently Admitted", value: admittedPatients, color: "bg-purple-100 text-purple-800" },
+      { label: "Male", value: malePatients, color: "bg-indigo-100 text-indigo-800" },
+      { label: "Female", value: femalePatients, color: "bg-pink-100 text-pink-800" },
+    ];
+  }, [patients]);
   
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -56,10 +59,12 @@ const PatientAnalytics: React.FC<{ patients: patientInfo[] }> = ({ patients }) =
       ))}
     </div>
   );
-};
+});
 
-export const HqPatients: React.FC = () => {
-    const { patientsData, fetchAllPatients } = useDashboard();
+export const HqPatients: React.FC = React.memo(() => {
+    const hospitalDetail = localStorage.getItem("hospital_data");
+    const token = JSON.parse(hospitalDetail || "{}").token;
+    const { patientsData, fetchAllPatients } = usePatients(token);
     const { deletePatient } = useHospital();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedPatient, setSelectedPatient] = useState<patientInfo | null>(null);
@@ -81,7 +86,8 @@ export const HqPatients: React.FC = () => {
         }
     }, [patientsData, fetchAllPatients]);
 
-    const handleActionConfirm = async () => {
+    // Memoize action handlers
+    const handleActionConfirm = useCallback(async () => {
         if (!confirmModal) return;
         if (confirmModal.type === "delete") {
             setIsLoading(true);
@@ -93,26 +99,26 @@ export const HqPatients: React.FC = () => {
                 setConfirmModal(null);
             }
         }
-    };
+    }, [confirmModal, deletePatient, fetchAllPatients]);
 
-    // Refresh patients data
-    const refreshPatients = async () => {
+    // Refresh patients data - memoized
+    const refreshPatients = useCallback(async () => {
         setIsLoading(true);
         try {
             await fetchAllPatients();
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [fetchAllPatients]);
 
-    // Handle sorting
-    const requestSort = (key: keyof patientInfo) => {
+    // Handle sorting - memoized
+    const requestSort = useCallback((key: keyof patientInfo) => {
         let direction = "ascending";
         if (sortConfig.key === key && sortConfig.direction === "ascending") {
             direction = "descending";
         }
         setSortConfig({ key, direction });
-    };
+    }, [sortConfig]);
 
     // Filter and sort patients
     const filteredAndSortedPatients = useMemo(() => {
@@ -154,20 +160,32 @@ export const HqPatients: React.FC = () => {
         return filteredPatients;
     }, [patientsData, searchTerm, filterStatus, sortConfig]);
     
-    // Get current patients for pagination
-    const indexOfLastPatient = currentPage * patientsPerPage;
-    const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
-    const currentPatients = filteredAndSortedPatients.slice(indexOfFirstPatient, indexOfLastPatient);
-    const totalPages = Math.ceil(filteredAndSortedPatients.length / patientsPerPage);
+    // Get current patients for pagination - memoized
+    const { currentPatients, totalPages, pageInfo } = useMemo(() => {
+        const indexOfLastPatient = currentPage * patientsPerPage;
+        const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
+        const currentPatients = filteredAndSortedPatients.slice(indexOfFirstPatient, indexOfLastPatient);
+        const totalPages = Math.ceil(filteredAndSortedPatients.length / patientsPerPage);
+        
+        // Generate an array of page numbers
+        const pageNumbers = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pageNumbers.push(i);
+        }
+        
+        return { 
+            currentPatients, 
+            totalPages,
+            pageInfo: {
+                indexOfFirstPatient,
+                indexOfLastPatient,
+                pageNumbers
+            }
+        };
+    }, [filteredAndSortedPatients, currentPage, patientsPerPage]);
 
-    // Generate an array of page numbers
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-    }
-
-    // Export to CSV
-    const exportToCSV = () => {
+    // Export to CSV - memoized
+    const exportToCSV = useCallback(() => {
         if (!filteredAndSortedPatients.length) return;
         
         const headers = ["Patient ID", "Name", "Gender", "Age", "Phone", "Status"];
@@ -194,16 +212,17 @@ export const HqPatients: React.FC = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    };
+    }, [filteredAndSortedPatients]);
 
-    const getSortIcon = (columnName: keyof patientInfo) => {
+    // Get sort icon - memoized
+    const getSortIcon = useCallback((columnName: keyof patientInfo) => {
         if (sortConfig.key !== columnName) {
             return null;
         }
         return sortConfig.direction === "ascending" ? 
             <FaSortAmountUp className="h-3 w-3 ml-1" /> : 
             <FaSortAmountDown className="h-3 w-3 ml-1" />;
-    };
+    }, [sortConfig]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100">
@@ -353,7 +372,7 @@ export const HqPatients: React.FC = () => {
                                     currentPatients.map((patient, index) => (
                                         <tr key={patient.patient_id} className="hover:bg-gray-50 transition">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {indexOfFirstPatient + index + 1}
+                                                {pageInfo.indexOfFirstPatient + index + 1}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-medium text-gray-900">
@@ -445,9 +464,9 @@ export const HqPatients: React.FC = () => {
                             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                                 <div>
                                     <p className="text-sm text-gray-700">
-                                        Showing <span className="font-medium">{indexOfFirstPatient + 1}</span> to{" "}
+                                        Showing <span className="font-medium">{pageInfo.indexOfFirstPatient + 1}</span> to{" "}
                                         <span className="font-medium">
-                                            {Math.min(indexOfLastPatient, filteredAndSortedPatients.length)}
+                                            {Math.min(pageInfo.indexOfLastPatient, filteredAndSortedPatients.length)}
                                         </span>{" "}
                                         of <span className="font-medium">{filteredAndSortedPatients.length}</span> patients
                                     </p>
@@ -467,7 +486,7 @@ export const HqPatients: React.FC = () => {
                                             </svg>
                                         </button>
                                         
-                                        {pageNumbers.map(number => (
+                                        {pageInfo.pageNumbers.map(number => (
                                             <button
                                                 key={number}
                                                 onClick={() => setCurrentPage(number)}
@@ -518,4 +537,4 @@ export const HqPatients: React.FC = () => {
             />
         </div>
     );
-};
+});

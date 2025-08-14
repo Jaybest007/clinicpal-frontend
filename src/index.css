@@ -9,3 +9,25 @@ body{
     margin: 0;
 }
 
+/* Print styles */
+@media print {
+    @page {
+        size: A4;
+        margin: 2cm;
+    }
+    
+    body {
+        background-color: white !important;
+        color: black !important;
+        font-size: 11pt;
+    }
+    
+    .print\:hidden {
+        display: none !important;
+    }
+    
+    /* Simple print layout */
+    .print\:p-0 {
+        padding: 0 !important;
+    }
+}

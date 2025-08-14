@@ -31,6 +31,8 @@ import { Xray } from "./pages/Xray";
 import { HqTransactions } from "./pages/HqPages/HqTransactions";
 import { SalesReportPrint } from "./components/print/SalesReportPrint";
 import PharmacyInventoryPage from "./pages/PharmacyInventoryPage";
+import PrintableReport from "./components/print/PrintableReport";
+
 
 function App() {
   // Get token from AuthContext
@@ -68,8 +70,8 @@ function App() {
             <Route path="/hq" element={<HospitalProtectedRoute><HospitalDashboard /></HospitalProtectedRoute>} />
             <Route path="/hq/patients" element={<HospitalProtectedRoute><HqPatients /></HospitalProtectedRoute>} />
             <Route path="/hq/reports" element={<HospitalProtectedRoute><HqReports /></HospitalProtectedRoute>} />
+            <Route path="/print-report" element={<HospitalProtectedRoute><PrintableReport /></HospitalProtectedRoute>} />
             <Route path="/hq/transactions" element={<HospitalProtectedRoute><HqTransactions /></HospitalProtectedRoute>} />
-            
             
             <Route path="/department-report/print" element={<DepartmentsReportPrint />} />
             <Route path="/cashier" element={<ProtectedRoute><Cashier /></ProtectedRoute>} />
