@@ -20,7 +20,7 @@ import HqReports from "./pages/HqPages/HqReports";
 import { Pharmacy } from "./pages/Pharmacy";
 import { Laboratory } from "./pages/Laboratory";
 import { Ultrasound } from "./pages/Ultrasound";
-import DocumentationPage from "./pages/Documentation";
+
 import ConfirmationPage from "./pages/Confirmation";
 import { useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
@@ -57,7 +57,7 @@ function App() {
             <Route path="/laboratory" element={<ProtectedRoute> <Laboratory /> </ProtectedRoute>} />
             <Route path="/ultrasound" element={<ProtectedRoute> <Ultrasound /> </ProtectedRoute>} />
             <Route path="/confirmation" element={<ProtectedRoute><ConfirmationPage /></ProtectedRoute>} />
-            <Route path="/docs" element={<DocumentationPage />} />
+            
             <Route path="/pharmacy/inventory" element={<ProtectedRoute><PharmacyInventoryPage /></ProtectedRoute>} />
             
             {/* Print Routes */}

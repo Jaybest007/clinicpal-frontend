@@ -44,35 +44,53 @@ export function BillReceipt() {
   const paymentMethod = tx.payment_method || "N/A";
   const paymentStatus = tx.payment_status || "paid";
   const amount = tx.amount || 0;
-  const createdAt = tx.created_at ? new Date(tx.created_at).toLocaleString() : "N/A";
+  // Store both the raw date string and a formatted version
+  const rawCreatedAt = tx.created_at || "N/A";
+  const createdAt = tx.created_at ? 
+    (() => {
+      try {
+        return new Date(tx.created_at).toLocaleString();
+      } catch (e) {
+        return tx.created_at;
+      }
+    })() : "N/A";
   const referenceId = tx.id || tx.reference_id || "N/A";
   const notes = tx.notes || "";
 
   // Format date for better display
   const formatDate = (dateStr: string) => {
+    if (dateStr === "N/A") return "N/A";
+    
     try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      // If it looks like a date string, try to parse it
+      if (typeof dateStr === 'string' && (dateStr.includes('-') || dateStr.includes('/'))) {
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+      }
+      return dateStr; // Return as is if we can't parse it
     } catch (e) {
-      return dateStr;
+      return dateStr; // Return original on error
     }
   };
   
+  // Create a safe date string for the QR code
+  const safeDate = rawCreatedAt !== "N/A" ? formatDate(rawCreatedAt) : createdAt;
+  
   const qrData = `CLINICPAL RECEIPT
-    REF: ${referenceId}
-    AMOUNT: ₦${Number(amount).toLocaleString()}
-    PAYER: ${payersName}
-    PATIENT: ${patientId}
-    DATE: ${formatDate(createdAt)}
-    STATUS: ${paymentStatus.toUpperCase()}`;
-
-
+REF: ${referenceId}
+AMOUNT: ₦${Number(amount).toLocaleString()}
+PAYER: ${payersName}
+PATIENT: ${patientId}
+DATE: ${safeDate}
+STATUS: ${paymentStatus.toUpperCase()}`;
 
   return (
     <div className="bg-white py-4 px-2 print:p-0 print:m-0">
@@ -113,7 +131,7 @@ export function BillReceipt() {
           <div className="flex justify-between text-xs mb-3">
             <div>
               <p className="text-gray-500 uppercase">Date</p>
-              <p className="font-medium">{formatDate(createdAt)}</p>
+              <p className="font-medium">{safeDate}</p>
               
               <p className="text-gray-500 uppercase mt-1">Receipt By</p>
               <p className="font-medium">{createdBy}</p>
