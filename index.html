@@ -2,12 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="src/assets/CP.png" />
+    <link rel="icon" type="image/svg+xml" href="/CP.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ClinicPal</title>
+    <link rel="stylesheet" href="/splash-screen.css">
   </head>
   <body>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+      <img src="/CP.png" alt="ClinicPal Logo" class="splash-logo" />
+      <div class="splash-text">ClinicPal</div>
+      <div class="splash-loader">
+        <div class="splash-loader-dot"></div>
+        <div class="splash-loader-dot"></div>
+        <div class="splash-loader-dot"></div>
+      </div>
+    </div>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script src="/splash-screen.js"></script>
   </body>
 </html>
