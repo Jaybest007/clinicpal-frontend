@@ -37,7 +37,7 @@ export const ArchivedReports: React.FC = () => {
     try {
       setUnarchiving(prev => ({ ...prev, [patientId]: true }));
       await unarchiveReport(patientId);
-      toast.success("Report unarchived successfully");
+    //   toast.success("Report unarchived successfully");
       // Refetch the archived reports
       fetchArchivedReports();
     } catch (error) {
@@ -113,23 +113,23 @@ export const ArchivedReports: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleUnarchive(patientId);
                     }}
                     disabled={unarchiving[patientId]}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm"
+                    className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-xs md:text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
                   >
                     {unarchiving[patientId] ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1"></div>
+                      <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     ) : (
-                      <FiRefreshCw className="w-4 h-4" />
+                      <FiRefreshCw className="w-3 h-3 md:w-4 md:h-4" />
                     )}
-                    Unarchive
+                    <span className="hidden xs:inline">Unarchive</span>
                   </button>
-                  <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full hidden sm:inline-block">
                     {reports.length} Report{reports.length !== 1 ? 's' : ''}
                   </span>
                   <FiChevronDown 

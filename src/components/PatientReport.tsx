@@ -96,15 +96,15 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                 <button 
                   onClick={() => setShowArchiveConfirm(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm"
+                  className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded-md text-xs md:text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
                   disabled={archiveLoading}
                 >
                   {archiveLoading ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1"></div>
+                    <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   ) : (
-                    <FiArchive className="w-4 h-4" />
+                    <FiArchive className="w-3 h-3 md:w-4 md:h-4" />
                   )}
-                  Archive
+                  <span className="hidden xs:inline">Archive</span>
                 </button>
                 <FiChevronDown 
                   className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isExpanded ? 'transform rotate-180' : ''}`} 
@@ -274,7 +274,7 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
                   onClick={() => {
                     archiveReport(patient_id);
                     setShowArchiveConfirm(false);
-                    toast.success("Report archived successfully");
+                    // toast.success("Report archived successfully");
                     setTimeout(() => navigate('/reports'), 1500);
                   }}
                   disabled={archiveLoading}
