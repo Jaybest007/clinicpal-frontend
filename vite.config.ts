@@ -7,21 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: [
-        'favicon.ico', 
-        'robots.txt', 
-        'apple-touch-icon.png',
-        // Explicitly include important assets
-        'src/assets/logo.png',
-        'src/assets/logo.svg',
-        'src/assets/logo1.png',
-        'src/assets/logo1.svg',
-        'src/assets/just-logo.svg',
-        'src/assets/CP.png',
-        'src/assets/hero1.png',
-        'src/assets/cards.webp',
-        'src/assets/statcard.png'
-      ],
+      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'ClinicPal',
         short_name: 'ClinicPal',
@@ -44,45 +30,59 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Cache images and fonts
-        globPatterns: ['**/*.{png,jpg,jpeg,svg,gif,webp,woff,woff2,ttf,eot}'],
+        globPatterns: [
+          '**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif,webp}',
+        ],
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api/],
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            urlPattern: /^https:\/\/fonts\.googleapis\.com/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'google-fonts-cache',
+              cacheName: 'google-fonts-css',
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
               }
             }
           },
           {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            urlPattern: /^https:\/\/fonts\.gstatic\.com/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'gstatic-fonts-cache',
+              cacheName: 'google-fonts-webfonts',
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
               }
             }
           },
           {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
+            urlPattern: new RegExp('\.(?:png|jpg|jpeg|svg|gif|webp)$'),
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'images-cache',
+              cacheName: 'images',
               expiration: {
-                maxEntries: 50,
+                maxEntries: 60,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              }
+            }
+          },
+          {
+            urlPattern: new RegExp('^https://api\\.'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 2 // 2 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }
