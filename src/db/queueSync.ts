@@ -39,12 +39,12 @@ export const syncQueueActions = async (token: string) => {
               const response = await axios.post(
                 `${API_BASE_URL}${API_ENDPOINTS.QUE_ACTIONS}`,
                 {
-                  patient_id: queueItem.patientId,
+                  patient_id: queueItem.patient_id,
                   action: 'add',
-                  performed_by: queueItem.queuededBy,
-                  patient_fullname: queueItem.patientName,
-                  visit_reason: queueItem.visitReason,
-                  assigned_doctor: queueItem.assignedDoctor
+                  performed_by: queueItem.qued_by,
+                  patient_fullname: queueItem.patient_fullname,
+                  visit_reason: queueItem.visit_reason,
+                  assigned_doctor: queueItem.assigned_doctor
                 },
                 createApiRequest(token)
               );
