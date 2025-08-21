@@ -441,7 +441,13 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
 // Main component
 export function TodaysTransaction() {
-  const { transactions, loading, fetchTransactions, externalBillingData, updatePaymentStatus } = useDashboard();
+  const { 
+    transactions, 
+    transactionsLoading, 
+    fetchTransactions, 
+    externalBillingData, 
+    updatePaymentStatus 
+  } = useDashboard();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<FilterType>("today");
   const [search, setSearch] = useState("");
@@ -549,7 +555,7 @@ export function TodaysTransaction() {
           onRefresh={fetchTransactions}
           onExportCSV={handleExportCSV}
           onPrintSummary={handlePrintSummary}
-          isLoading={loading}
+          isLoading={transactionsLoading}
           hasData={filteredTransactions.length > 0}
         />
 
@@ -562,7 +568,7 @@ export function TodaysTransaction() {
         />
 
         {/* Transaction table - now a separate component */}
-        {loading ? (
+        {transactionsLoading ? (
           <div className="p-8 text-center">
             <div className="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-2"></div>
             <p className="text-blue-600 font-medium">Loading transactions...</p>
@@ -587,7 +593,7 @@ export function TodaysTransaction() {
             message={`Are you sure you want to mark the payment of ₦${confirmModal.amount.toLocaleString()} for ${confirmModal.payersName} as paid?`}
             onConfirm={handleConfirmedAction}
             onCancel={() => setConfirmModal(null)}
-            isLoading={loading}
+            isLoading={transactionsLoading}
             confirmText="Mark as Paid"
             confirmColor="bg-green-600 hover:bg-green-700"
             icon={<BsCheckCircle className="text-green-500 w-5 h-5" />}
@@ -601,7 +607,7 @@ export function TodaysTransaction() {
             message={`Are you sure you want to cancel the payment of ₦${confirmModal.amount.toLocaleString()} for ${confirmModal.payersName}? This action cannot be undone.`}
             onConfirm={handleConfirmedAction}
             onCancel={() => setConfirmModal(null)}
-            isLoading={loading}
+            isLoading={transactionsLoading}
             confirmText="Cancel Transaction"
             confirmColor="bg-red-600 hover:bg-red-700"
             icon={<FiX className="text-red-500 w-5 h-5" />}

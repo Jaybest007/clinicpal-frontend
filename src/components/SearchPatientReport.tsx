@@ -70,7 +70,7 @@ const EmptyState = () => (
 export default function SearchPatientReport() {
   const [errors, setErrors] = useState<{ searchValue?: string }>({});
   const [searchValue, setSearchValue] = useState("");
-  const { patientReport, fetchPatientReport, loading, setPatientReport } = useDashboard();
+  const { patientReport, fetchPatientReport, patientReportLoading, setPatientReport } = useDashboard();
 
   // Fetch patient reports
   const handleFetchReport = async (e: React.FormEvent) => {
@@ -116,7 +116,7 @@ export default function SearchPatientReport() {
           onClick={handleClear}
           className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-600 transition-colors px-2 py-1 rounded-md hover:bg-gray-50"
           title="Clear search"
-          disabled={loading}
+          disabled={patientReportLoading}
         >
           <FiXCircle className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Clear</span>
@@ -143,9 +143,9 @@ export default function SearchPatientReport() {
                   setSearchValue(e.target.value);
                   setErrors((prev) => ({ ...prev, searchValue: "" }));
                 }}
-                disabled={loading}
+                disabled={patientReportLoading}
               />
-              {searchValue && !loading && (
+              {searchValue && !patientReportLoading && (
                 <button
                   type="button"
                   onClick={() => setSearchValue("")}
@@ -159,9 +159,9 @@ export default function SearchPatientReport() {
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors shadow-sm hover:shadow
                         disabled:bg-blue-400 disabled:cursor-not-allowed min-w-[90px]"
-              disabled={loading}
+              disabled={patientReportLoading}
             >
-              {loading ? (
+              {patientReportLoading ? (
                 <FiLoader className="w-4 h-4 animate-spin" />
               ) : (
                 <>
@@ -188,7 +188,7 @@ export default function SearchPatientReport() {
 
       {/* Results area */}
       <div className="p-4 flex-1 overflow-y-auto max-h-[600px] scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-        {loading && (
+        {patientReportLoading && (
           <div className="flex justify-center items-center py-8">
             <div className="flex flex-col items-center">
               <FiLoader className="w-8 h-8 text-blue-500 animate-spin mb-2" />
@@ -198,7 +198,7 @@ export default function SearchPatientReport() {
         )}
         
         <AnimatePresence>
-          {!loading && searchValue.trim() !== "" && Array.isArray(patientReport) && (
+          {!patientReportLoading && searchValue.trim() !== "" && Array.isArray(patientReport) && (
             patientReport.length === 0 ? (
               <EmptyState />
             ) : (
@@ -212,7 +212,7 @@ export default function SearchPatientReport() {
         </AnimatePresence>
         
         {/* Initial state - no search performed yet */}
-        {!loading && searchValue.trim() === "" && (
+        {!patientReportLoading && searchValue.trim() === "" && (
           <div className="flex flex-col items-center justify-center text-center py-8 px-4">
             <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
               <FiSearch className="w-6 h-6 text-gray-300" />

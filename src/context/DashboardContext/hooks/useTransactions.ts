@@ -15,7 +15,12 @@ import type {
  * Hook for managing billing and transaction operations
  */
 export const useTransactions = (token: string | null, role: string | null) => {
-  const [loading, setLoading] = useState(false);
+  // Replace single loading state with granular loading states
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [patientHistoryLoading, setPatientHistoryLoading] = useState(false);
+  const [externalBillingLoading, setExternalBillingLoading] = useState(false);
+  
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [patientPaymentHistory, setPatientPaymentHistory] = useState<Transaction[]>([]);
   const [externalBillingData, setExternalBillingData] = useState<externalBillingData[]>([]);
@@ -26,7 +31,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
       if (!token) return;
       
       try {
-        setLoading(true);
+        setBillingLoading(true);
         const response = await axios.post(
           `${API_BASE_URL}${API_ENDPOINTS.ADD_BILL}`,
           credentials,
@@ -37,7 +42,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
         handleApiError(err);
         throw err;
       } finally {
-        setLoading(false);
+        setBillingLoading(false);
       }
     },
     [token]
@@ -49,7 +54,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
     if (!token) return;
     
     try {
-      setLoading(true);
+      setTransactionsLoading(true);
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_TRANSACTIONS}`,
         createApiRequest(token)
@@ -58,7 +63,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
     } catch (err: any) {
       handleApiError(err);
     } finally {
-      setLoading(false);
+      setTransactionsLoading(false);
     }
   }, [token, role]);
 
@@ -74,7 +79,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
       if (!token) return;
       
       try {
-        setLoading(true);
+        setPatientHistoryLoading(true);
         const response = await axios.get(
           `${API_BASE_URL}${API_ENDPOINTS.FETCH_PATIENT_PAYMENT_HISTORY}/${patientId}`,
           createApiRequest(token)
@@ -84,7 +89,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
         handleApiError(err);
         throw err;
       } finally {
-        setLoading(false);
+        setPatientHistoryLoading(false);
       }
     },
     [token]
@@ -96,7 +101,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
       if (!token) return;
       
       try {
-        setLoading(true);
+        setExternalBillingLoading(true);
         const response = await axios.post(
           `${API_BASE_URL}${API_ENDPOINTS.EXTERNAL_BILLING}`,
           credentials,
@@ -107,7 +112,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
         handleApiError(err);
         throw err;
       } finally {
-        setLoading(false);
+        setExternalBillingLoading(false);
       }
     },
     [token]
@@ -118,7 +123,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
     if (!token) return;
     
     try {
-      setLoading(true);
+      setExternalBillingLoading(true);
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_EXTERNAL_BILLING}`,
         createApiRequest(token)
@@ -127,7 +132,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
     } catch (err: any) {
       handleApiError(err);
     } finally {
-      setLoading(false);
+      setExternalBillingLoading(false);
     }
   }, [token]);
 
@@ -136,7 +141,7 @@ export const useTransactions = (token: string | null, role: string | null) => {
     if (!token) return;
 
     try{
-      setLoading(true);
+      setBillingLoading(true);
       const response = await axios.post(
         `${API_BASE_URL}${API_ENDPOINTS.PAYMENT_ACTIONS}`,
         credentials,
@@ -147,15 +152,23 @@ export const useTransactions = (token: string | null, role: string | null) => {
       handleApiError(err);
       throw err;
     } finally {
-      setLoading(false);
+      setBillingLoading(false);
     }
   }, [token]);
 
   return {
-    loading,
+    // Loading states
+    billingLoading,
+    transactionsLoading,
+    patientHistoryLoading,
+    externalBillingLoading,
+    
+    // Data
     transactions,
     patientPaymentHistory,
     externalBillingData,
+    
+    // Functions
     newBilling,
     fetchTransactions,
     fetchPatientPaymentHistory,

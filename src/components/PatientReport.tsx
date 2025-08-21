@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiFileText, FiClock, FiUser, FiChevronDown, FiX, FiAlertCircle } from "react-icons/fi";
+import { FiFileText, FiClock, FiUser, FiChevronDown, FiX, FiAlertCircle, FiArchive } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDashboard } from "../context/DashboardContext";
 import { toast } from "react-toastify";
@@ -22,9 +22,10 @@ interface Report {
 type PatientReportData = Report[] | { reports: Report[] } | undefined;
 
 export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
-  const { fetchPatientReport, patientReport, loading } = useDashboard();
+  const { fetchPatientReport, patientReport, loading, archiveReport, archiveLoading } = useDashboard();
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -78,8 +79,7 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
         <div className="space-y-6">
           {/* Patient Information Card */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div 
-              className="px-6 py-4 border-b border-gray-200 flex items-center justify-between cursor-pointer"
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between cursor-pointer"
               onClick={() => setIsExpanded(!isExpanded)}
             >
               <div className="flex items-center">
@@ -93,9 +93,23 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
                   </p>
                 </div>
               </div>
-              <FiChevronDown 
-                className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isExpanded ? 'transform rotate-180' : ''}`} 
-              />
+              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <button 
+                  onClick={() => setShowArchiveConfirm(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm"
+                  disabled={archiveLoading}
+                >
+                  {archiveLoading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1"></div>
+                  ) : (
+                    <FiArchive className="w-4 h-4" />
+                  )}
+                  Archive
+                </button>
+                <FiChevronDown 
+                  className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isExpanded ? 'transform rotate-180' : ''}`} 
+                />
+              </div>
             </div>
             
             {isExpanded && (
@@ -215,6 +229,61 @@ export const PatientReport: React.FC<PatientReportProps> = ({ patient_id }) => {
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
                 >
                   Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Archive Confirmation Modal */}
+      <AnimatePresence>
+        {showArchiveConfirm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
+            >
+              <div className="p-5 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <FiArchive className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg text-gray-800">Archive Patient Report</h3>
+                </div>
+              </div>
+              
+              <div className="p-5">
+                <p className="text-gray-600">
+                  Are you sure you want to archive all reports for <span className="font-semibold">{patientName}</span>? 
+                  Archived reports will be moved to the archive section and won't appear in the regular reports list.
+                </p>
+              </div>
+              
+              <div className="p-4 bg-gray-50 rounded-b-lg flex justify-end gap-3">
+                <button 
+                  onClick={() => setShowArchiveConfirm(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    archiveReport(patient_id);
+                    setShowArchiveConfirm(false);
+                    toast.success("Report archived successfully");
+                    setTimeout(() => navigate('/reports'), 1500);
+                  }}
+                  disabled={archiveLoading}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                  {archiveLoading && (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  )}
+                  Confirm Archive
                 </button>
               </div>
             </motion.div>

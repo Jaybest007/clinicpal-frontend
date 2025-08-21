@@ -6,34 +6,18 @@ import ReportForm from "../components/ReportForm";
 import { AdmittedReport } from "../components/AdmittedReports";
 import { PatientReport } from "../components/PatientReport";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { ArchivedReports } from "../components/ArchivedReports";
 
 const Reports = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [activeTab, setActiveTab] = useState("current"); // 'current' or 'archived'
-  const { user } = useAuth();
   const { patient_id } = useParams();
 
   useEffect(() => {
     document.title = "Reports - ClinicPal App";
   }, []);
 
-  return user?.role === "unactivated" ? (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-slate-200">
-      <div className="bg-white shadow-lg rounded-xl p-8 text-center max-w-md mx-auto border border-red-200">
-        <h1 className="text-2xl font-semibold text-red-600 mb-4">Access Restricted</h1>
-        <p className="text-gray-700 mb-6">
-          Your account is inactive. Please contact your hospital administrator to activate access to the dashboard.
-        </p>
-        <button
-          className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-          onClick={() => window.location.reload()}
-        >
-          Retry
-        </button>
-      </div>
-    </div>
-  ) : (
+  return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavBar />
 
@@ -137,8 +121,10 @@ const Reports = () => {
               <div className="p-6">
                 {patient_id ? (
                   <PatientReport patient_id={patient_id} />
-                ) : (
+                ) : activeTab === "current" ? (
                   <AdmittedReport />
+                ) : (
+                  <ArchivedReports />
                 )}
               </div>
             </div>

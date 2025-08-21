@@ -41,7 +41,14 @@ export const Cashier = () => {
   
   const [externalBilling, setExternalBilling] = useState(false);
   const [patientHistory, setPatientHistory] = useState(false);
-  const { newBilling, loading, token, transactions, fetchTransactions, fetchExternalBilling,  } = useDashboard();
+  const { 
+    billingLoading, 
+    token, 
+    transactions, 
+    fetchTransactions, 
+    fetchExternalBilling,
+    newBilling
+  } = useDashboard();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [billingData, setBillingData] = useState<BillingDetails>({
     payers_name: "",
@@ -217,7 +224,7 @@ export const Cashier = () => {
             errors={errors}
             handleInputChange={handleInputChange}
             handleBillingSubmit={handleBillingSubmit}
-            loading={loading}
+            loading={billingLoading}
             formSubmitted={formSubmitted}
             formatCurrency={formatCurrency}
           />

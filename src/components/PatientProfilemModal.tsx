@@ -82,11 +82,7 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
     }
   }, [isOnline, fetchAllPatients]);
 
-  useEffect(() => {
-    if (user?.name) {
-      setWrote_by(user.name);
-    }
-  }, [user?.name]);
+  
 
   useEffect(() => {
     if (!isOpen || !patient?.patient_id) {
@@ -106,6 +102,13 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
     );
     setNextOfKin(match || null);
   }, [isOpen, patient, nextOfKinData, nextOfKinList, isOnline]);
+
+  // Set wrote_by from user name
+  useEffect(() => {
+    if (user?.name) {
+      setWrote_by(user.name);
+    }
+  }, [user?.name]);
 
   if (!isOpen || !patient) return null;
 
@@ -127,7 +130,7 @@ const PatientProfileModal = ({ isOpen, onClose, patient, nextOfKinList }: Props)
       setAdmissionReason("");
       fetch_Admitted_Patient_Report();
       fetchAllPatients();
-      toast.success("Patient admitted successfully");
+      // toast.success("Patient admitted successfully");
       onClose();
     } catch (err: any) {
       const msg =

@@ -71,7 +71,19 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       
       // Global loading state (combine loading states if needed)
       loading: patients.loading || queue.loading || reports.loading || 
-               appointments.loading || orders.loading || transactions.loading || inventoryData.loading,
+               appointments.loading || orders.loading || inventoryData.loading,
+               
+      // Granular loading states for transactions
+      billingLoading: transactions.billingLoading,
+      transactionsLoading: transactions.transactionsLoading,
+      patientHistoryLoading: transactions.patientHistoryLoading,
+      externalBillingLoading: transactions.externalBillingLoading,
+      
+      // Granular loading states for reports
+      patientReportLoading: reports.patientReportLoading,
+      admittedReportLoading: reports.admittedReportLoading,
+      newReportLoading: reports.newReportLoading,
+      archiveLoading: reports.archiveLoading,
 
       // Patient Management
       patientsData: patients.patientsData,
@@ -91,6 +103,10 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       fetchPatientReport: reports.fetchPatientReport,
       fetch_Admitted_Patient_Report: reports.fetch_Admitted_Patient_Report,
       setPatientReport: reports.setPatientReport,
+      archivedReport: reports.archivedReport,
+      fetchArchivedReports: reports.fetchArchivedReports,
+      archiveReport: reports.archiveReport,
+      unarchiveReport: reports.unarchiveReport,
 
       // Appointments
       appointments: appointments.appointments,

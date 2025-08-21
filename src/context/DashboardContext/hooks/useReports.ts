@@ -9,10 +9,14 @@ import type { report, fetchReport, discharge } from "../types";
  * Hook for managing medical reports and patient records
  */
 export const useReports = (token: string | null) => {
-  const [loading, setLoading] = useState(false);
+  // Replace single loading state with granular loading states
+  const [patientReportLoading, setPatientReportLoading] = useState(false);
+  const [admittedReportLoading, setAdmittedReportLoading] = useState(false);
+  const [newReportLoading, setNewReportLoading] = useState(false);
+  const [archivedReport, setArchivedReport] = useState<fetchReport[]>([]);  
   const [patientReport, setPatientReport] = useState<fetchReport[]>([]);
   const [admittedPatientReport, setAdmittedPatientReport] = useState<fetchReport[]>([]);
-  
+  const [archiveLoading, setArchiveLoading] = useState(false);
   const hasFetchedAdmittedReports = useRef(false);
 
   // Create new report
@@ -21,7 +25,7 @@ export const useReports = (token: string | null) => {
       if (!token) return;
       
       try {
-        setLoading(true);
+        setNewReportLoading(true);
         const response = await axios.post(
           `${API_BASE_URL}${API_ENDPOINTS.NEW_REPORT}`,
           credentials,
@@ -32,7 +36,7 @@ export const useReports = (token: string | null) => {
         handleApiError(err);
         throw err;
       } finally {
-        setLoading(false);
+        setNewReportLoading(false);
       }
     },
     [token]
@@ -43,7 +47,7 @@ export const useReports = (token: string | null) => {
     if (!token) return;
     
     try {
-      setLoading(true);
+      setAdmittedReportLoading(true);
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_ADMITTED_REPORTS}`,
         createApiRequest(token)
@@ -53,7 +57,7 @@ export const useReports = (token: string | null) => {
       handleApiError(err);
       throw err;
     } finally {
-      setLoading(false);
+      setAdmittedReportLoading(false);
     }
   }, [token]);
 
@@ -70,7 +74,7 @@ export const useReports = (token: string | null) => {
       if (!token) return;
       
       try {
-        setLoading(true);
+        setPatientReportLoading(true);
         const response = await axios.post(
           `${API_BASE_URL}${API_ENDPOINTS.FETCH_PATIENT_REPORT}`,
           credentials,
@@ -81,19 +85,94 @@ export const useReports = (token: string | null) => {
         handleApiError(err);
         throw err;
       } finally {
-        setLoading(false);
+        setPatientReportLoading(false);
       }
     },
     [token]
   );
 
+  //Archive report
+  const archiveReport = useCallback(
+    async (patient_id: string) => {
+      if (!token) return;
+
+      try {
+        setArchiveLoading(true);
+        const response = await axios.post(
+          `${API_BASE_URL}${API_ENDPOINTS.ARCHIVE_REPORT}`,
+          { patient_id },
+          createApiRequest(token)
+        );
+        fetchArchivedReports()
+        toast.success(response.data.success);
+        setArchiveLoading(false);
+      } catch (err: any) {
+        handleApiError(err);
+        throw err;
+      }
+    },
+    [token]
+  );
+
+  //unachive report 
+  const unarchiveReport = useCallback(
+    async (patient_id: string) => {
+
+      if(!token) return;
+
+      try{
+        setArchiveLoading(true);
+        const response = await axios.post(
+          `${API_BASE_URL}${API_ENDPOINTS.UNARCHIVE_REPORT}`, { patient_id},
+          createApiRequest(token)
+        );
+        fetchArchivedReports()
+        setArchiveLoading(false);
+        toast.success(response.data.success);
+      } catch (err: any) {
+        handleApiError(err);
+        throw err;
+      }
+
+    },[token])
+
+  //fetch report
+  const fetchArchivedReports = useCallback( async() => {
+    if(!token) return;
+
+    try{
+      setArchiveLoading(true);
+      const response = await axios.get(
+        `${API_BASE_URL}${API_ENDPOINTS.FETCH_ARCHIVED_REPORTS}`,
+        createApiRequest(token)
+      );
+      setArchivedReport(response.data);
+      setArchiveLoading(false);
+    } catch (err: any) {
+      handleApiError(err);
+      throw err;
+    }
+  },[token])
+
   return {
-    loading,
+    // Granular loading states
+    patientReportLoading,
+    admittedReportLoading,
+    newReportLoading,
+    archiveLoading,
+    // For backward compatibility
+    loading: patientReportLoading || admittedReportLoading || newReportLoading || archiveLoading,
+    // Data
     patientReport,
     admittedPatientReport,
+    archivedReport,
+    // Actions
     newReport,
     fetch_Admitted_Patient_Report,
     fetchPatientReport,
     setPatientReport,
+    fetchArchivedReports,
+    archiveReport,
+    unarchiveReport,
   };
 };

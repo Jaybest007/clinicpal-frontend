@@ -26,7 +26,7 @@ type ExternalBillingProps = {
 };
 
 export function ExternalBilling({ onClose }: ExternalBillingProps) {
-  const { loading, externalBilling, fetchExternalBilling } = useDashboard();
+  const { externalBillingLoading, externalBilling, fetchExternalBilling } = useDashboard();
 
   const [errors, setErrors] = useState<Errors>({});
   const [billingData, setBillingData] = useState<BillingData>({
@@ -229,10 +229,10 @@ export function ExternalBilling({ onClose }: ExternalBillingProps) {
         <div className="mt-4">
           <button
         type="submit"
-        disabled={loading}
+        disabled={externalBillingLoading}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50"
           >
-        {loading ? <FiLoader className="animate-spin" /> : <FiPlus />}
+        {externalBillingLoading ? <FiLoader className="animate-spin" /> : <FiPlus />}
         <span>Add Billing Entry</span>
           </button>
         </div>

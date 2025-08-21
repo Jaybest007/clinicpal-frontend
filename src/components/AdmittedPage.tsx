@@ -3,7 +3,7 @@ import { useDashboard } from '../context/DashboardContext';
 import { DischargeBtn } from './DischargeBtn';
 import { ReportBtn } from './ReportBtn';
 import { useAuth } from '../context/AuthContext';
-import { MdWarning, MdOutlineLocalHospital, MdOutlineNoteAdd } from 'react-icons/md';
+import { MdWarning, MdOutlineLocalHospital } from 'react-icons/md';
 import { FaBed, FaRegCalendarAlt, FaUser, FaIdCard } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
@@ -91,15 +91,7 @@ const AdmittedPage = () => {
                     </div>
                     <p className="text-lg font-medium text-gray-600 mb-2">No admitted patients</p>
                     <p className="text-gray-500 text-sm mb-6">All beds are currently available</p>
-                    {(user?.role === 'doctor' || user?.role === 'super admin') && (
-                      <button 
-                        onClick={() => navigate('/reception')}
-                        className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg font-medium text-sm transition flex items-center"
-                      >
-                        <MdOutlineNoteAdd className="mr-2" />
-                        Admit a patient
-                      </button>
-                    )}
+                    
                   </div>
                 </td>
               </tr>
@@ -180,7 +172,7 @@ const AdmittedPage = () => {
               <span className="text-sm text-gray-500 block mt-1">This action cannot be undone.</span>
             </p>
             <div className="flex justify-center gap-4 pt-2">
-              <DischargeBtn patient_id={selectedPatientId} />
+              <DischargeBtn patient_id={selectedPatientId} onClose={() => setConfirmPage(false)} />
               <button
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-md px-5 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
                 onClick={() => setConfirmPage(false)}

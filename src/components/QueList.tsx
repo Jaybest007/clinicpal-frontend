@@ -1,9 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDashboard } from "../context/DashboardContext";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiClock, FiCheckCircle, FiXCircle,  FiPhoneCall, FiEye, FiUserCheck } from "react-icons/fi";
+import { fetchLocalQueueList, performQueueActionLocally } from "../db/patientHelpers";
+import { toast } from "react-toastify";
+
+
 
 const StatusBadge = ({ status }: { status: string }) => {
   if (status === "waiting") {
@@ -47,7 +51,7 @@ const EmptyQueue = ({ type }: { type: string }) => (
 );
 
 const QueList: React.FC = () => {
-  const { queList, QueActions, fetchQueList, loading } = useDashboard();
+  const { queList: serverQueList, QueActions, fetchQueList, loading } = useDashboard();
   const { user } = useAuth();
   const [confirmModal, setConfirmModal] = useState<
     null | {
@@ -56,50 +60,149 @@ const QueList: React.FC = () => {
       full_name: string;
     }
   >(null);
+  
+  // Online/offline state
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [localQueList, setLocalQueList] = useState<typeof serverQueList>([]);
+
+  // Listen for online/offline changes
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Refresh data when coming back online
+      fetchQueList();
+      toast.success("You're back online. Queue data refreshed.");
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.info("You're offline. Limited queue functionality available.");
+      // Fetch local data when going offline
+      fetchLocalQueueList().then(data => {
+        setLocalQueList(data);
+      });
+    };
+    
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [fetchQueList]);
+
+  // Load initial data on component mount
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        // Fetch local data for fallback
+        const data = await fetchLocalQueueList();
+        setLocalQueList(data);
+        
+        // If online, also fetch from server
+        if (isOnline) {
+          fetchQueList();
+        }
+      } catch (error) {
+        console.error("Error initializing queue data:", error);
+        toast.error("Error loading queue data. Please refresh the page.");
+      }
+    };
+    
+    initializeData();
+  }, []);  // Empty dependency array means this runs once on mount
+
+  // Select the appropriate data source based on online status
+  const queList = useMemo(() => 
+    !isOnline ? localQueList : serverQueList, 
+    [isOnline, localQueList, serverQueList]
+  );
 
   const waitingList = useMemo(() => queList.filter(p => p.status === "waiting"), [queList]);
   const calledList = useMemo(() => queList.filter(p => p.status === "called"), [queList]);
 
   const handleAction = async () => {
     if (!confirmModal) return;
-    await QueActions({
-      patient_id: confirmModal.patient_id,
-      action: confirmModal.type,
-      performed_by: user?.name || "Unknown",
-    });
-    fetchQueList();
-    setConfirmModal(null);
+    
+    try {
+      if (isOnline) {
+        // Online mode: use API
+        await QueActions({
+          patient_id: confirmModal.patient_id, // Already a string
+          action: confirmModal.type,
+          performed_by: user?.name || "Unknown",
+        });
+        fetchQueList();
+      } else {
+        // Offline mode: use local storage
+        await performQueueActionLocally(
+          confirmModal.patient_id, // Already a string
+          confirmModal.type,
+          user?.name || "Unknown"
+        );
+        
+        // Refresh local queue data
+        const updatedQueue = await fetchLocalQueueList();
+        setLocalQueList(updatedQueue);
+      }
+      
+      setConfirmModal(null);
+    } catch (error) {
+      console.error(`Error performing queue action (${confirmModal.type}):`, error);
+      toast.error(`Failed to perform action: ${confirmModal.type}`);
+      // Don't close the modal on error so the user can try again
+    }
   };
 
   // Get action label and color based on action type
   const getActionProps = (type: "remove" | "called" | "seen") => {
-    switch (type) {
-      case "remove":
-        return {
-          label: "Remove Patient",
-          icon: <FiXCircle className="w-5 h-5" />,
-          color: "bg-red-600 text-white",
-          description: "Remove this patient from the queue"
-        };
-      case "called":
-        return {
-          label: "Call Patient",
-          icon: <FiPhoneCall className="w-5 h-5" />,
-          color: "bg-green-600 text-white",
-          description: "Mark this patient as called"
-        };
-      case "seen":
-        return {
-          label: "Mark as Seen",
-          icon: <FiCheckCircle className="w-5 h-5" />,
-          color: "bg-amber-600 text-white",
-          description: "Mark this patient as seen by doctor"
-        };
+    // Basic props (for online mode)
+    const baseProps = {
+      remove: {
+        label: "Remove Patient",
+        icon: <FiXCircle className="w-5 h-5" />,
+        color: "bg-red-600 text-white",
+        description: "Remove this patient from the queue"
+      },
+      called: {
+        label: "Call Patient",
+        icon: <FiPhoneCall className="w-5 h-5" />,
+        color: "bg-green-600 text-white",
+        description: "Mark this patient as called"
+      },
+      seen: {
+        label: "Mark as Seen",
+        icon: <FiCheckCircle className="w-5 h-5" />,
+        color: "bg-amber-600 text-white",
+        description: "Mark this patient as seen by doctor"
+      }
+    };
+    
+    // If offline, modify the props
+    if (!isOnline) {
+      return {
+        ...baseProps[type],
+        color: "bg-gray-400 text-white cursor-not-allowed",
+        description: "This action is not available while offline"
+      };
     }
+    
+    return baseProps[type];
   };
 
   return (
     <div className="space-y-6 ">
+      {/* Offline Indicator */}
+      {!isOnline && (
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4 flex items-center gap-3">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <p className="text-sm text-blue-700">
+            You are currently offline. Queue data is being served from local storage.
+            You can perform all queue actions while offline, and they will sync when you reconnect.
+          </p>
+        </div>
+      )}
+      
       {/* Waiting Patients Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
@@ -184,7 +287,7 @@ const QueList: React.FC = () => {
                             onClick={() =>
                               setConfirmModal({
                                 type: "called",
-                                patient_id: String(item.patient_id),
+                                patient_id: item.patient_id,
                                 full_name: item.patient_fullname,
                               })
                             }
@@ -197,7 +300,7 @@ const QueList: React.FC = () => {
                             onClick={() =>
                               setConfirmModal({
                                 type: "remove",
-                                patient_id: String(item.patient_id),
+                                patient_id: item.patient_id,
                                 full_name: item.patient_fullname,
                               })
                             }
@@ -301,7 +404,7 @@ const QueList: React.FC = () => {
                             onClick={() =>
                               setConfirmModal({
                                 type: "seen",
-                                patient_id: String(item.patient_id),
+                                patient_id: item.patient_id,
                                 full_name: item.patient_fullname,
                               })
                             }

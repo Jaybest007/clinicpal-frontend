@@ -148,8 +148,8 @@ export interface orderResult {
 
 // ==================== QUEUE INTERFACES ====================
 export interface QueList {
-  id: number;
-  patient_id: number;
+  id: string;
+  patient_id: string;
   patient_fullname: string;
   visit_reason: string;
   assigned_doctor: string;
@@ -159,9 +159,13 @@ export interface QueList {
 }
 
 export interface QueActions {
-  patient_id: any;
+  patient_id: string;
+  patient_fullname?: string;
+  visit_reason?: string;
+  assigned_doctor?: string;
+  qued_by?: string;
   action: string;
-  performed_by: any;
+  performed_by: string;
 }
 
 // ==================== BILLING INTERFACES ====================
@@ -308,6 +312,16 @@ export interface DashboardContextType {
   role: string | null;
   loading: boolean;
 
+  // Granular loading states
+  billingLoading: boolean;
+  transactionsLoading: boolean;
+  patientHistoryLoading: boolean;
+  externalBillingLoading: boolean;
+  patientReportLoading: boolean;
+  admittedReportLoading: boolean;
+  newReportLoading: boolean;
+  archiveLoading: boolean;
+
   // Patients
   patientsData: PatientsData[];
   nextOfKinData: nextOfKinData[];
@@ -326,7 +340,12 @@ export interface DashboardContextType {
   fetchPatientReport: (credentials: discharge) => Promise<void>;
   fetch_Admitted_Patient_Report: () => Promise<void>;
   setPatientReport: Dispatch<SetStateAction<fetchReport[]>>;
+  archivedReport: fetchReport[];
+  fetchArchivedReports: () => Promise<void>;
+  archiveReport: (patient_id: string) => Promise<void>;
+  unarchiveReport: (patient_id: string) => Promise<void>;
 
+  
   // Appointments
   appointments: fetchedAppointment[];
   addAppointment: (credentials: appointment) => Promise<void>;

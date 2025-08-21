@@ -60,7 +60,7 @@ const Card = ({ title, value, subtitle, icon: Icon, color = "blue", trend }: Car
 };
 
 export function CashierStatCard() {
-  const { transactions, externalBillingData, loading } = useDashboard();
+  const { transactions, externalBillingData, transactionsLoading, externalBillingLoading } = useDashboard();
   
   // Use useMemo to calculate stats only when data changes
   const stats = useMemo(() => {
@@ -117,7 +117,7 @@ export function CashierStatCard() {
   };
   
   // If loading, show skeleton
-  if (loading) {
+  if (transactionsLoading || externalBillingLoading) {
     return (
       <div className="relative">
         <div className="absolute right-0 top-1/2 -translate-y-1/2 mr-2 text-gray-400 animate-pulse hidden sm:hidden md:block">

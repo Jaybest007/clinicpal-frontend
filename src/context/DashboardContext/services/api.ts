@@ -28,6 +28,9 @@ export const API_ENDPOINTS = {
   NEW_REPORT: "/reports/newReport",
   FETCH_ADMITTED_REPORTS: "/reports/fetch_admitted_patient_reports",
   FETCH_PATIENT_REPORT: "/reports/fetchPatientReport",
+  FETCH_ARCHIVED_REPORTS: "/reports/fetchArchivedReports",
+  ARCHIVE_REPORT: "/reports/archiveReport",
+  UNARCHIVE_REPORT: "/reports/unarchiveReport",
 
   // Appointments
   ADD_APPOINTMENT: "/appointments/addAppointment",

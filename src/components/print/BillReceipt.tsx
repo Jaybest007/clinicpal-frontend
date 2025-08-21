@@ -85,12 +85,14 @@ export function BillReceipt() {
   const safeDate = rawCreatedAt !== "N/A" ? formatDate(rawCreatedAt) : createdAt;
   
   const qrData = `CLINICPAL RECEIPT
-REF: ${referenceId}
-AMOUNT: ₦${Number(amount).toLocaleString()}
-PAYER: ${payersName}
-PATIENT: ${patientId}
-DATE: ${safeDate}
-STATUS: ${paymentStatus.toUpperCase()}`;
+  REF: ${referenceId}
+  AMOUNT: ₦${Number(amount).toLocaleString()}
+  PAYER: ${payersName}
+  PATIENT: ${patientId}
+  DATE: ${safeDate}
+  STATUS: ${paymentStatus.toUpperCase()}
+  NOTE: ${notes || "N/A"}
+  `;
 
   return (
     <div className="bg-white py-4 px-2 print:p-0 print:m-0">
@@ -141,14 +143,6 @@ STATUS: ${paymentStatus.toUpperCase()}`;
               <p className="text-gray-500 uppercase">Reference ID</p>
               <p className="font-mono">{referenceId}</p>
               
-              <div className="mt-1 hidden sm:block print:block">
-                <QRCodeSVG 
-                  value={qrData}
-                  size={80}
-                  level="M"
-                  className="ml-auto"
-                />
-              </div>
             </div>
           </div>
           
@@ -234,10 +228,11 @@ STATUS: ${paymentStatus.toUpperCase()}`;
               <div className="bg-white p-2 border border-gray-200 rounded-md shadow-sm">
                 <QRCodeSVG 
                   value={qrData}
-                  size={140}
+                  size={120}
                   level="M"
                   includeMargin={true}
                 />
+                
               </div>
             </div>
             

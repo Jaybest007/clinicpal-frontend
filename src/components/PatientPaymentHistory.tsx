@@ -5,7 +5,7 @@ import OrderModal from "./OrderModal";
 import { useNavigate } from "react-router-dom";
 
 export function PatientPaymentHistory({ onClose }: { onClose: () => void }) {
-  const { loading, patientPaymentHistory, fetchPatientPaymentHistory, setPatientPaymentHistory } = useDashboard();
+  const { patientHistoryLoading, patientPaymentHistory, fetchPatientPaymentHistory, setPatientPaymentHistory } = useDashboard();
   const [patient_id, setPatientId] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [hasSearched, setHasSearched] = useState<boolean>(false);
@@ -82,9 +82,9 @@ export function PatientPaymentHistory({ onClose }: { onClose: () => void }) {
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 min-w-[120px]"
-              disabled={loading}
+              disabled={patientHistoryLoading}
             >
-              {loading ? (
+              {patientHistoryLoading ? (
                 <>
                   <FiLoader className="animate-spin h-4 w-4" />
                   <span>Searching...</span>
@@ -122,7 +122,7 @@ export function PatientPaymentHistory({ onClose }: { onClose: () => void }) {
               <div className="text-center py-8 text-slate-500">
                 Enter a patient ID to view their payment history
               </div>
-            ) : loading ? (
+            ) : patientHistoryLoading ? (
               <div className="text-center py-8 text-slate-500">
                 Loading payment history...
               </div>

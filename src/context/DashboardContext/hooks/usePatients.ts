@@ -5,6 +5,9 @@ import { clinipalDB } from "../../../db/clinipal-db"; // Adjust path to your Ind
 import { handleApiError } from "../utils/errorHandler";
 import { API_BASE_URL, API_ENDPOINTS, createApiRequest } from "../services/api";
 import type { PatientsData, nextOfKinData, newPatientData, newPatient, admission, discharge } from "../types";
+import { addToSyncQueue } from "../../../db/syncQueue";
+import { SyncEntityType } from "../../../db/syncModels";
+import { addPatientToQueueLocally } from "../../../db/patientHelpers";
 
 /**
  * Hook for managing patient-related operations
@@ -14,6 +17,21 @@ export const usePatients = (token: string | null) => {
   const [patientsData, setPatientsData] = useState<PatientsData[]>([]);
   const [nextOfKinData, setNextOfKinData] = useState<nextOfKinData[]>([]);
   const [newPatient, setNewPatient] = useState<newPatient[]>([]);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  // Monitor online status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const hasFetchedPatients = useRef(false);
 
@@ -142,18 +160,59 @@ export const usePatients = (token: string | null) => {
   // Queue patient
   const quePatient = useCallback(
     async (credentials: admission) => {
-      if (!token) return;
-      
       try {
         setLoading(true);
-        const response = await axios.post(
-          `${API_BASE_URL}${API_ENDPOINTS.QUE_PATIENT}`,
-          credentials,
-          createApiRequest(token)
-        );
-        toast.success(response.data.success);
-        // Note: Socket will handle queue list updates
-        fetchAllPatients();
+        
+        if (isOnline && token) {
+          // Online mode: send to API
+          const response = await axios.post(
+            `${API_BASE_URL}${API_ENDPOINTS.QUE_PATIENT}`,
+            credentials,
+            createApiRequest(token)
+          );
+          toast.success(response.data.success);
+          // Note: Socket will handle queue list updates
+          fetchAllPatients();
+        } else {
+          // Offline mode: store in local DB and queue for sync
+          try {
+            // First get patient details
+            const patient = await clinipalDB.patientsData.filter(
+              (p: any) => p.patient_id === credentials.patient_id
+            ).first();
+            
+            if (!patient) {
+              toast.error("Patient not found in local database");
+              throw new Error("Patient not found in local database");
+            }
+            
+            // Use the new helper function to add to queue
+            await addPatientToQueueLocally(
+              credentials.patient_id,
+              patient.full_name,
+              credentials.reason,
+              credentials.wrote_by
+            );
+            
+            // Add to sync queue
+            await addToSyncQueue({
+              url: `${API_BASE_URL}${API_ENDPOINTS.QUE_PATIENT}`,
+              method: 'POST',
+              body: credentials,
+              endpoint: 'queue',
+              priority: 5,
+              entityType: SyncEntityType.QUEUE,
+              entityId: credentials.patient_id,
+              tempId: `queue_${credentials.patient_id}_${Date.now()}`
+            });
+            
+            fetchAllPatients();
+          } catch (error) {
+            console.error("Error adding to queue in local DB:", error);
+            toast.error("Failed to add to queue offline");
+            throw error;
+          }
+        }
       } catch (err: any) {
         handleApiError(err);
         throw err;
@@ -161,7 +220,7 @@ export const usePatients = (token: string | null) => {
         setLoading(false);
       }
     },
-    [fetchAllPatients, token]
+    [fetchAllPatients, token, isOnline]
   );
 
   return {
