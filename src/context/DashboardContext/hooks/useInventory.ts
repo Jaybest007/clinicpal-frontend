@@ -7,7 +7,8 @@ import type {
   InventoryTransactionItem, 
   RestockItem, 
   SaleData, 
-  TransactionFilters 
+  TransactionFilters,
+  InventoryCategory
 } from "../types";
 import { API_BASE_URL, API_ENDPOINTS } from "../services/api";
 import { handleApiError } from "../utils/errorHandler";
@@ -75,7 +76,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       
       // Make the API call
       const response = await axios.get(
-        `${API_BASE_URL}/inventory/transactions${query}`, 
+        `${API_BASE_URL}${API_ENDPOINTS.FETCH_TRANSACTION_HISTORY}${query}`, 
         getHeaders()
       );
       
@@ -130,6 +131,27 @@ export const useInventory = (token?: string, userRole?: string) => {
     }
   }, [getHeaders]);
 
+  // Update inventory item status
+  const updateInventoryItemStatus = useCallback(async (id: string, status: string): Promise<InventoryItem> => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}${API_ENDPOINTS.UPDATE_INVENTORY_ITEM_STATUS}/${id}`, 
+        { status }, 
+        getHeaders()
+      );
+      
+      // Update local state
+      setInventory(prev => prev.map(item => 
+        item.id === response.data.id ? response.data : item
+      ));
+      
+      return response.data;
+    } catch (error) {
+      const handledError = handleApiError(error);
+      throw handledError;
+    }
+  }, [getHeaders]);
+
   // Delete inventory item
   const deleteInventoryItem = useCallback(async (id: string): Promise<void> => {
     try {
@@ -146,6 +168,34 @@ export const useInventory = (token?: string, userRole?: string) => {
     }
   }, [getHeaders]);
 
+  // Fetch a single inventory item by ID
+  const fetchInventoryItem = useCallback(async (id: number): Promise<InventoryItem> => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}${API_ENDPOINTS.FETCH_INVENTORY_ITEM}/${id}`, 
+        getHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      const handledError = handleApiError(error);
+      throw handledError;
+    }
+  }, [getHeaders]);
+
+  // Fetch inventory categories
+  const fetchInventoryCategories = useCallback(async (): Promise<InventoryCategory[]> => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}${API_ENDPOINTS.FETCH_INVENTORY_CATEGORIES}`, 
+        getHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      const handledError = handleApiError(error);
+      throw handledError;
+    }
+  }, [getHeaders]);
+
   // Process sale transaction
   const processSale = useCallback(async (
     items: InventoryTransactionItem[], 
@@ -154,14 +204,15 @@ export const useInventory = (token?: string, userRole?: string) => {
     try {
       const payload = {
         items,
-        staff: saleData.staff,
-        notes: saleData.notes,
-        totalAmount: saleData.totalAmount,
-        type: "sale"
+        saleData: {
+          staff: saleData.staff,
+          notes: saleData.notes,
+          totalAmount: saleData.totalAmount
+        }
       };
       
       const response = await axios.post(
-        `${API_BASE_URL}/inventory/transactions/sale`, 
+        `${API_BASE_URL}${API_ENDPOINTS.PROCESS_SALE}`, 
         payload, 
         getHeaders()
       );
@@ -191,14 +242,10 @@ export const useInventory = (token?: string, userRole?: string) => {
   // Process restock transaction
   const processRestock = useCallback(async (items: RestockItem[]): Promise<InventoryTransaction> => {
     try {
-      const payload = {
-        items,
-        type: "restock",
-        notes: "Inventory restocked"
-      };
+      const payload = { items };
       
       const response = await axios.post(
-        `${API_BASE_URL}/inventory/transactions/restock`, 
+        `${API_BASE_URL}${API_ENDPOINTS.PROCESS_RESTOCK}`, 
         payload, 
         getHeaders()
       );
@@ -251,8 +298,11 @@ export const useInventory = (token?: string, userRole?: string) => {
     loading,
     error,
     fetchInventory,
+    fetchInventoryItem,
+    fetchInventoryCategories,
     addInventoryItem,
     updateInventoryItem,
+    updateInventoryItemStatus,
     deleteInventoryItem,
     getStockStatus,
     

@@ -278,6 +278,13 @@ export interface SaleData {
   totalAmount: number;
 }
 
+export interface InventoryCategory {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 export interface InventoryTransaction {
   id: string;
   date: string;
@@ -393,9 +400,12 @@ export interface DashboardContextType {
   transactionLoading: boolean;
   transactionError: Error | null;
   fetchInventory: () => Promise<void>;
+  fetchInventoryItem: (id: number) => Promise<InventoryItem>;
+  fetchInventoryCategories: () => Promise<InventoryCategory[]>;
   fetchTransactionHistory: (filters?: TransactionFilters) => Promise<void>;
   addInventoryItem: (item: NewInventoryItem) => Promise<InventoryItem>;
   updateInventoryItem: (item: InventoryItem) => Promise<InventoryItem>;
+  updateInventoryItemStatus: (id: string, status: string) => Promise<InventoryItem>;
   deleteInventoryItem: (id: string) => Promise<void>;
   processSale: (items: InventoryTransactionItem[], saleData: SaleData) => Promise<InventoryTransaction>;
   processRestock: (items: RestockItem[]) => Promise<InventoryTransaction>;

@@ -64,4 +64,7 @@ export const API_ENDPOINTS = {
   FETCH_INVENTORY_CATEGORIES: "/inventory/fetchInventoryCategories",
   FETCH_INVENTORY_ITEM: "/inventory/fetchInventoryItem",
   UPDATE_INVENTORY_ITEM_STATUS: "/inventory/updateInventoryItemStatus",
+  FETCH_TRANSACTION_HISTORY: "/inventory/fetchTransactionHistory",
+  PROCESS_SALE: "/inventory/processSale",
+  PROCESS_RESTOCK: "/inventory/processRestock",
 } as const; 
