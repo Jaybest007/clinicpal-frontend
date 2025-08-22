@@ -105,7 +105,7 @@ export default function InventoryItemRow({
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
           <span className={`${
-            isExpired(item.expiryDate) 
+            isExpired(item.expiryDate)
               ? 'text-red-600 font-medium' 
               : isExpiringSoon(item.expiryDate) 
                 ? 'text-amber-600 font-medium' 

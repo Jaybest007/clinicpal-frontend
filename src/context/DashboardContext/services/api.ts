@@ -5,7 +5,7 @@ export const API_BASE_URL = "https://clinicpal.onrender.com/api";
 /**
  * Create axios instance with default config
  */
-export const createApiRequest = (token: string | null) => {
+export const createApiRequest = (token: string | null | undefined) => {
   return {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   };

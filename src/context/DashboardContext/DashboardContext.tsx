@@ -8,6 +8,7 @@ import { useOrders } from "./hooks/useOrders";
 import { useTransactions } from "./hooks/useTransactions";
 import { useSocketEvents } from "./services/socketService";
 import { useInventory } from "./hooks/useInventory";
+import { getRoleFromStorage } from "./utils/storage";
 import type { DashboardContextType } from "./types";
 
 /**
@@ -39,21 +40,16 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   
   // Get user data and token from your auth context or storage
   const [userRole, setUserRole] = useState<string>("");
-  const [token, setToken] = useState<string>("");
   
   // Initialize user data
   useEffect(() => {
-    // Get user data from localStorage or another source
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    const userToken = userData.token || '';
-    const role = userData.role || '';
-    
-    setToken(userToken);
-    setUserRole(role);
+    // Get user data from localStorage using the utility functions
+    const role = getRoleFromStorage();
+    setUserRole(role || '');
   }, []);
   
-  // Pass role directly to useInventory instead of relying on context
-  const inventoryData = useInventory(token, userRole);
+  // Pass auth.token directly to useInventory instead of local token state
+  const inventoryData = useInventory(auth.token || undefined, userRole);
 
   // Set up real-time socket events
   useSocketEvents(

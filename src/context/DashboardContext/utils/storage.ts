@@ -4,9 +4,13 @@
 export const getUserFromStorage = () => {
   try {
     const stored = localStorage.getItem("clinicpal_user");
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    
+    const parsed = JSON.parse(stored);
+    return parsed;
   } catch (err) {
     console.error("Failed to parse clinicpal_user:", err);
+    localStorage.removeItem("clinicpal_user"); // Clear corrupted data
     return null;
   }
 };

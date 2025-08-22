@@ -9,17 +9,13 @@ export const useAuth = () => {
   const [role, setRole] = useState<string | null>(() => getRoleFromStorage());
 
   useEffect(() => {
-    // Sync with localStorage on mount if not already set
-    if (!token) {
-      const storedToken = getTokenFromStorage();
-      if (storedToken) setToken(storedToken);
-    }
-
-    if (!role) {
-      const storedRole = getRoleFromStorage();
-      if (storedRole) setRole(storedRole);
-    }
-  }, [token, role]);
+    // Sync with localStorage on mount
+    const storedToken = getTokenFromStorage();
+    setToken(storedToken);
+    
+    const storedRole = getRoleFromStorage();
+    setRole(storedRole);
+  }, []);
 
   return {
     token,

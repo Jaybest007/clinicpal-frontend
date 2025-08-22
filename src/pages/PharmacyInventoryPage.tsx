@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FiPlus, FiPackage, FiShoppingCart, FiTrendingUp, FiCalendar } from "react-icons/fi";
 import InventorySection from "../components/pharmacy/InventorySection";
 import HistorySection from "../components/pharmacy/HistorySection";
@@ -48,6 +48,15 @@ export default function PharmacyInventoryPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
   
+  // Default categories if none exist in inventory
+  const defaultCategories = [
+    "Medications", 
+    "Supplies", 
+    "Equipment", 
+    "Laboratory", 
+    "Radiology"
+  ];
+  
   // Tab and history state
   const [activeTab, setActiveTab] = useState<"inventory" | "history">("inventory");
   const [historyFilters, setHistoryFilters] = useState({
@@ -59,12 +68,30 @@ export default function PharmacyInventoryPage() {
   const [selectedTransaction, setSelectedTransaction] = useState<InventoryTransaction | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // Get unique categories from inventory
+  // Get unique categories from inventory and combine with defaults
   const categories = useMemo(() => {
-    if (!inventory.length) return ["All"];
-    const uniqueCategories = [...new Set(inventory.map(item => item.category))];
-    return ["All", ...uniqueCategories.sort()];
-  }, [inventory]);
+    // Always start with default categories to ensure we have all standard options
+    const baseCategories = new Set(defaultCategories);
+    
+    // Add categories from inventory
+    if (inventory.length) {
+      inventory.forEach(item => {
+        if (item.category) {
+          baseCategories.add(item.category);
+        }
+      });
+    }
+    
+    // Convert back to array, sort, and add "All" at the beginning
+    return ["All", ...Array.from(baseCategories).sort()];
+  }, [inventory, defaultCategories]);
+
+  // Initial data load
+  useEffect(() => {
+    // Fetch inventory data when component mounts
+    fetchInventory();
+    fetchTransactionHistory();
+  }, [fetchInventory, fetchTransactionHistory]);
 
   // Filter inventory based on current filters
   const filteredInventory = useMemo(() => {
@@ -170,8 +197,19 @@ export default function PharmacyInventoryPage() {
   // Handle adding new item
   const handleAddItem = async (newItem: any) => {
     try {
-      await addInventoryItem(newItem);
+      // Convert string values to numbers where needed
+      const formattedItem = {
+        ...newItem,
+        quantity: Number(newItem.quantity),
+        minThreshold: Number(newItem.minThreshold),
+        price: newItem.price ? Number(newItem.price) : 0
+      };
+      
+      await addInventoryItem(formattedItem);
       setIsAddModalOpen(false);
+      
+      // Refresh inventory data
+      fetchInventory();
     } catch (error) {
       console.error("Error adding item:", error);
       alert("Failed to add item. Please try again.");
@@ -230,9 +268,20 @@ export default function PharmacyInventoryPage() {
   // Handle saving edited item
   const handleSaveEditedItem = async (updatedItem: InventoryItem) => {
     try {
-      await updateInventoryItem(updatedItem);
+      // Convert string values to numbers where needed
+      const formattedItem = {
+        ...updatedItem,
+        quantity: Number(updatedItem.quantity),
+        minThreshold: Number(updatedItem.minThreshold),
+        price: updatedItem.price ? Number(updatedItem.price) : 0
+      };
+      
+      await updateInventoryItem(formattedItem);
       setIsEditModalOpen(false);
       setItemToEdit(null);
+      
+      // Refresh inventory data
+      fetchInventory();
     } catch (error) {
       console.error("Error updating item:", error);
       alert("Failed to update item. Please try again.");
@@ -400,7 +449,9 @@ export default function PharmacyInventoryPage() {
         <EditItemModal
           isOpen={isEditModalOpen}
           item={itemToEdit ? { ...itemToEdit, expiryDate: itemToEdit.expiryDate ?? "" } : null}
-          categories={categories.filter(cat => cat !== "All")}
+          categories={categories.filter(cat => cat !== "All").length > 0 ? 
+            categories.filter(cat => cat !== "All") : 
+            defaultCategories}
           onClose={() => {
             setIsEditModalOpen(false);
             setItemToEdit(null);

@@ -46,7 +46,7 @@ export default function AddItemModal({
       setFormData({
         id: "",
         name: "",
-        category: categories[0] || "",
+        category: categories.length > 0 ? categories[0] : "",
         unit: "tablets",
         quantity: "",
         minThreshold: "",
@@ -192,11 +192,20 @@ export default function AddItemModal({
                     }`}
                   >
                     <option value="">Select category</option>
-                    {categories.map((category: string) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
+                    {categories && categories.length > 0 ? 
+                      categories.map((category: string) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      )) : 
+                      [
+                        <option key="med" value="Medications">Medications</option>,
+                        <option key="sup" value="Supplies">Supplies</option>,
+                        <option key="eqp" value="Equipment">Equipment</option>,
+                        <option key="lab" value="Laboratory">Laboratory</option>,
+                        <option key="rad" value="Radiology">Radiology</option>
+                      ]
+                    }
                   </select>
                   {errors.category && (
                     <p className="mt-1 text-sm text-red-600">{errors.category}</p>

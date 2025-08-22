@@ -116,7 +116,7 @@ export default function InventoryTable({
                     {item.expiryDate ? (
                       <>
                         <div className={`text-sm ${expired ? 'text-red-600 font-medium' : expiringSoon ? 'text-yellow-600 font-medium' : 'text-gray-900'}`}>
-                          {item.expiryDate}
+                          {new Date(item.expiryDate).toLocaleString(undefined, { dateStyle: 'short' })}
                         </div>
                         {(expired || expiringSoon) && (
                           <div className="flex items-center text-xs text-yellow-600">

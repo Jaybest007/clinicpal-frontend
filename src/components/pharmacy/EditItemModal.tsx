@@ -195,11 +195,14 @@ export default function EditItemModal({ isOpen, item, categories, onClose, onSav
                     }`}
                   >
                     <option value="">Select category</option>
-                    {categories.map(category => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
+                    {categories && categories.length > 0 ? 
+                      categories.map(category => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      )) : 
+                      <option value="Medications">Medications</option>
+                    }
                   </select>
                   {errors.category && (
                     <p className="mt-1 text-sm text-red-600">{errors.category}</p>

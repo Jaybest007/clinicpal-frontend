@@ -324,7 +324,7 @@ export default function SaleTransactionModal({
                             className="w-16 px-1 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
                           />
                           <span className="text-xs text-gray-600">
-                            = ${((item.unitPrice || 0) * item.quantityToSell).toFixed(2)}
+                            = ₦{((item.unitPrice || 0) * item.quantityToSell).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>
                         </div>
                         
@@ -392,7 +392,7 @@ export default function SaleTransactionModal({
                     </div>
                     <div className="flex justify-between font-medium text-base border-t pt-1">
                       <span>Total Amount:</span>
-                      <span>${getTotalAmount().toFixed(2)}</span>
+                      <span>₦{getTotalAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 </div>
@@ -411,7 +411,7 @@ export default function SaleTransactionModal({
               disabled={transactionItems.length === 0}
               className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Process Sale (${getTotalAmount().toFixed(2)})
+              Process Sale (₦{getTotalAmount().toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})})
             </button>
             <button
               onClick={onClose}

@@ -41,7 +41,7 @@ const InventorySection: React.FC<InventorySectionProps> = ({
   return (
     <div className="space-y-6">
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="flex flex-wrap justify-center gap-3">
         <StatCard
           title="Total Items"
           icon={FiPackage}

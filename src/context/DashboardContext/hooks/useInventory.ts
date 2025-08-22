@@ -10,11 +10,11 @@ import type {
   TransactionFilters,
   InventoryCategory
 } from "../types";
-import { API_BASE_URL, API_ENDPOINTS } from "../services/api";
+import { API_BASE_URL, API_ENDPOINTS, createApiRequest } from "../services/api";
 import { handleApiError } from "../utils/errorHandler";
 
 // Add role as a parameter instead of using context
-export const useInventory = (token?: string, userRole?: string) => {
+export const useInventory = (token?: string | null, userRole?: string) => {
   // State for inventory items
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,12 +25,6 @@ export const useInventory = (token?: string, userRole?: string) => {
   const [transactionLoading, setTransactionLoading] = useState(true);
   const [transactionError, setTransactionError] = useState<Error | null>(null);
 
-  // Common headers for authenticated requests
-  const getHeaders = useCallback(() => {
-    return {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    };
-  }, [token]);
 
   // Helper function to determine stock status
   const getStockStatus = useCallback((quantity: number, minThreshold: number): string => {
@@ -47,7 +41,7 @@ export const useInventory = (token?: string, userRole?: string) => {
     try {
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_INVENTORY}`, 
-        getHeaders()
+        createApiRequest(token)
       );
       setInventory(response.data);
     } catch (error) {
@@ -56,7 +50,7 @@ export const useInventory = (token?: string, userRole?: string) => {
     } finally {
       setLoading(false);
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Fetch transaction history
   const fetchTransactionHistory = useCallback(async (filters?: TransactionFilters) => {
@@ -77,7 +71,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       // Make the API call
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_TRANSACTION_HISTORY}${query}`, 
-        getHeaders()
+        createApiRequest(token)
       );
       
       setTransactionHistory(response.data);
@@ -88,7 +82,7 @@ export const useInventory = (token?: string, userRole?: string) => {
     } finally {
       setTransactionLoading(false);
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Add new inventory item
   const addInventoryItem = useCallback(async (newItem: NewInventoryItem): Promise<InventoryItem> => {
@@ -96,7 +90,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       const response = await axios.post(
         `${API_BASE_URL}${API_ENDPOINTS.ADD_INVENTORY_ITEM}`, 
         newItem, 
-        getHeaders()
+        createApiRequest(token)
       );
       
       // Update local state
@@ -108,7 +102,7 @@ export const useInventory = (token?: string, userRole?: string) => {
      
       throw handledError;
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Update inventory item
   const updateInventoryItem = useCallback(async (updatedItem: InventoryItem): Promise<InventoryItem> => {
@@ -116,7 +110,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       const response = await axios.put(
         `${API_BASE_URL}${API_ENDPOINTS.UPDATE_INVENTORY_ITEM}/${updatedItem.id}`, 
         updatedItem, 
-        getHeaders()
+        createApiRequest(token)
       );
       
       // Update local state
@@ -129,7 +123,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Update inventory item status
   const updateInventoryItemStatus = useCallback(async (id: string, status: string): Promise<InventoryItem> => {
@@ -137,7 +131,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       const response = await axios.patch(
         `${API_BASE_URL}${API_ENDPOINTS.UPDATE_INVENTORY_ITEM_STATUS}/${id}`, 
         { status }, 
-        getHeaders()
+        createApiRequest(token)
       );
       
       // Update local state
@@ -150,14 +144,14 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Delete inventory item
   const deleteInventoryItem = useCallback(async (id: string): Promise<void> => {
     try {
       await axios.delete(
         `${API_BASE_URL}${API_ENDPOINTS.DELETE_INVENTORY_ITEM}/${id}`, 
-        getHeaders()
+       createApiRequest(token)
       );
       
       // Update local state
@@ -166,35 +160,35 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Fetch a single inventory item by ID
   const fetchInventoryItem = useCallback(async (id: number): Promise<InventoryItem> => {
     try {
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_INVENTORY_ITEM}/${id}`, 
-        getHeaders()
+        createApiRequest(token)
       );
       return response.data;
     } catch (error) {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Fetch inventory categories
   const fetchInventoryCategories = useCallback(async (): Promise<InventoryCategory[]> => {
     try {
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_INVENTORY_CATEGORIES}`, 
-        getHeaders()
+        createApiRequest(token)
       );
       return response.data;
     } catch (error) {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Process sale transaction
   const processSale = useCallback(async (
@@ -214,7 +208,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       const response = await axios.post(
         `${API_BASE_URL}${API_ENDPOINTS.PROCESS_SALE}`, 
         payload, 
-        getHeaders()
+        createApiRequest(token)
       );
       
       // Update local inventory state
@@ -237,7 +231,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Process restock transaction
   const processRestock = useCallback(async (items: RestockItem[]): Promise<InventoryTransaction> => {
@@ -247,7 +241,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       const response = await axios.post(
         `${API_BASE_URL}${API_ENDPOINTS.PROCESS_RESTOCK}`, 
         payload, 
-        getHeaders()
+        createApiRequest(token)
       );
       
       // Update local inventory state
@@ -270,7 +264,7 @@ export const useInventory = (token?: string, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [getHeaders]);
+  }, [token]);
 
   // Initial data load - only check role here
   useEffect(() => {

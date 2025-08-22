@@ -8,6 +8,7 @@ import { DepartmentsReport } from "../components/DepartmentsReport";
 import { FiLoader, FiRefreshCw,  FiCheck, FiX, FiSearch } from "react-icons/fi";
 import { ViewOrderDetail } from "../components/ViewOrderDetail";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 
 type PharmacyOrder = {
   id: string;
@@ -159,6 +160,15 @@ export const Pharmacy = () => {
                 <MdHistory className="mr-2" />
                 {orderHistory ? "Current Orders" : "Order History"}
               </button>
+                <Link 
+                to="/pharmacy/inventory"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-neutral-600 hover:bg-neutral-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm flex items-center"
+                >
+                <MdOutlineInventory className="mr-2" />
+                Inventory
+                </Link>
             </div>
           </div>
           
