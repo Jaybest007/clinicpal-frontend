@@ -33,10 +33,30 @@ export const useInventory = (token?: string | null, userRole?: string) => {
     return "In Stock";
   }, []);
 
+  // Check if user is authorized to perform inventory operations
+  const authorizedRole = useCallback((): boolean => {
+    if (!userRole) {
+      setError(new Error("Authentication required"));
+      return false;
+    }
+
+    if (!["super admin", "pharmacist"].includes(userRole.toLowerCase())) {
+      setError(new Error("Unauthorized: Only pharmacists and administrators can access inventory"));
+      return false;
+    }
+    
+    return true;
+  }, [userRole]);
   // Fetch inventory items
   const fetchInventory = useCallback(async () => {
     setLoading(true);
     setError(null);
+    
+    // Check authorization
+    if (!authorizedRole()) {
+      setLoading(false);
+      return;
+    }
     
     try {
       const response = await axios.get(
@@ -50,12 +70,18 @@ export const useInventory = (token?: string | null, userRole?: string) => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Fetch transaction history
   const fetchTransactionHistory = useCallback(async (filters?: TransactionFilters) => {
     setTransactionLoading(true);
     setTransactionError(null);
+    
+    // Check authorization
+    if (!authorizedRole()) {
+      setTransactionLoading(false);
+      return;
+    }
     
     try {
       // Build query params
@@ -82,10 +108,15 @@ export const useInventory = (token?: string | null, userRole?: string) => {
     } finally {
       setTransactionLoading(false);
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Add new inventory item
   const addInventoryItem = useCallback(async (newItem: NewInventoryItem): Promise<InventoryItem> => {
+    // Check authorization
+    if (!authorizedRole()) {
+      throw new Error("Unauthorized: Only pharmacists and administrators can add inventory");
+    }
+    
     try {
       const response = await axios.post(
         `${API_BASE_URL}${API_ENDPOINTS.ADD_INVENTORY_ITEM}`, 
@@ -102,10 +133,15 @@ export const useInventory = (token?: string | null, userRole?: string) => {
      
       throw handledError;
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Update inventory item
   const updateInventoryItem = useCallback(async (updatedItem: InventoryItem): Promise<InventoryItem> => {
+    // Check authorization
+    if (!authorizedRole()) {
+      throw new Error("Unauthorized: Only pharmacists and administrators can update inventory");
+    }
+    
     try {
       const response = await axios.put(
         `${API_BASE_URL}${API_ENDPOINTS.UPDATE_INVENTORY_ITEM}/${updatedItem.id}`, 
@@ -123,10 +159,15 @@ export const useInventory = (token?: string | null, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Update inventory item status
   const updateInventoryItemStatus = useCallback(async (id: string, status: string): Promise<InventoryItem> => {
+    // Check authorization
+    if (!authorizedRole()) {
+      throw new Error("Unauthorized: Only pharmacists and administrators can update inventory status");
+    }
+    
     try {
       const response = await axios.patch(
         `${API_BASE_URL}${API_ENDPOINTS.UPDATE_INVENTORY_ITEM_STATUS}/${id}`, 
@@ -144,10 +185,15 @@ export const useInventory = (token?: string | null, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Delete inventory item
   const deleteInventoryItem = useCallback(async (id: string): Promise<void> => {
+    // Check authorization
+    if (!authorizedRole()) {
+      throw new Error("Unauthorized: Only pharmacists and administrators can delete inventory items");
+    }
+    
     try {
       await axios.delete(
         `${API_BASE_URL}${API_ENDPOINTS.DELETE_INVENTORY_ITEM}/${id}`, 
@@ -160,10 +206,15 @@ export const useInventory = (token?: string | null, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Fetch a single inventory item by ID
   const fetchInventoryItem = useCallback(async (id: number): Promise<InventoryItem> => {
+    // Check authorization
+    if (!authorizedRole()) {
+      throw new Error("Unauthorized: Only pharmacists and administrators can view inventory details");
+    }
+    
     try {
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_INVENTORY_ITEM}/${id}`, 
@@ -174,10 +225,15 @@ export const useInventory = (token?: string | null, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Fetch inventory categories
   const fetchInventoryCategories = useCallback(async (): Promise<InventoryCategory[]> => {
+    // Check authorization
+    if (!authorizedRole()) {
+      throw new Error("Unauthorized: Only pharmacists and administrators can view inventory categories");
+    }
+    
     try {
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.FETCH_INVENTORY_CATEGORIES}`, 
@@ -188,13 +244,18 @@ export const useInventory = (token?: string | null, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Process sale transaction
   const processSale = useCallback(async (
     items: InventoryTransactionItem[], 
     saleData: SaleData
   ): Promise<InventoryTransaction> => {
+    // Check authorization
+    if (!authorizedRole()) {
+      throw new Error("Unauthorized: Only pharmacists and administrators can process sales");
+    }
+    
     try {
       const payload = {
         items,
@@ -231,10 +292,15 @@ export const useInventory = (token?: string | null, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Process restock transaction
   const processRestock = useCallback(async (items: RestockItem[]): Promise<InventoryTransaction> => {
+    // Check authorization
+    if (!authorizedRole()) {
+      throw new Error("Unauthorized: Only pharmacists and administrators can restock inventory");
+    }
+    
     try {
       const payload = { items };
       
@@ -264,7 +330,7 @@ export const useInventory = (token?: string | null, userRole?: string) => {
       const handledError = handleApiError(error);
       throw handledError;
     }
-  }, [token]);
+  }, [token, authorizedRole]);
 
   // Initial data load - only check role here
   useEffect(() => {
@@ -274,9 +340,8 @@ export const useInventory = (token?: string | null, userRole?: string) => {
       return;
     }
     
-    // Only check the role once here
-    const hasAccess = userRole === "super admin" || userRole === "pharmacist";
-    if (!hasAccess) {
+    // Let the authorizedRole function handle all authorization checks
+    if (!authorizedRole()) {
       setLoading(false);
       setTransactionLoading(false);
       return;
@@ -284,7 +349,7 @@ export const useInventory = (token?: string | null, userRole?: string) => {
     
     fetchInventory();
     fetchTransactionHistory();
-  }, [token, fetchInventory, fetchTransactionHistory, userRole]);
+  }, [token, fetchInventory, fetchTransactionHistory, authorizedRole]);
 
   return {
     // Inventory data and operations
