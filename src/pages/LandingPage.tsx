@@ -7,6 +7,7 @@ import { FiFileText, FiUsers, FiPieChart, FiClipboard, FiServer, FiShield, FiMes
 import { MdOutlineHealthAndSafety, MdOutlineReceiptLong } from "react-icons/md";
 import { RiHospitalLine } from "react-icons/ri";
 import { LandingPageNav } from "../components/landing_page/LandingpageNav";
+import { Pricing } from "../components/landing_page/Pricing";
 
 // Feature card component for better reusability
 type FeatureCardProps = {
@@ -123,7 +124,7 @@ const LandingPage = () => {
                   className="flex flex-row flex-wrap gap-2 w-full"
                 >
                   <Link
-                    to="/signup"
+                    to="/onboarding"
                     className="flex-1 min-w-[120px] px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow flex items-center justify-center gap-2 text-sm"
                   >
                     Start Free Trial <span className="ml-1">→</span>
@@ -323,6 +324,11 @@ const LandingPage = () => {
             </div>
           </div>
         </section>
+
+        {/* Pricing Section */}
+        <div id="pricing">
+          <Pricing />
+        </div>
 
         {/* Enhanced Impact Section */}
         <section className="py-20 bg-white px-6 md:px-12">
@@ -529,7 +535,6 @@ const LandingPage = () => {
               <div>
                 <div className="flex items-center space-x-3 mb-6">
                   <img src={logo} alt="ClinicPal Logo" className="h-10 w-auto" />
-                  <span className="font-semibold text-xl">ClinicPal</span>
                 </div>
                 <p className="text-slate-400 mb-6">
                   Enterprise healthcare management for Nigerian clinics and hospitals.
@@ -557,7 +562,7 @@ const LandingPage = () => {
                 <h3 className="font-semibold text-lg mb-4">Product</h3>
                 <ul className="space-y-2 text-slate-400">
                   <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+                  <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
                   <li><a href="#" className="hover:text-white transition-colors">Case Studies</a></li>
                   <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
                 </ul>
