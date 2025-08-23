@@ -3,7 +3,7 @@ import NavBar from "../components/NavBar";
 import StatCard from "../components/StatCard";
 import { FaUser, FaUserInjured, FaStethoscope, FaSearch, FaClock } from "react-icons/fa";
 import NewPatient from "../components/NewPatient";
-import ReportForm from "../components/ReportForm";
+import ReportForm from "../components/report/ReportForm"
 import { useAuth } from "../context/AuthContext";
 import { useDashboard } from "../context/DashboardContext";
 import QueList from "../components/QueList";

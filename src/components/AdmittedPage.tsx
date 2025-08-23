@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDashboard } from '../context/DashboardContext';
 import { DischargeBtn } from './DischargeBtn';
-import { ReportBtn } from './ReportBtn';
+import { ReportBtn } from './report/ReportBtn';
 import { useAuth } from '../context/AuthContext';
 import { MdWarning, MdOutlineLocalHospital } from 'react-icons/md';
 import { FaBed, FaRegCalendarAlt, FaUser, FaIdCard } from 'react-icons/fa';

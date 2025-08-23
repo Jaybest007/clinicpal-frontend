@@ -3,8 +3,8 @@ import { FaSearch, FaTimes, FaRegCalendarAlt, FaPhoneAlt, FaMapMarkerAlt } from 
 import { FiPlus, FiFilter, FiUser, FiUserCheck, FiUsers } from "react-icons/fi";
 import NavBar from "../components/NavBar";
 import NewPatient from "../components/NewPatient";
-import PatientProfileModal from "../components/PatientProfilemModal";
-import type { patientInfo } from "../components/PatientProfilemModal";
+import PatientProfileModal from "../components/patient/PatientProfilemModal";
+import type { patientInfo } from "../components/patient/PatientProfilemModal";
 import { useDashboard } from "../context/DashboardContext";
 import AdmittedPage from "../components/AdmittedPage";
 import { useAuth } from "../context/AuthContext";

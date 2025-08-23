@@ -1,8 +1,8 @@
 import { FaTimes, FaClipboard, FaUser, FaPhone,  FaUserFriends, FaCalendarAlt, FaHospital, FaClock } from "react-icons/fa";
 import { FiAlertCircle,  FiUserPlus, FiFilePlus } from "react-icons/fi";
-import { useDashboard } from "../context/DashboardContext";
+import { useDashboard } from "../../context/DashboardContext";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";

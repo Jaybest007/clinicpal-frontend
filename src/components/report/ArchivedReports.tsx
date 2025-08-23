@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { useDashboard } from "../context/DashboardContext";
-import { FiFileText, FiUser, FiClock, FiChevronDown, FiX, FiMessageSquare } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { useDashboard } from "../../context/DashboardContext";
+import { FiFileText, FiUser, FiClock, FiChevronDown, FiX, FiMessageSquare, FiRefreshCw } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
 
 // Define the type for a single report
 interface Report {
@@ -12,18 +13,40 @@ interface Report {
   created_at: string;
 }
 
-export const AdmittedReport: React.FC = () => {
-  const { admittedPatientReport, loading } = useDashboard();
+export const ArchivedReports: React.FC = () => {
+  const { archiveLoading, archivedReport, fetchArchivedReports, unarchiveReport } = useDashboard();
   
   // Ensure reports is always an array
-  const reports: Report[] = Array.isArray(admittedPatientReport)
-    ? admittedPatientReport
-    : admittedPatientReport && Array.isArray(admittedPatientReport)
-      ? admittedPatientReport
+  const reports: Report[] = Array.isArray(archivedReport)
+    ? archivedReport
+    : archivedReport && Array.isArray(archivedReport)
+      ? archivedReport
       : [];
 
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [expandedPatients, setExpandedPatients] = useState<Record<string, boolean>>({});
+  const [unarchiving, setUnarchiving] = useState<Record<string, boolean>>({});
+
+  // Fetch archived reports on component mount
+  useEffect(() => {
+    fetchArchivedReports();
+  }, [fetchArchivedReports]);
+
+  // Handle unarchive
+  const handleUnarchive = async (patientId: string) => {
+    try {
+      setUnarchiving(prev => ({ ...prev, [patientId]: true }));
+      await unarchiveReport(patientId);
+    //   toast.success("Report unarchived successfully");
+      // Refetch the archived reports
+      fetchArchivedReports();
+    } catch (error) {
+      toast.error("Failed to unarchive report");
+      console.error("Unarchive error:", error);
+    } finally {
+      setUnarchiving(prev => ({ ...prev, [patientId]: false }));
+    }
+  };
 
   // Group by patient_id
   const groupedReports = reports.reduce((acc, report) => {
@@ -48,20 +71,20 @@ export const AdmittedReport: React.FC = () => {
 
   return (
     <div className="w-full">
-      {loading ? (
+      {archiveLoading ? (
         <div className="flex flex-col items-center justify-center py-16 space-y-4">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
           <span className="text-blue-600 font-medium">Loading reports...</span>
         </div>
       ) : Object.entries(groupedReports).length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 space-y-4 bg-gray-50 rounded-xl border border-gray-200">
-          <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-            <FiFileText className="w-8 h-8 text-blue-400" />
+          <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center">
+            <FiFileText className="w-8 h-8 text-amber-400" />
           </div>
           <div className="text-center max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">No Admitted Patient Reports</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">No Archived Reports</h3>
             <p className="text-gray-500">
-              There are currently no reports for admitted patients. Reports will appear here when created.
+              There are currently no archived reports. Reports that have been archived will appear here.
             </p>
           </div>
         </div>
@@ -74,10 +97,12 @@ export const AdmittedReport: React.FC = () => {
             >
               {/* Patient Header */}
               <div 
-                onClick={() => togglePatient(patientId)}
-                className="flex justify-between items-center px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-200"
+                className="flex justify-between items-center px-6 py-4 hover:bg-gray-50 transition-colors border-b border-gray-200"
               >
-                <div className="flex items-center">
+                <div 
+                  className="flex items-center cursor-pointer flex-1"
+                  onClick={() => togglePatient(patientId)}
+                >
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
                     <FiUser className="w-5 h-5 text-blue-600" />
                   </div>
@@ -88,14 +113,33 @@ export const AdmittedReport: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <span className="mr-3 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUnarchive(patientId);
+                    }}
+                    disabled={unarchiving[patientId]}
+                    className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-xs md:text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
+                  >
+                    {unarchiving[patientId] ? (
+                      <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : (
+                      <FiRefreshCw className="w-3 h-3 md:w-4 md:h-4" />
+                    )}
+                    <span className="hidden xs:inline">Unarchive</span>
+                  </button>
+                  <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full hidden sm:inline-block">
                     {reports.length} Report{reports.length !== 1 ? 's' : ''}
                   </span>
                   <FiChevronDown 
                     className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
                       isExpanded(patientId) ? 'transform rotate-180' : ''
                     }`} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePatient(patientId);
+                    }}
                   />
                 </div>
               </div>

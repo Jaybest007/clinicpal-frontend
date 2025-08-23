@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { HqNavBar } from "../../components/hq_components/HqNavBar";
 
-import PatientProfileModal from "../../components/PatientProfilemModal";
-import type { patientInfo } from "../../components/PatientProfilemModal";
+import PatientProfileModal from "../../components/patient/PatientProfilemModal";
+import type { patientInfo } from "../../components/patient/PatientProfilemModal";
 import { useHospital } from "../../context/HospitalContext";
 import ConfirmActionModal from "../../components/ConfirmActionModal";
 import { FaSearch, FaUserPlus, FaFileExport, FaSortAmountDown, FaSortAmountUp, FaEye, FaTrash } from "react-icons/fa";

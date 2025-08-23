@@ -32,7 +32,8 @@ import { HqTransactions } from "./pages/HqPages/HqTransactions";
 import { SalesReportPrint } from "./components/print/SalesReportPrint";
 import PharmacyInventoryPage from "./pages/PharmacyInventoryPage";
 import PrintableReport from "./components/print/PrintableReport";
-
+import { PasswordRecovery } from "./pages/PasswordRecovery";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   // Get token from AuthContext
@@ -50,6 +51,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="*" element={<PageNotFound />} />
             <Route path="/onboarding" element={<HospitalRegistration />} />
+            <Route path="/forgot-password" element={<PasswordRecovery />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /> </ProtectedRoute> } />
             <Route path="/patients" element={<ProtectedRoute> <Patients /> </ProtectedRoute> } />
             <Route path="/reports/:patient_id" element={<ProtectedRoute> <Reports /> </ProtectedRoute> } />

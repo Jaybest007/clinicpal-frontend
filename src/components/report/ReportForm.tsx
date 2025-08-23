@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FaTimes, FaMicrophone, FaMicrophoneSlash, FaRegClipboard, FaPills, FaFlask, FaXRay, FaHospital } from "react-icons/fa";
 import { FiSave, FiAlertCircle, FiCheck } from "react-icons/fi";
-import { useDashboard } from "../context/DashboardContext";
-import { useAuth } from "../context/AuthContext";
+import { useDashboard } from "../../context/DashboardContext";
+import { useAuth } from "../../context/AuthContext";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import { motion, AnimatePresence } from "framer-motion";
 

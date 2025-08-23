@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { FiFileText, FiEdit, FiFilePlus, FiClock, FiList } from "react-icons/fi";
 import { motion } from "framer-motion";
 import NavBar from "../components/NavBar";
-import ReportForm from "../components/ReportForm";
-import { AdmittedReport } from "../components/AdmittedReports";
-import { PatientReport } from "../components/PatientReport";
+import ReportForm from "../components/report/ReportForm";
+import { AdmittedReport } from "../components/report/AdmittedReports";
+import { PatientReport } from "../components/report/PatientReport";
 import { useParams } from "react-router-dom";
-import { ArchivedReports } from "../components/ArchivedReports";
+import { ArchivedReports } from "../components/report/ArchivedReports";
 
 const Reports = () => {
   const [showReportModal, setShowReportModal] = useState(false);

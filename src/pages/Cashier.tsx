@@ -5,12 +5,12 @@ import { FiPlus, FiDollarSign, FiClock, } from "react-icons/fi";
 import { useDashboard } from "../context/DashboardContext";
 
 import NavBar from "../components/NavBar";
-import SearchPatientReport from "../components/SearchPatientReport";
+import SearchPatientReport from "../components/report/SearchPatientReport";
 import { TodaysTransaction } from "../components/TodaysTransaction";
 
-import { ExternalBilling } from "../components/ExternalBilling";
+import { ExternalBilling } from "../components/cashier/ExternalBilling";
 
-import { PatientPaymentHistory } from "../components/PatientPaymentHistory";
+import { PatientPaymentHistory } from "../components/patient/PatientPaymentHistory";
 import { CashierStatCard } from "../components/cashier/CashierStatCard";
 import { BillingForm } from "../components/cashier/BillingForm";
 

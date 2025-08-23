@@ -2,7 +2,7 @@ import  { useState } from "react";
 import { HqNavBar } from "../../components/hq_components/HqNavBar";
 import { useDashboard } from "../../context/DashboardContext";
 import { TodaysTransaction } from "../../components/TodaysTransaction";
-import { PatientPaymentHistory } from "../../components/PatientPaymentHistory";
+import { PatientPaymentHistory } from "../../components/patient/PatientPaymentHistory";
 import TransactionStats from "../../components/hq_components/TransactionStats";
 import TransactionHeader from "../../components/hq_components/TransactionHeader";
 import LoadingSpinner from "../../components/common/LoadingSpinner";

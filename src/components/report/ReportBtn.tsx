@@ -1,4 +1,4 @@
-import ReportForm from "./ReportForm";
+import ReportForm from "../report/ReportForm";
 import { useState } from "react";
 
 interface BtnProp{

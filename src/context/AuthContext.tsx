@@ -47,6 +47,8 @@ interface AuthContextType {
   hospital_Signup: (data: HospitalSignupData) => Promise<void>;
   tempInfo: tempInfo[];
   setTempInfo: React.Dispatch<React.SetStateAction<tempInfo[]>>;
+  passwordRecovery: (email: string) => Promise<void>;
+  resetPassword: (token: string, email: string, password: string) => Promise<void>;
 }
 
 // ================= Constants =================
@@ -169,6 +171,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.location.replace("/login");
   }, []);
 
+  //password recovery
+  const passwordRecovery = useCallback( async(email: string) =>{
+    setLoading(true);
+
+    try{
+      const response = await axios.post("https://clinicpal.onrender.com/api/auth/password_recovery", {email});
+      toast.success(response.data.message || "If your email is registered, you will receive password reset instructions.");
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        "Password recovery failed";
+      toast.error(message);
+      throw new Error(message);
+    } finally {
+      setLoading(false);
+    }
+  },[]);
+
+  // Reset password
+  const resetPassword = useCallback(async (token: string, email: string, password: string) => {
+    setLoading(true);
+    
+    try {
+      const response = await axios.post("https://clinicpal.onrender.com/api/auth/reset_password", {
+        token,
+        email,
+        password
+      });
+      toast.success(response.data.message || "Password reset successful");
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        "Password reset failed";
+      toast.error(message);
+      throw new Error(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -179,7 +223,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signup,
         logout,
         hospital_Signup,
-        setTempInfo, tempInfo
+        setTempInfo, tempInfo,
+        passwordRecovery,
+        resetPassword
       }}
     >
       {children}
